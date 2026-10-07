@@ -11,10 +11,10 @@ One install gives you three apps:
 
 ## Download
 
-Get `GraysonsWallet.apk` from the [latest release](https://github.com/FrosTether/Graysons-Wallet/releases/latest). Android 8.0 or newer.
+**[Download GraysonsWallet-0.3.0-poc.apk](https://github.com/FrosTether/Graysons-Wallet/raw/main/releases/GraysonsWallet-0.3.0-poc.apk)** (Android 8.0 or newer).
 Your phone will ask you to allow installs from your browser, since the app isn't on the Play Store.
 
-Check the file before installing. Its SHA-256 is listed in the release notes.
+SHA-256: `5594c078584f0e2a0edc6037b7f87f4044a89cd085eedae850cdfb436ca0694f`
 
 ## Tone mining
 
