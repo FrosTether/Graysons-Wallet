@@ -3,6 +3,7 @@
   --text: #1d2226; --muted: #626b73; --accent: #4a5561; --accent-text: #fff;
   --frost: #1d7fa6; --frost-soft: #e2f2f8; --good: #217a4b; --bad: #b3261e; --warn: #8a5a00;
   --gold: #946200; --gold-soft: #fbf0d9;
+  --delta: #a3620a; --alpha: #b0177f;
   --mono: ui-monospace, "SF Mono", "Roboto Mono", "DejaVu Sans Mono", monospace;
   --radius: 14px;
 }
@@ -12,6 +13,7 @@
     --text: #e6e8ea; --muted: #9aa3ab; --accent: #aeb7c0; --accent-text: #15181b;
     --frost: #6cc7ea; --frost-soft: #16323d; --good: #5fcf8f; --bad: #ff8a80; --warn: #e6b450;
     --gold: #f2c14e; --gold-soft: #3a2e12;
+    --delta: #ffb547; --alpha: #ff52d9;
   }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -207,3 +209,12 @@ ol.steps .copy { border-bottom: 1px dashed currentColor; }
 .mm-kv dd { overflow-wrap: anywhere; color: var(--frost); }
 #mm-card .actions { margin-top: 12px; }
 #mm-open { margin-top: 10px; }
+
+/* v0.4: three-way choice, Rez-style explorer */
+.seg.three { grid-template-columns: 1fr 1fr 1fr; }
+.rez { position: relative; height: 240px; margin-top: 10px; border-radius: 12px; overflow: hidden; background: #07060f; background: radial-gradient(ellipse at 50% 40%, #13102a, #07060f 70%); }
+.rez canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; touch-action: manipulation; }
+/* The legend sits on the dark explorer in both themes, so it uses the same neon colors as the blocks. */
+.rez-legend { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 2px 12px; color: #9c96cb; font-size: 12px; pointer-events: none; }
+.rez-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.rez-legend i.d { background: #ffb547; } .rez-legend i.t { background: #3fe9ff; } .rez-legend i.a { background: #ff52d9; }

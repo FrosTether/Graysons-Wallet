@@ -186,10 +186,16 @@
         <ul class="peers" id="peers"></ul>
       </div>
       <div class="card">
-        <h2>Bring over Graysons Wallet 2</h2>
-        <p class="small">If Graysons Wallet 2 is on this phone, it runs its own node on port <b>7831</b>. Open it, then tap below so this app copies its chain. When the heights match, restore your wallet here with your 25 words and you can uninstall Graysons Wallet 2.</p>
-        <button class="btn wide" id="n-v2">Sync from Graysons Wallet 2 (127.0.0.1:7831)</button>
-        <div class="msg small" id="n-v2-msg"></div>
+        <div class="row-between"><h2>Explorer</h2><button class="btn small" id="x-motion" aria-pressed="false">Pause motion</button></div>
+        <div class="rez">
+          <canvas id="rez" aria-label="The newest blocks as a wireframe tunnel, newest in front. Tap a block to see it."></canvas>
+          <div class="rez-legend" aria-hidden="true">
+            <span><i class="d"></i>4.0 Hz low</span>
+            <span><i class="t"></i>7.83 Hz medium</span>
+            <span><i class="a"></i>11.11 Hz high</span>
+          </div>
+        </div>
+        <dl class="kv compact" id="x-detail"></dl>
       </div>
       <div class="card">
         <h2>Recent blocks</h2>
@@ -270,10 +276,11 @@
         </dl>
         <h3 class="small" style="margin:14px 0 4px">What this chain actually uses (live consensus)</h3>
         <dl class="kv">
-          <dt>Block reward</dt><dd id="live-reward">Monero-style smooth emission (≈263.86 QOIN now, slowly falling)</dd>
+          <dt>Block reward</dt><dd id="live-reward">Monero-style smooth emission (≈263.88 QOIN now, slowly falling)</dd>
           <dt>Block time</dt><dd>300 s · LWMA-60 difficulty</dd>
           <dt>Decimals</dt><dd>11</dd>
-          <dt>Premine</dt><dd>13,370.08241991 QOIN to block 1 (jacobfrost.frostchain)</dd>
+          <dt>Block 1</dt><dd>Normal reward, plus the name jacobfrost.frostchain for its miner</dd>
+          <dt>Mining tones</dt><dd>4.0 Hz low · 7.83 Hz medium · 11.11 Hz high</dd>
           <dt>Mining unlock</dt><dd>after 12 blocks</dd>
         </dl>
       </div>
@@ -281,8 +288,8 @@
         <h2>About this proof of concept</h2>
         <p><b>Quantum-safe signatures.</b> Every transaction is signed with LMS (RFC 8554, NIST SP 800-208), a hash-based scheme. Shor's algorithm breaks the elliptic curves under Monero and Wownero; it doesn't apply to SHA-256. Each key has 1,024 one-time signatures. The chain makes sure none is ever used twice, and the wallet rotates to a new key before they run out.</p>
         <p><b>Not private.</b> Balances and transfers are public, like Bitcoin. CryptoNote's ring signatures and stealth addresses use elliptic curves, and no practical quantum-safe replacement exists yet.</p>
-        <p><b>Schumann-gated mining.</b> Frostoise mines only while the phone senses a 7.83 Hz resonator, and each block records that reading. Other nodes can check that the reading is plausible, but they can't prove a physical resonator was there: a synthesized 7.83 Hz signal looks the same.</p>
-        <p class="muted small">Graysons Wallet · Frostoise · MyFrost · Qoin on Frostchain PoC v0.3 · <span id="about-platform"></span></p>
+        <p><b>Tone-gated mining.</b> Frostoise mines only while the phone hears one of three tones: 4.0 Hz (delta), 7.83 Hz (theta, the Schumann resonance) or 11.11 Hz (alpha). The tone sets how hard it mines: low, medium or high. Each block records the reading. Other nodes can check that the reading is plausible, but they can't prove a physical resonator was there: a synthesized tone looks the same.</p>
+        <p class="muted small">Graysons Wallet · Frostoise · MyFrost · Qoin on Frostchain v0.4 · <span id="about-platform"></span></p>
       </div>
     </div>
   </main>
@@ -301,7 +308,7 @@
 <section id="frostoise" class="screen frost-screen hidden">
   <header class="bar frost-bar">
     <img src="frostoise.svg" alt="" class="logo sm">
-    <div class="who"><b>Frostoise</b><span class="small">Schumann-gated Qoin miner</span></div>
+    <div class="who"><b>Frostoise</b><span class="small">Tone-gated Qoin miner</span></div>
     <span class="pill" id="f-node-pill"><span class="dot" id="f-node-dot"></span><span id="f-node-text">…</span></span>
   </header>
   <main>
@@ -311,9 +318,9 @@
         <span class="muted small" id="reso-rate"></span>
       </div>
       <div class="hz"><span id="hz">–</span><small> Hz</small></div>
-      <div class="muted small" id="reso-why">Turn on a sensor and put the phone on your resonator.</div>
-      <div class="spectrum" id="spectrum" aria-label="Spectrum from 4 to 12 Hz"></div>
-      <div class="scale"><span>4 Hz</span><span>7.83</span><span>12 Hz</span></div>
+      <div class="muted small" id="reso-why">Turn on a sensor and put the phone near a speaker playing a mining tone, or on your resonator.</div>
+      <div class="spectrum" id="spectrum" aria-label="Spectrum from 2 to 14.8 Hz"></div>
+      <div class="scale"><span>2 Hz</span><span>4.0 · 7.83 · 11.11</span><span>14.8 Hz</span></div>
       <div class="seg" role="radiogroup" aria-label="Sensor">
         <button data-sensor="mag" class="on">Magnetometer<span>coil generators</span></button>
         <button data-sensor="mic">Microphone<span>pulsing or humming ones</span></button>
@@ -333,11 +340,29 @@
       <p class="small muted" id="m-gate"></p>
       <label for="m-payout">Pays to</label>
       <input id="m-payout" type="text" placeholder="open wallet, or any name.frostchain" autocomplete="off" autocapitalize="none" spellcheck="false">
-      <label for="m-threads">Threads: <b id="m-threads-v">1</b> <span class="muted small">(more = faster and warmer)</span></label>
+      <label for="m-threads">Most threads: <b id="m-threads-v">1</b> <span class="muted small">(the tone picks low, medium or high)</span></label>
       <input id="m-threads" type="range" min="1" max="4" value="1">
       <button class="btn frost wide" id="mine-btn">Start mining</button>
       <div id="f-msg" class="msg"></div>
-      <p class="small muted">Frostoise only hashes while it is locked on 7.83 Hz. Rewards unlock after 12 blocks. Block 1 pays the 13,370.08241991 QOIN premine and the name jacobfrost.frostchain.</p>
+      <p class="small muted">Frostoise only hashes while it is locked on 4.0, 7.83 or 11.11 Hz. 4.0 Hz mines on low (up to 2 threads), 7.83 Hz on medium (about half) and 11.11 Hz on high (all of them). Rewards unlock after 12 blocks. Block 1 pays the normal reward and the name jacobfrost.frostchain.</p>
+    </div>
+
+    <div class="card" id="tone-card">
+      <div class="row-between"><h2>Tone</h2><span class="tag" id="tone-tag">off</span></div>
+      <div class="seg three" role="radiogroup" aria-label="Tone">
+        <button data-tone="4.0">4.0 Hz<span>delta · low</span></button>
+        <button data-tone="7.83" class="on">7.83 Hz<span>theta · medium</span></button>
+        <button data-tone="11.11">11.11 Hz<span>alpha · high</span></button>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="How it plays">
+        <button data-tmode="pulse" class="on">Pulse<span>speaker, for mining</span></button>
+        <button data-tmode="binaural">Binaural<span>headphones, for listening</span></button>
+      </div>
+      <label class="check"><input type="checkbox" id="tone-40"> Add a 40 Hz layer</label>
+      <label for="tone-vol">Volume</label>
+      <input id="tone-vol" type="range" min="0" max="40" value="12">
+      <button class="btn wide" id="tone-btn">Play tone</button>
+      <p class="small muted">A pulse from a speaker is what the microphone locks on. A binaural beat only exists between your ears, so it's for listening, not mining. Keep the volume low. No health claims are made for any frequency.</p>
     </div>
 
     <div class="card">

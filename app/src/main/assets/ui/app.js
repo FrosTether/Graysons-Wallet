@@ -429,7 +429,6 @@
       if (l.length) $('live-reward').textContent = 'Monero-style smooth emission · block #' + l[0].height + ' paid ' + short(l[0].paid) + ' QOIN';
     }).catch(function () {});
   }
-  var V2_PEER = '127.0.0.1:7831';
   function loadNode() {
     var s = S.status; if (!s) return;
     var n = s.node;
@@ -440,9 +439,6 @@
     $('n-offline').checked = n.offline;
     $('n-lan').checked = n.discovery;
     call('node.peers').then(function (l) {
-      var has = l.some(function (p) { return p.addr === V2_PEER; });
-      $('n-v2').disabled = has;
-      $('n-v2').textContent = has ? 'Graysons Wallet 2 added (127.0.0.1:7831)' : 'Sync from Graysons Wallet 2 (127.0.0.1:7831)';
       $('peers').innerHTML = l.length ? l.map(function (p) {
         var st = p.ok ? '#' + p.height : (p.error ? esc(p.error) : 'not tried yet');
         return '<li><span><span class="dot ' + (p.ok ? 'good' : 'warn') + '" style="display:inline-block;margin-right:6px"></span>' + esc(p.addr) +
@@ -452,8 +448,9 @@
     call('node.blocks', { count: 8 }).then(function (l) {
       $('blocks').innerHTML = l.length ? l.map(function (b) {
         return '<li><span>#' + b.height + ' · ' + esc(b.miner) + '</span><span>' + esc(b.paid) + ' QOIN · ' + b.hz.toFixed(2) + ' Hz ' + esc(b.sensor) + '<br>' + ago(b.time) + '</span></li>';
-      }).join('') : '<li class="muted small">No blocks yet: the first block mined pays the 13,370.08241991 QOIN premine and gets jacobfrost.frostchain.</li>';
+      }).join('') : '<li class="muted small">No blocks yet. Block 1 pays the normal reward and gives its miner the name jacobfrost.frostchain.</li>';
     });
+    loadExplorer();
   }
   $('peers').addEventListener('click', function (e) {
     var b = e.target.closest('[data-rm]'); if (!b) return;
@@ -464,12 +461,181 @@
     call('node.addPeer', { addr: v }).then(function () { $('n-peer').value = ''; toast('Added: syncing'); setTimeout(loadNode, 1500); })
       .catch(function (e) { toast(e.message); });
   });
-  $('n-v2').addEventListener('click', function () {
-    var btn = this;
-    busy(btn, true, 'Adding…');
-    call('node.addPeer', { addr: V2_PEER }).then(function () {
-      msg('n-v2-msg', 'Added. Keep Graysons Wallet 2 open until both apps show the same block height.', 'ok');
-    }).catch(function (e) { msg('n-v2-msg', e.message, 'err'); }).then(function () { busy(btn, false); setTimeout(loadNode, 1500); });
+
+  // ---------------- Explorer (v0.4): the newest blocks as a Rez-style wireframe tunnel ----------------
+  // Blocks glow slower than once a second, so nothing flashes, and motion stops for reduce-motion users.
+  var REZ = { blocks: [], sel: null, moving: true, t: 0, last: 0, raf: 0, hit: [] };
+  var REZ_COLOR = { delta: '#ffb547', theta: '#3fe9ff', alpha: '#ff52d9', '': '#9c96cb' };
+  var REZ_HZ = { delta: 4.0, theta: 7.83, alpha: 11.11, '': 7.83 };
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    REZ.moving = false; $('x-motion').textContent = 'Start motion'; $('x-motion').setAttribute('aria-pressed', 'true');
+  }
+  function rezBand(b) {
+    if (b.band) return b.band;
+    return Math.abs(b.hz - 4.0) <= 0.3 ? 'delta' : Math.abs(b.hz - 11.11) <= 0.35 ? 'alpha' : Math.abs(b.hz - 7.83) <= 0.4 ? 'theta' : '';
+  }
+  function loadExplorer() {
+    call('node.blocks', { count: 26 }).then(function (l) {
+      REZ.blocks = l.slice().reverse();
+      if (REZ.sel == null || !l.some(function (b) { return b.height === REZ.sel; })) REZ.sel = l.length ? l[0].height : null;
+      rezDetail(); rezStart();
+    }).catch(function () { });
+  }
+  function rezDetail() {
+    var b = REZ.blocks.filter(function (x) { return x.height === REZ.sel; })[0];
+    $('x-detail').innerHTML = b
+      ? '<dt>Block</dt><dd>#' + b.height + ' · ' + ago(b.time) + '</dd>' +
+        '<dt>Miner</dt><dd>' + esc(b.miner) + '</dd>' +
+        '<dt>Tone</dt><dd>' + b.hz.toFixed(2) + ' Hz ' + esc(rezBand(b)) + ' · ' + esc(b.sensor) + '</dd>' +
+        '<dt>Reward</dt><dd>' + esc(b.paid) + ' QOIN</dd>' +
+        '<dt>Transactions</dt><dd>' + b.txs + '</dd>' +
+        '<dt>Hash</dt><dd class="mono">' + esc(b.hash) + '</dd>'
+      : '<dt>Blocks</dt><dd>None yet. Block 1 pays the normal reward and gives its miner the name jacobfrost.frostchain.</dd>';
+  }
+  function rezStart() { if (!REZ.raf) REZ.raf = requestAnimationFrame(rezFrame); }
+  function rezFrame(now) {
+    REZ.raf = 0;
+    var c = $('rez');
+    if (!c || !c.offsetParent) return; // the Node page is hidden: stop until it's shown again
+    if (REZ.moving) REZ.t += Math.min(0.05, (now - (REZ.last || now)) / 1000);
+    REZ.last = now;
+    rezDraw(c);
+    if (REZ.moving) REZ.raf = requestAnimationFrame(rezFrame);
+  }
+  var REZ_EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  var REZ_CORNERS = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+  function rezDraw(c) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), w = c.clientWidth, h = c.clientHeight;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) { c.width = Math.round(w * dpr); c.height = Math.round(h * dpr); }
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    var t = REZ.t, ph = t * 0.09, f = Math.min(w, h) * 0.95, cx = w / 2, cy = h * 0.46;
+    function px(z) { return Math.sin(z * 0.075 + ph) * 3.2; }
+    function py(z) { return Math.cos(z * 0.052 + ph * 0.7) * 1.1 - 0.4; }
+    var camX = px(0) * 0.7, camY = py(0) * 0.7;
+    function proj(x, y, z) { return [cx + (x - camX) * f / z, cy + (y - camY) * f / z]; }
+    ctx.lineWidth = 1; ctx.strokeStyle = '#2b2654';
+    var off = (t * 1.1) % 6, z, a, b2;
+    for (z = 2 + (6 - off); z < 150; z += 6) { a = proj(-40, 3, z); b2 = proj(40, 3, z); ctx.globalAlpha = Math.max(0, 1 - z / 150) * 0.8; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b2[0], b2[1]); ctx.stroke(); }
+    for (var gx = -40; gx <= 40; gx += 4) { a = proj(gx, 3, 2); b2 = proj(gx, 3, 150); ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b2[0], b2[1]); ctx.stroke(); }
+    var list = REZ.blocks, tipH = list.length ? list[list.length - 1].height : 0, SP = 4.2, NEAR = 5.5;
+    REZ.hit = [];
+    if (!list.length) { ctx.globalAlpha = 1; ctx.fillStyle = '#9c96cb'; ctx.font = '13px ' + getComputedStyle(document.body).fontFamily; ctx.textAlign = 'center'; ctx.fillText('No blocks yet', cx, cy); return; }
+    ctx.globalAlpha = 0.55; ctx.strokeStyle = '#9c96cb'; ctx.beginPath();
+    list.forEach(function (b, i) { var zz = NEAR + (tipH - b.height) * SP, p = proj(px(zz), py(zz), zz); if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
+    ctx.stroke();
+    list.forEach(function (b) {
+      var zz = NEAR + (tipH - b.height) * SP, x = px(zz), y = py(zz);
+      var depth = Math.max(0, 1 - (zz - NEAR) / (list.length * SP)), sel = b.height === REZ.sel, band = rezBand(b), col = REZ_COLOR[band];
+      var glow = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(2 * Math.PI * t * (REZ_HZ[band] / 16) + b.height));
+      var ang = t * 0.35 + b.height * 0.6, ca = Math.cos(ang), sa = Math.sin(ang), ct = Math.cos(0.45), st = Math.sin(0.45), s = sel ? 0.75 : 0.55;
+      var pts = REZ_CORNERS.map(function (k) {
+        var X = k[0] * s, Y = k[1] * s, Z = k[2] * s, X1 = X * ca + Z * sa, Z1 = -X * sa + Z * ca;
+        return proj(x + X1, y + Y * ct - Z1 * st, zz + Y * st + Z1 * ct);
+      });
+      ctx.globalAlpha = Math.max(0.12, depth) * (sel ? 1 : 0.85);
+      ctx.strokeStyle = col; ctx.shadowColor = col; ctx.shadowBlur = (sel ? 18 : 10) * glow * depth;
+      ctx.lineWidth = (sel ? 2.4 : 1.4) * (0.5 + depth);
+      ctx.beginPath();
+      REZ_EDGES.forEach(function (e) { ctx.moveTo(pts[e[0]][0], pts[e[0]][1]); ctx.lineTo(pts[e[1]][0], pts[e[1]][1]); });
+      ctx.stroke(); ctx.shadowBlur = 0;
+      var cpt = proj(x, y, zz);
+      REZ.hit.push({ h: b.height, x: cpt[0], y: cpt[1], r: Math.max(16, s * f * 1.6 / zz) });
+      if (sel || b.height === tipH) {
+        ctx.globalAlpha = 1; ctx.fillStyle = sel ? '#ece9ff' : '#9c96cb';
+        ctx.font = '12px ' + getComputedStyle(document.documentElement).getPropertyValue('--mono'); ctx.textAlign = 'center';
+        ctx.fillText('#' + b.height, cpt[0], cpt[1] - s * f * 1.9 / zz);
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+  $('rez').addEventListener('click', function (e) {
+    var r = this.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, best = null, bd = 1e9;
+    REZ.hit.forEach(function (c) { var d = Math.hypot(c.x - x, c.y - y); if (d < c.r && d < bd) { bd = d; best = c; } });
+    if (best) { REZ.sel = best.h; rezDetail(); if (!REZ.moving) rezDraw(this); }
+  });
+  $('x-motion').addEventListener('click', function () {
+    REZ.moving = !REZ.moving;
+    this.textContent = REZ.moving ? 'Pause motion' : 'Start motion';
+    this.setAttribute('aria-pressed', String(!REZ.moving));
+    REZ.last = 0; rezStart();
+  });
+  window.addEventListener('resize', function () { var c = $('rez'); if (c && c.offsetParent && !REZ.moving) rezDraw(c); });
+
+  // ---------------- Tone (v0.4 sound layer) ----------------
+  var TONE = { hz: 7.83, mode: 'pulse', ac: null, master: null, nodes: [], on: false };
+  function toneStopNodes() { TONE.nodes.forEach(function (n) { try { if (n.stop) n.stop(); } catch (e) { } try { n.disconnect(); } catch (e) { } }); TONE.nodes = []; }
+  function toneBuild() {
+    toneStopNodes();
+    var ac = TONE.ac, out = TONE.master;
+    if (TONE.mode === 'pulse') {
+      var carrier = ac.createOscillator(); carrier.frequency.value = 220;
+      var amp = ac.createGain(); amp.gain.value = 0.5;
+      var lfo = ac.createOscillator(); lfo.frequency.value = TONE.hz;
+      var depth = ac.createGain(); depth.gain.value = 0.5;
+      lfo.connect(depth); depth.connect(amp.gain); carrier.connect(amp); amp.connect(out);
+      carrier.start(); lfo.start();
+      TONE.nodes.push(carrier, lfo, amp, depth);
+    } else {
+      var merger = ac.createChannelMerger(2);
+      var l = ac.createOscillator(); l.frequency.value = 200;
+      var r = ac.createOscillator(); r.frequency.value = 200 + TONE.hz;
+      l.connect(merger, 0, 0); r.connect(merger, 0, 1); merger.connect(out);
+      l.start(); r.start();
+      TONE.nodes.push(l, r, merger);
+    }
+    if ($('tone-40').checked) {
+      var c2 = ac.createOscillator(); c2.frequency.value = 400;
+      var g2 = ac.createGain(); g2.gain.value = 0.2;
+      var l2 = ac.createOscillator(); l2.frequency.value = 40;
+      var d2 = ac.createGain(); d2.gain.value = 0.2;
+      l2.connect(d2); d2.connect(g2.gain); c2.connect(g2); g2.connect(out);
+      c2.start(); l2.start();
+      TONE.nodes.push(c2, g2, l2, d2);
+    }
+  }
+  function toneTag() {
+    $('tone-tag').textContent = TONE.on ? (TONE.hz === 4 ? '4.0' : TONE.hz) + ' Hz ' + (TONE.mode === 'pulse' ? 'pulse' : 'binaural') + ($('tone-40').checked ? ' + 40 Hz' : '') : 'off';
+    $('tone-tag').className = 'tag' + (TONE.on ? ' frost' : '');
+    $('tone-btn').textContent = TONE.on ? 'Stop tone' : 'Play tone';
+  }
+  function toneRetune() { if (TONE.on && TONE.ac) toneBuild(); toneTag(); }
+  qsa('[data-tone]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      TONE.hz = Number(b.dataset.tone);
+      qsa('[data-tone]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      toneRetune();
+    });
+  });
+  qsa('[data-tmode]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      TONE.mode = b.dataset.tmode;
+      qsa('[data-tmode]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      toneRetune();
+    });
+  });
+  $('tone-40').addEventListener('change', toneRetune);
+  $('tone-vol').addEventListener('input', function () { if (TONE.master) TONE.master.gain.setTargetAtTime(Number(this.value) / 100, TONE.ac.currentTime, 0.05); });
+  $('tone-btn').addEventListener('click', function () {
+    if (TONE.on) {
+      TONE.on = false;
+      if (TONE.master) TONE.master.gain.setTargetAtTime(0, TONE.ac.currentTime, 0.05);
+      setTimeout(toneStopNodes, 250);
+      toneTag(); return;
+    }
+    try {
+      if (!TONE.ac) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        TONE.ac = new AC(); TONE.master = TONE.ac.createGain(); TONE.master.gain.value = 0; TONE.master.connect(TONE.ac.destination);
+      }
+      var go = function () {
+        toneBuild(); TONE.on = true;
+        TONE.master.gain.setTargetAtTime(Number($('tone-vol').value) / 100, TONE.ac.currentTime, 0.08);
+        toneTag();
+      };
+      if (TONE.ac.state === 'suspended') TONE.ac.resume().then(go); else go();
+    } catch (e) { msg('f-msg', 'This phone can’t play the tone here: ' + e.message, 'err'); }
   });
   document.addEventListener('click', function (e) {
     var b = e.target.closest('[data-copy]'); if (!b) return;
@@ -501,7 +667,7 @@
   (function buildSpectrum() {
     var html = '';
     for (var i = 0; i < 33; i++) {
-      var hz = 4 + i * 0.25, band = Math.abs(hz - 7.83) <= 0.26;
+      var hz = 2 + i * 0.4, band = Math.abs(hz - 4.0) <= 0.2 || Math.abs(hz - 7.83) <= 0.2 || Math.abs(hz - 11.11) <= 0.2;
       html += '<i class="' + (band ? 'band' : '') + '" style="height:2%"></i>';
     }
     $('spectrum').innerHTML = html;
@@ -574,7 +740,7 @@
       $('reso-kv').innerHTML = '';
     } else {
       badge.className = 'lock ' + (r.locked ? 'on' : 'search');
-      badge.textContent = r.locked ? 'Locked · 7.83 Hz' : 'Searching';
+      badge.textContent = r.locked ? 'Locked · ' + (r.bandHz === 4 ? '4.0' : r.bandHz) + ' Hz ' + r.band : 'Searching';
       $('hz').textContent = r.snr > 3 ? r.hz.toFixed(2) : '–';
       $('reso-why').textContent = r.why;
       $('reso-rate').textContent = (r.sensor === 'mag' ? 'magnetometer ' : 'microphone ') + Math.round(r.rate) + ' Hz';
@@ -584,13 +750,13 @@
         bars[i].classList.toggle('hit', r.locked && bars[i].classList.contains('band'));
       });
       $('reso-kv').innerHTML = '<dt>Peak strength</dt><dd>' + r.snr.toFixed(1) + '× noise (needs 12×)</dd>' +
-        (r.sensor === 'mag' ? '<dt>Field at 7.83 Hz</dt><dd>' + (r.amplitude * 1000).toFixed(0) + ' nT</dd>' : '<dt>Pulse depth</dt><dd>' + (r.depth * 100).toFixed(1) + '%</dd>') +
+        (r.sensor === 'mag' ? '<dt>Field at the peak</dt><dd>' + (r.amplitude * 1000).toFixed(0) + ' nT</dd>' : '<dt>Pulse depth</dt><dd>' + (r.depth * 100).toFixed(1) + '%</dd>') +
         '<dt>Samples</dt><dd>' + r.samples + '</dd>';
     }
     var m = s.miner;
     if (S.lastAccepted != null && m.accepted > S.lastAccepted) toast('❄ Found block ' + s.node.height + '!');
     S.lastAccepted = m.accepted;
-    $('mine-tag').textContent = m.running ? (m.mining ? 'mining' : 'waiting for 7.83 Hz') : 'stopped';
+    $('mine-tag').textContent = m.running ? (m.mining ? 'mining' + (m.level ? ' · ' + m.level + ' (' + m.active + ' of ' + m.threads + ')' : '') : 'waiting for a tone') : 'stopped';
     $('mine-tag').className = 'tag' + (m.mining ? ' frost' : '');
     $('mine-btn').textContent = m.running ? 'Stop mining' : 'Start mining';
     $('m-rate').textContent = rate(m.mining ? m.hashrate : 0);

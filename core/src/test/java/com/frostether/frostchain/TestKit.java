@@ -95,7 +95,12 @@ final class TestKit {
 
     /** Mines the next block on a node from its mempool, then submits it like Frostoise does. */
     static Block mine(Node node, FakeClock clock, byte[] miner) throws InterruptedException {
-        Block found = search(node.chain, clock, miner, node.mempool.select(200, miner));
+        return mine(node, clock, miner, 7.83);
+    }
+
+    /** Same, with the block's resonance proof locked on the given tone. */
+    static Block mine(Node node, FakeClock clock, byte[] miner, double hz) throws InterruptedException {
+        Block found = search(node.chain, clock, miner, node.mempool.select(200, miner), hz);
         Chain.Result r = node.submitBlock(found, null);
         if (!r.ok) {
             throw new AssertionError("block " + found.height + " rejected: " + r.error);
@@ -105,7 +110,7 @@ final class TestKit {
 
     /** Builds the next block the way Frostoise does, searches for a nonce, and adds it to the chain. */
     static Block mine(Chain chain, FakeClock clock, byte[] miner, List<Tx> txs) throws InterruptedException {
-        Block block = search(chain, clock, miner, txs);
+        Block block = search(chain, clock, miner, txs, 7.83);
         Chain.Result r = chain.addBlock(block);
         if (!r.ok) {
             throw new AssertionError("block " + block.height + " rejected: " + r.error);
@@ -113,7 +118,7 @@ final class TestKit {
         return block;
     }
 
-    private static Block search(Chain chain, FakeClock clock, byte[] miner, List<Tx> txs) throws InterruptedException {
+    private static Block search(Chain chain, FakeClock clock, byte[] miner, List<Tx> txs, double hz) throws InterruptedException {
         Block tip = chain.tip();
         Block b = new Block();
         b.height = tip.height + 1;
@@ -123,7 +128,7 @@ final class TestKit {
         b.txs.addAll(txs);
         b.root = Block.txRoot(b.txs, chain.chainId);
         b.miner = miner.clone();
-        b.reso = proof(b.time);
+        b.reso = proof(b.time, hz);
         b.resoHash = b.reso.hash();
 
         final byte[] target = Consensus.target(b.difficulty);

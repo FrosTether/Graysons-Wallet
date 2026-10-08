@@ -239,7 +239,10 @@ public final class Api {
             objArr[15] = at.reso == null ? "" : at.reso.sensor;
             objArr[16] = "difficulty";
             objArr[17] = U64.str(at.difficulty);
-            arrayList.add(Json.o(objArr));
+            Map<String, Object> row = Json.o(objArr);
+            int band = at.reso == null ? -1 : Resonance.bandOfMilli(at.reso.hzMilli);
+            row.put("band", band >= 0 ? Resonance.BAND_NAMES[band] : "");
+            arrayList.add(row);
             height = j - 1;
         }
         return arrayList;
