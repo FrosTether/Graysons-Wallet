@@ -39,7 +39,14 @@ Until the repository has the release key, those builds are signed with a throwaw
 Phones only accept an update signed with the same key as the version already installed.
 Keep a backup of the keystore and its password somewhere other than the build machine. Losing the key means every phone has to uninstall before it can update.
 
-**Make the key** (in Termux on the phone, or on any machine with Java):
+**The quick way**, in Termux on the phone: [`tools/release-key.sh`](tools/release-key.sh) makes the key, keeps it in
+`~/graysons-release-key/`, and adds the four secrets below with the GitHub CLI. Run it again any time; it reuses the key.
+
+```bash
+curl -fsSLO https://github.com/FrosTether/Graysons-Wallet/raw/main/tools/release-key.sh && sh release-key.sh
+```
+
+**By hand**, make the key (in Termux on the phone, or on any machine with Java):
 
 ```bash
 pkg install openjdk-17        # Termux only
