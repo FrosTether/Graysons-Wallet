@@ -44,6 +44,7 @@ Keep a backup of the keystore and its password somewhere other than the build ma
 **The quick way**, in Termux on the phone: [`tools/release-key.sh`](tools/release-key.sh) makes the key, keeps it in
 `~/graysons-release-key/`, adds the four secrets below with the GitHub CLI, and offers to start a build. Run it again any time; it reuses the key.
 It won't give GitHub a different key from the one in `.github/release-cert.sha256`, so on a new machine, copy the backed-up folder to `~/graysons-release-key/` first.
+To see which certificate signed an APK, run `python3 tools/apk-cert.py GraysonsVault.apk`.
 
 ```bash
 curl -fsSLO https://github.com/FrosTether/Graysons-Wallet/raw/main/tools/release-key.sh && sh release-key.sh

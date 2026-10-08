@@ -91,13 +91,11 @@ jobs:
           cd out && sha256sum * | tee SHA256SUMS
       - name: Read the signing certificate
         # Phones accept an update only when it's signed by the same certificate as the app they have.
+        # tools/apk-cert.py writes it the way keytool does (AB:CD:…), which is what tools/release-key.sh prints.
         run: |
-          APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
-          CERT=$("$APKSIGNER" verify --print-certs out/GraysonsVault.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -n 1)
-          if [ -z "$CERT" ]; then echo "::error::Couldn't read the app's signing certificate."; exit 1; fi
-          # Written the way keytool writes it (AB:CD:…), which is what tools/release-key.sh prints.
-          CERT=$(printf '%s' "$CERT" | tr a-f A-F | sed 's/../&:/g; s/:$//')
+          CERT=$(python3 -I tools/apk-cert.py out/GraysonsVault.apk) || { echo "::error::Couldn't read the app's signing certificate."; exit 1; }
           echo "CERT=$CERT" >> "$GITHUB_ENV"
+          echo "::notice title=Signing certificate SHA-256 ($BUILD_KIND key)::$CERT"
           { echo "### Graysons Vault $VERSION ($BUILD_KIND key)"
             echo "Signing certificate SHA-256: \`$CERT\`"
             echo '```'; cat out/SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
