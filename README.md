@@ -15,11 +15,12 @@ One install gives you three apps:
 This link always serves the newest build. Checksums and notes are on the [release page](https://github.com/FrosTether/Graysons-Wallet/releases/latest).
 Your phone will ask you to allow installs from your browser, since the app isn't on the Play Store.
 
-**Coming from 0.3.x?** 0.4 runs a new chain, and Android won't install it over 0.3.x:
+**Coming from 0.3.x?** 0.4 runs a new chain, so you start fresh:
 
-1. In 0.3.x, open Graysons Wallet and **write down your 25 words**.
-2. Uninstall 0.3.x.
-3. Install 0.4.0, tap **Restore** and enter the same 25 words.
+1. Uninstall 0.3.x. Android won't install 0.4 over it.
+2. Install 0.4.0, tap **Create wallet** and write down your new 25 words.
+
+Nothing from 0.3.x carries over: not coins, names or blocks. If you restore your 0.3.x words anyway, you get a new, empty account, because 0.4 derives fresh signing keys from them. That keeps the old chain's one-time keys from ever signing again.
 
 The 0.3.0 APK stays in [`releases/`](releases/) for the record. It runs the old chain.
 

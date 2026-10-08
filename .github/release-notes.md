@@ -7,10 +7,11 @@
 
 ### Install
 
-1. In 0.3.x, open Graysons Wallet and **write down your 25 words**.
-2. Uninstall 0.3.x. Android won't install over it, because it's signed with a different key.
-3. Download `GraysonsWallet.apk` below, open it, and allow installs from your browser when asked.
-4. Open Graysons Wallet, tap **Restore**, and enter the same 25 words. It's the same wallet, not a new one.
+1. Uninstall 0.3.x. Android won't install over it, because it's signed with a different key.
+2. Download `GraysonsWallet.apk` below, open it, and allow installs from your browser when asked.
+3. Open Graysons Wallet, tap **Create wallet**, and write down your new 25 words.
+
+Nothing from 0.3.x carries over. If you restore your 0.3.x words anyway, you get a new, empty account: 0.4 derives fresh signing keys from them, so the old chain's one-time keys never sign again.
 
 Check the file against `SHA256SUMS`. `frostnode.zip` is the server node; see `node/README.md`.
 

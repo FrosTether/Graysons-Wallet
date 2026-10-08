@@ -74,4 +74,37 @@ public class WalletTest {
         assertEquals(address, list.get(0).get("address"));
         assertArrayEquals(Wallets.accountFor(Mnemonic.decode(seed)), Address.decodeRaw(address));
     }
+
+    /** How 0.3.x derived key i from the seed. */
+    private static Lms.PrivateKey oldKey(byte[] seed, int i) {
+        byte[] oldI = Bytes.slice(Sha256.hash(Bytes.utf8("frostchain/lms/I"), seed, Bytes.u32(i)), 0, 16);
+        byte[] oldSeed = Sha256.hash(Bytes.utf8("frostchain/lms/seed"), seed, Bytes.u32(i));
+        return Lms.generate(oldI, oldSeed, null);
+    }
+
+    /** Words from 0.3.x must not sign with the one-time keys they already used on the old chain. */
+    @Test
+    public void oldWordsGetFreshKeysOnTheNewChain() {
+        byte[] seed = Bytes.random(32);
+        Lms.PrivateKey old = oldKey(seed, 0);
+        Lms.PrivateKey now = Lms.generate(Wallets.lmsI(seed, 0), Wallets.lmsSeed(seed, 0), null);
+        assertTrue(!Bytes.equal(old.pub, now.pub));
+        assertTrue(!Bytes.equal(Address.accountId(old.pub), Wallets.accountFor(seed)));
+        for (int i = 1; i < 4; i++) {
+            assertTrue(!Bytes.equal(Bytes.slice(Sha256.hash(Bytes.utf8("frostchain/lms/I"), seed, Bytes.u32(i)), 0, 16), Wallets.lmsI(seed, i)));
+            assertTrue(!Bytes.equal(Sha256.hash(Bytes.utf8("frostchain/lms/seed"), seed, Bytes.u32(i)), Wallets.lmsSeed(seed, i)));
+        }
+    }
+
+    /** Pins the v0.4 derivation: changing it would move every wallet to a different address. */
+    @Test
+    public void wordsGiveAFixedAddress() {
+        byte[] seed = new byte[32];
+        for (int i = 0; i < 32; i++) {
+            seed[i] = (byte) i;
+        }
+        assertEquals(PINNED_ADDRESS, Address.raw(Wallets.accountFor(Mnemonic.decode(Mnemonic.encode(seed)))));
+    }
+
+    static final String PINNED_ADDRESS = "fcad5th2e2tquqd2duisuoysixxo3usouxmloo";
 }

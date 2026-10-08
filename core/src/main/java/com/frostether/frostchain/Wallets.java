@@ -61,12 +61,20 @@ public final class Wallets {
         this.node = node;
     }
 
+    /**
+     * Signing keys are derived per chain. 0.3.x derived them from the seed under "frostchain/lms/", so the same
+     * 25 words on the v0.4 chain would sign with one-time keys the old chain already used. Two signatures from one
+     * LM-OTS key let anyone who sees both forge more, so v0.4 derives its keys under its own tag: old words give
+     * a fresh account here. A future chain that keeps the same seeds must change this tag again.
+     */
+    static final String KEY_TAG = "frostchain/v0.4/lms/";
+
     static byte[] lmsI(byte[] bArr, int i) {
-        return Bytes.slice(Sha256.hash(Bytes.utf8("frostchain/lms/I"), bArr, Bytes.u32(i)), 0, 16);
+        return Bytes.slice(Sha256.hash(Bytes.utf8(KEY_TAG + "I"), bArr, Bytes.u32(i)), 0, 16);
     }
 
     static byte[] lmsSeed(byte[] bArr, int i) {
-        return Sha256.hash(Bytes.utf8("frostchain/lms/seed"), bArr, Bytes.u32(i));
+        return Sha256.hash(Bytes.utf8(KEY_TAG + "seed"), bArr, Bytes.u32(i));
     }
 
     public static byte[] accountFor(byte[] bArr) {
