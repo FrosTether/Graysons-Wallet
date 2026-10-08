@@ -13,11 +13,15 @@ public final class ChainState {
     final TreeMap<Long, List<Credit>> locked = new TreeMap<>();
     public long height = -1;
 
-    /** A new state, at genesis: the founder name is already registered (v0.4). */
+    /** A new state, at genesis: the founder's names are already registered (v0.4). */
     public ChainState() {
         byte[] founder = Consensus.founderAccount();
+        String hex = Bytes.hex(founder);
         getOrCreate(founder).name = Consensus.FOUNDER_NAME;
-        this.names.put(Consensus.FOUNDER_NAME, Bytes.hex(founder));
+        this.names.put(Consensus.FOUNDER_NAME, hex);
+        for (String alias : Consensus.FOUNDER_ALIASES) {
+            this.names.put(alias, hex);
+        }
     }
 
     public static final class Account {

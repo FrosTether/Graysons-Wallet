@@ -1,6 +1,6 @@
 (function () {
   'use strict';
-  var LAUNCH = 1791567420 * 1000; // Friday 9 October 2026, 13:37 Eastern: the v0.4 genesis
+  var LAUNCH = 1791481020 * 1000; // Thursday 8 October 2026, 13:37 Eastern: the v0.4 genesis
   var $ = function (id) { return document.getElementById(id); };
   var root = document.documentElement;
 

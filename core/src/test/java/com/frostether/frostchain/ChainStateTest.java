@@ -27,7 +27,9 @@ public class ChainStateTest {
     public void theFounderNameBelongsToItsAddressFromGenesis() {
         ChainState s = new ChainState();
         assertArrayEquals(Consensus.founderAccount(), s.lookupName("jacobfrost"));
+        assertArrayEquals(Consensus.founderAccount(), s.lookupName("agorajay"));
         assertEquals("jacobfrost", s.account(Consensus.founderAccount()).name);
+        assertEquals(2, s.nameCount());
         // Mining block 1 doesn't come with a name any more.
         s = funded();
         assertNull(s.account(TestKit.id(ALICE)).name);
@@ -101,6 +103,7 @@ public class ChainStateTest {
         ChainState s = funded();
         assertNull(s.apply(TestKit.send(ALICE, 0, TestKit.id(BOB), 10 * QOIN, CHAIN)));
         assertEquals("name already taken", s.apply(TestKit.claimName(BOB, 0, "jacobfrost", CHAIN)));
+        assertEquals("name already taken", s.apply(TestKit.claimName(BOB, 0, "agorajay", CHAIN)));
         assertNull(s.apply(TestKit.claimName(BOB, 0, "oofmaster", CHAIN)));
         assertArrayEquals(TestKit.id(BOB), s.lookupName("oofmaster"));
         assertEquals(10 * QOIN - Consensus.MIN_FEE, s.account(TestKit.id(BOB)).balance);

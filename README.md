@@ -27,7 +27,7 @@ The 0.3.0 APK stays in [`releases/`](releases/) for the record. It runs the old 
 
 ## Tone mining
 
-Mining opens at launch: **Friday 9 October 2026, 13:37 Eastern**.
+Mining opened at launch: **Thursday 8 October 2026, 13:37 Eastern**.
 
 Frostoise mines only while it's locked on one of three tones. The tone sets how hard the phone works. The reward per block is the same.
 
@@ -60,14 +60,14 @@ Phones on the same Wi-Fi find each other automatically. To reach anyone else, op
 | Proof of work | double SHA-256 |
 | Block reward | (2⁶⁴ − coins mined so far) ÷ 2²⁰ × 1.5, about 263.88 QOIN at launch |
 | Block 1 | Mined like any block, at the normal reward |
-| Founder name | `jacobfrost.frostchain` belongs to `fc72wlnkh65dywzf6n3ap6xxm7dpl5axhzxv5k` from genesis, and the genesis block says so |
+| Founder names | `jacobfrost.frostchain` and `agorajay.frostchain` belong to `fc3dlrkt7demghofiz7wzjz2st4vzvjiskxumv` from genesis, and the genesis block says so |
 | Mined coins unlock | after 12 blocks |
 | Minimum fee | 0.0001 QOIN |
 | Signatures | LMS_SHA256_M32_H10 with LMOTS_SHA256_N32_W4 (RFC 8554), 1,024 per key, automatic key rotation |
 | Accounts | public, with optional `.frostchain` names |
 | Resonance proof | 3.75–4.25, 7.50–8.20 or 10.80–11.40 Hz, peak ≥ 10× noise, 4–60 s window, ≥ 200 samples at ≥ 16 Hz and above twice the tone, at most 15 minutes old |
 | P2P | HTTP on TCP 7830, LAN discovery on UDP 7830 |
-| Genesis | 9 October 2026, 13:37 Eastern. Chain ID `5f8a7ec5b9db1444…` |
+| Genesis | 8 October 2026, 13:37 Eastern. Chain ID `7cf2e3422f69c1e7…` |
 
 The emission curve follows CryptoNote and Wownero. Signatures and accounts do not: there are no ring signatures or stealth addresses, so transfers are public.
 

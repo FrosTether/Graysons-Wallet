@@ -76,11 +76,11 @@ public class ConsensusTest {
     public void genesisIsTheV04Relaunch() {
         // The chain ID is the genesis block's hash. Phones only talk to nodes with the same one,
         // so this locks it in: a change here means a different chain.
-        assertEquals(1_791_567_420L, Consensus.GENESIS_TIME); // Fri 9 Oct 2026, 13:37 Eastern
+        assertEquals(1_791_481_020L, Consensus.GENESIS_TIME); // Thu 8 Oct 2026, 13:37 Eastern
         assertEquals(Consensus.GENESIS_TIME, Block.genesis().time);
         assertEquals(CHAIN_ID, Block.genesis().hashHex());
     }
 
     /** v0.4 chain ID. 0.3.x phones are on 98ede167f7885dae… and won't connect to it. */
-    static final String CHAIN_ID = "5f8a7ec5b9db14449f1646738b0fdf9316018166ddf81f897f7fcf7ffb20331b";
+    static final String CHAIN_ID = "7cf2e3422f69c1e7918b191964dd1411d28392b4b6b2f94b44f289d6b9882ebe";
 }

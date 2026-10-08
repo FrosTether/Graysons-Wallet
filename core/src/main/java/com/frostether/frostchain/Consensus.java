@@ -1,6 +1,8 @@
 package com.frostether.frostchain;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public final class Consensus {
@@ -10,11 +12,14 @@ public final class Consensus {
     public static final int COINBASE_MATURITY = 12;
     public static final int EMISSION_SPEED_FACTOR = 20;
     public static final String FOUNDER_NAME = "jacobfrost";
+    /** More names for the founder's wallet. They point to it like FOUNDER_NAME, which stays the name it shows. */
+    public static final List<String> FOUNDER_ALIASES = Collections.unmodifiableList(Arrays.asList("agorajay"));
     /**
-     * jacobfrost.frostchain belongs to this address from genesis. 0.3.x gave the name to whoever mined block 1,
-     * which anyone running the public app could do. The genesis marker names it, so it's part of the chain ID.
+     * jacobfrost.frostchain and the aliases belong to this address from genesis. 0.3.x gave jacobfrost to whoever
+     * mined block 1, which anyone running the public app could do. The genesis marker names them all, so they're
+     * part of the chain ID.
      */
-    public static final String FOUNDER_ADDRESS = "fc72wlnkh65dywzf6n3ap6xxm7dpl5axhzxv5k";
+    public static final String FOUNDER_ADDRESS = "fc3dlrkt7demghofiz7wzjz2st4vzvjiskxumv";
     private static final byte[] FOUNDER_ACCOUNT = Address.decodeRaw(FOUNDER_ADDRESS);
 
     public static byte[] founderAccount() {
@@ -22,10 +27,10 @@ public final class Consensus {
     }
     public static final long FUTURE_TIME_LIMIT = 900;
     /**
-     * v0.4 relaunch: Friday 9 October 2026, 13:37 Eastern. Mining opens at this moment, and changing it
+     * v0.4 relaunch: Thursday 8 October 2026, 13:37 Eastern. Mining opens at this moment, and changing it
      * (with the marker in Resonance.genesisMarker) makes a different chain. 0.3.x started on 3 October.
      */
-    public static final long GENESIS_TIME = 1791567420;
+    public static final long GENESIS_TIME = 1791481020;
     public static final long INITIAL_DIFFICULTY = 20000000;
     public static final int LWMA_N = 60;
     public static final int MAX_BLOCK_TXS = 200;

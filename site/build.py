@@ -22,7 +22,7 @@ APK_URL = "https://github.com/FrosTether/Graysons-Wallet/releases/latest/downloa
 RELEASE_URL = "https://github.com/FrosTether/Graysons-Wallet/releases/latest"
 TITLE = "Get Qoin | finux"
 DESCRIPTION = ("Install Graysons Wallet and mine Qoin on your Android phone, only while it hears a tone. "
-               "Mining opens Friday 9 October at 13:37 Eastern.")
+               "Mining is open.")
 GOOGLE_FONTS = ("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900"
                 "&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap")
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"

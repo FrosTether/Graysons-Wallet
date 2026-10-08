@@ -97,7 +97,7 @@ public class MinerTest {
         node.miner.start(TestKit.id(TestKit.key(55)), 1);
         try {
             assertTrue(waitFor(() -> String.valueOf(node.miner.status().get("gate")).startsWith("mining opens at launch"), 10_000));
-            assertEquals("mining opens at launch: Fri 9 Oct 2026, 13:37 Eastern", node.miner.status().get("gate"));
+            assertEquals("mining opens at launch: Thu 8 Oct 2026, 13:37 Eastern", node.miner.status().get("gate"));
             assertEquals(Boolean.FALSE, node.miner.status().get("mining"));
         } finally {
             node.miner.stop();

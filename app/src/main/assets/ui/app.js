@@ -448,7 +448,7 @@
     call('node.blocks', { count: 8 }).then(function (l) {
       $('blocks').innerHTML = l.length ? l.map(function (b) {
         return '<li><span>#' + b.height + ' · ' + esc(b.miner) + '</span><span>' + esc(b.paid) + ' QOIN · ' + b.hz.toFixed(2) + ' Hz ' + esc(b.sensor) + '<br>' + ago(b.time) + '</span></li>';
-      }).join('') : '<li class="muted small">No blocks yet. Mining opens Friday 9 October at 13:37 Eastern.</li>';
+      }).join('') : '<li class="muted small">No blocks yet. Mining is open: play a tone in Frostoise to find block 1.</li>';
     });
     loadExplorer();
   }
@@ -490,7 +490,7 @@
         '<dt>Reward</dt><dd>' + esc(b.paid) + ' QOIN</dd>' +
         '<dt>Transactions</dt><dd>' + b.txs + '</dd>' +
         '<dt>Hash</dt><dd class="mono">' + esc(b.hash) + '</dd>'
-      : '<dt>Blocks</dt><dd>None yet. Mining opens Friday 9 October at 13:37 Eastern.</dd>';
+      : '<dt>Blocks</dt><dd>None yet. Mining is open: play a tone in Frostoise to find block 1.</dd>';
   }
   function rezStart() { if (!REZ.raf) REZ.raf = requestAnimationFrame(rezFrame); }
   function rezFrame(now) {
