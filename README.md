@@ -57,7 +57,9 @@ See [ROADMAP.md](ROADMAP.md) for what comes next and how to help.
 
 ## Source
 
-The app source is being moved into this repository. Until then, the release APK is the reference build.
+The full source is here: the chain core in `core/`, the server node in `node/` and the Android app in `app/`.
+It was rebuilt from the 0.3.0 APK and is covered by an end-to-end test suite.
+See [BUILDING.md](BUILDING.md) to build the app, run the tests or set up a server node.
 
 ## License
 

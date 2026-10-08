@@ -1,0 +1,18 @@
+[Unit]
+Description=Frostchain node for Qoin (frostnode)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=frostnode
+WorkingDirectory=/opt/frostnode
+ExecStart=/opt/frostnode/bin/frostnode --data /opt/frostnode/data
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/opt/frostnode/data
+
+[Install]
+WantedBy=multi-user.target

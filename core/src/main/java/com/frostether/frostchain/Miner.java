@@ -1,0 +1,338 @@
+package com.frostether.frostchain;
+
+import com.frostether.frostchain.Chain;
+import com.frostether.frostchain.Resonance;
+import java.security.SecureRandom;
+import java.util.Locale;
+import java.util.Map;
+
+public final class Miner {
+    public static final long MAX_READING_AGE_MS = 20000;
+    private volatile int accepted;
+    private volatile Template current;
+    private volatile int found;
+    private volatile double hashrate;
+    private volatile Listener listener;
+    private final Node node;
+    private volatile byte[] payout;
+    private Thread refresher;
+    private volatile boolean running;
+    private volatile ResonanceSource source;
+    private volatile int threads = 1;
+    private Thread[] workers = new Thread[0];
+    private final long[] hashCounts = new long[64];
+    private volatile String lastBlock = "";
+    private volatile String gateWhy = "not started";
+    private final Object wake = new Object();
+    private final Object submitLock = new Object();
+    private final SecureRandom rng = new SecureRandom();
+
+    public interface Listener {
+        void found(Block block, boolean z, String str);
+    }
+
+    public interface ResonanceSource {
+        Resonance.Reading latest();
+    }
+
+    static final class Template {
+        final Block block;
+        final int[] mid = new int[8];
+        final int[] tail = new int[4];
+        final int[] target = new int[8];
+
+        Template(Block block) {
+            this.block = block;
+            byte[] header = block.header();
+            System.arraycopy(Sha256.IV, 0, this.mid, 0, 8);
+            int[] iArr = new int[64];
+            Sha256.compress(this.mid, header, 0, iArr);
+            Sha256.compress(this.mid, header, 64, iArr);
+            for (int i = 0; i < 4; i++) {
+                this.tail[i] = Miner.word(header, (i * 4) + 128);
+            }
+            byte[] target = Consensus.target(block.difficulty);
+            for (int i2 = 0; i2 < 8; i2++) {
+                this.target[i2] = Miner.word(target, i2 * 4);
+            }
+        }
+    }
+
+    public Miner(Node node) {
+        this.node = node;
+    }
+
+    public void setSource(ResonanceSource resonanceSource) {
+        this.source = resonanceSource;
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    public byte[] payout() {
+        return this.payout;
+    }
+
+    public boolean running() {
+        return this.running;
+    }
+
+    public int threads() {
+        return this.threads;
+    }
+
+    public synchronized void start(byte[] bArr, int i) {
+        if (bArr != null) {
+            if (bArr.length == 20) {
+                stop();
+                this.payout = (byte[]) bArr.clone();
+                this.threads = Math.max(1, Math.min(Math.min(32, this.hashCounts.length), i));
+                this.running = true;
+                this.found = 0;
+                this.accepted = 0;
+                this.refresher = new Thread(new Runnable() {
+                    @Override // java.lang.Runnable
+                    public void run() {
+                        Miner.this.refreshLoop();
+                    }
+                }, "frostoise-template");
+                this.refresher.setDaemon(true);
+                this.refresher.start();
+                this.workers = new Thread[this.threads];
+                for (int t = 0; t < this.threads; t++) {
+                    final int i2 = t;
+                    this.workers[i2] = new Thread(new Runnable() {
+                        @Override // java.lang.Runnable
+                        public void run() {
+                            Miner.this.hashLoop(i2);
+                        }
+                    }, "frostoise-" + i2);
+                    this.workers[i2].setDaemon(true);
+                    this.workers[i2].setPriority(1);
+                    this.workers[i2].start();
+                }
+                Log.i("frostoise", "mining with " + this.threads + " thread(s) to " + Address.raw(this.payout));
+            }
+        }
+        throw new IllegalArgumentException("Frostoise needs a payout address");
+    }
+
+    public synchronized void stop() {
+        synchronized (this) {
+            this.running = false;
+            synchronized (this.wake) {
+                this.wake.notifyAll();
+            }
+            for (Thread thread : this.workers) {
+                try {
+                    thread.join(2000L);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            if (this.refresher != null) {
+                try {
+                    this.refresher.join(2000L);
+                } catch (InterruptedException e2) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            this.workers = new Thread[0];
+            this.refresher = null;
+            this.current = null;
+            this.hashrate = 0.0d;
+        }
+    }
+
+    public void refresh() {
+        synchronized (this.wake) {
+            this.wake.notifyAll();
+        }
+    }
+
+    public Map<String, Object> status() {
+        Template template = this.current;
+        Object[] objArr = new Object[16];
+        objArr[0] = "running";
+        objArr[1] = Boolean.valueOf(this.running);
+        objArr[2] = "threads";
+        objArr[3] = Long.valueOf(this.threads);
+        objArr[4] = "hashrate";
+        objArr[5] = Long.valueOf(Math.round(this.hashrate));
+        objArr[6] = "mining";
+        objArr[7] = Boolean.valueOf(template != null);
+        objArr[8] = "gate";
+        objArr[9] = this.gateWhy;
+        objArr[10] = "found";
+        objArr[11] = Long.valueOf(this.found);
+        objArr[12] = "accepted";
+        objArr[13] = Long.valueOf(this.accepted);
+        objArr[14] = "lastBlock";
+        objArr[15] = this.lastBlock;
+        Map<String, Object> o = Json.o(objArr);
+        if (this.payout != null) {
+            o.put("payout", Address.raw(this.payout));
+        }
+        long nextDifficulty = this.node.chain.nextDifficulty();
+        o.put("difficulty", U64.str(nextDifficulty));
+        o.put("expectedSeconds", Long.valueOf(this.hashrate > 0.0d ? Math.round(nextDifficulty / this.hashrate) : -1L));
+        return o;
+    }
+
+    public void refreshLoop() {
+        long[] jArr = new long[this.hashCounts.length];
+        long nanoTime = System.nanoTime();
+        while (this.running) {
+            try {
+                this.current = build();
+            } catch (RuntimeException e) {
+                this.current = null;
+                this.gateWhy = "error: " + e.getMessage();
+                Log.w("frostoise", "template: " + e);
+            }
+            synchronized (this.wake) {
+                try {
+                    this.wake.wait(3000L);
+                } catch (InterruptedException e2) {
+                    return;
+                }
+            }
+            long nanoTime2 = System.nanoTime();
+            long j = 0;
+            for (int i = 0; i < this.hashCounts.length; i++) {
+                j += this.hashCounts[i] - jArr[i];
+                jArr[i] = this.hashCounts[i];
+            }
+            double d = (nanoTime2 - nanoTime) / 1.0E9d;
+            if (d > 0.0d) {
+                this.hashrate = ((j / d) * 0.4d) + (0.6d * this.hashrate);
+            }
+            nanoTime = nanoTime2;
+        }
+    }
+
+    private Template build() {
+        ResonanceSource resonanceSource = this.source;
+        Resonance.Reading latest = resonanceSource == null ? null : resonanceSource.latest();
+        long now = this.node.chain.now() * 1000;
+        if (latest == null) {
+            this.gateWhy = "resonance sensor is off";
+            return null;
+        }
+        if (!latest.locked) {
+            this.gateWhy = "waiting for 7.83 Hz: " + latest.why;
+            return null;
+        }
+        if (now - (latest.startMs + latest.durMs) > MAX_READING_AGE_MS) {
+            this.gateWhy = "resonance reading is stale";
+            return null;
+        }
+        Block tip = this.node.chain.tip();
+        Block block = new Block();
+        block.height = tip.height + 1;
+        block.prev = tip.hash();
+        block.time = Math.max(this.node.chain.now(), this.node.chain.minNextTime());
+        block.difficulty = this.node.chain.nextDifficulty();
+        block.txs.addAll(this.node.mempool.select(200, this.payout));
+        block.root = Block.txRoot(block.txs, this.node.chain.chainId);
+        block.miner = this.payout;
+        block.reso = latest.proof();
+        String check = block.reso.check(block.time);
+        if (check != null) {
+            this.gateWhy = "resonance proof: " + check;
+            return null;
+        }
+        block.resoHash = block.reso.hash();
+        this.gateWhy = "mining: locked on " + String.format(Locale.ROOT, "%.2f", Double.valueOf(latest.peakHz)) + " Hz";
+        return new Template(block);
+    }
+
+    public void hashLoop(int i) {
+        int[] iArr = new int[64];
+        int[] iArr2 = new int[64];
+        int[] iArr3 = new int[8];
+        while (this.running) {
+            Template template = this.current;
+            if (template == null) {
+                synchronized (this.wake) {
+                    try {
+                        this.wake.wait(500L);
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
+            } else {
+                System.arraycopy(template.tail, 0, iArr, 0, 4);
+                iArr[6] = Integer.MIN_VALUE;
+                for (int i2 = 7; i2 < 15; i2++) {
+                    iArr[i2] = 0;
+                }
+                iArr[15] = 1216;
+                for (int i3 = 9; i3 < 15; i3++) {
+                    iArr2[i3] = 0;
+                }
+                iArr2[8] = Integer.MIN_VALUE;
+                iArr2[15] = 256;
+                long nextLong = this.rng.nextLong();
+                // Hash in batches of 16,384, then recheck that the job is still current.
+                // Rebuilt from the 0.3.0 bytecode; the decompiled batch loop never ended.
+                while (this.running && this.current == template) {
+                    for (int i4 = 0; i4 < 16384; i4++) {
+                        System.arraycopy(template.mid, 0, iArr3, 0, 8);
+                        iArr[4] = (int) (nextLong >>> 32);
+                        iArr[5] = (int) nextLong;
+                        Sha256.compressW(iArr3, iArr);
+                        System.arraycopy(iArr3, 0, iArr2, 0, 8);
+                        System.arraycopy(Sha256.IV, 0, iArr3, 0, 8);
+                        Sha256.compressW(iArr3, iArr2);
+                        if (Integer.compareUnsigned(iArr3[0], template.target[0]) <= 0 && meets(iArr3, template.target)) {
+                            submit(template, nextLong);
+                            break;
+                        }
+                        nextLong++;
+                    }
+                    long[] jArr = this.hashCounts;
+                    jArr[i] = jArr[i] + 16384;
+                }
+            }
+        }
+    }
+
+    private static boolean meets(int[] iArr, int[] iArr2) {
+        for (int i = 0; i < 8; i++) {
+            int compareUnsigned = Integer.compareUnsigned(iArr[i], iArr2[i]);
+            if (compareUnsigned != 0) {
+                return compareUnsigned < 0;
+            }
+        }
+        return true;
+    }
+
+    private void submit(Template template, long j) {
+        synchronized (this.submitLock) {
+            if (this.current == template) {
+                this.current = null;
+                Block fromJson = Block.fromJson(template.block.toJson());
+                fromJson.nonce = j;
+                fromJson.invalidateHash();
+                this.found++;
+                Chain.Result submitBlock = this.node.submitBlock(fromJson, null);
+                if (submitBlock.ok) {
+                    this.accepted++;
+                    this.lastBlock = fromJson.height + " " + fromJson.hashHex();
+                }
+                Log.i("frostoise", "found block " + fromJson.height + (submitBlock.ok ? " (accepted)" : " (rejected: " + submitBlock.error + ")"));
+                Listener listener = this.listener;
+                if (listener != null) {
+                    listener.found(fromJson, submitBlock.ok, submitBlock.error);
+                }
+                refresh();
+            }
+        }
+    }
+
+    public static int word(byte[] bArr, int i) {
+        return (bArr[i] << 24) | ((bArr[i + 1] & 255) << 16) | ((bArr[i + 2] & 255) << 8) | (bArr[i + 3] & 255);
+    }
+}

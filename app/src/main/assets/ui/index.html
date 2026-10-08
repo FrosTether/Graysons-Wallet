@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Graysons Wallet</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- ================= Gate: open / create / restore / watch ================= -->
+<section id="gate" class="screen hidden">
+  <header class="gate-head">
+    <img src="graysons.svg" alt="" class="logo">
+    <div><h1>Graysons Wallet</h1><p class="muted">Qoin (QOIN) on <b>.frostchain</b> · quantum-safe signatures</p></div>
+  </header>
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button data-gate="open" class="on">Open</button>
+      <button data-gate="create">Create</button>
+      <button data-gate="restore">Restore</button>
+      <button data-gate="watch">Watch</button>
+    </div>
+    <form id="f-open" data-pane="open">
+      <label for="o-file">Wallet</label>
+      <select id="o-file"></select>
+      <label for="o-pass">Password</label>
+      <input id="o-pass" type="password" autocomplete="current-password">
+      <button class="btn primary wide" type="submit">Open wallet</button>
+      <p class="muted small" id="o-none">No wallets on this phone yet. Create one, or restore from your 25 words.</p>
+    </form>
+    <form id="f-create" data-pane="create" class="hidden">
+      <label for="c-label">Wallet name (just for you)</label>
+      <input id="c-label" type="text" placeholder="e.g. Jacob" autocomplete="off" maxlength="40">
+      <label for="c-pass">Password</label>
+      <input id="c-pass" type="password" autocomplete="new-password">
+      <label for="c-pass2">Repeat password</label>
+      <input id="c-pass2" type="password" autocomplete="new-password">
+      <button class="btn primary wide" type="submit">Create wallet</button>
+      <p class="muted small">Creates a post-quantum key (1,024 one-time LMS signatures). Takes a few seconds.</p>
+    </form>
+    <form id="f-restore" data-pane="restore" class="hidden">
+      <label for="r-label">Wallet name</label>
+      <input id="r-label" type="text" autocomplete="off" maxlength="40">
+      <label for="r-seed">Your 25 words</label>
+      <textarea id="r-seed" spellcheck="false" autocomplete="off" autocapitalize="none" placeholder="abbey ability … (the first 3 letters of each word are enough)"></textarea>
+      <label for="r-pass">New password</label>
+      <input id="r-pass" type="password" autocomplete="new-password">
+      <button class="btn primary wide" type="submit">Restore wallet</button>
+    </form>
+    <form id="f-watch" data-pane="watch" class="hidden">
+      <p class="muted small" style="margin-top:4px">Watch-only: see a store's balance and history without being able to spend. Managers keep the seed; crew add the store's address here.</p>
+      <label for="w-label">Name</label>
+      <input id="w-label" type="text" placeholder="e.g. Milan Ave store" autocomplete="off" maxlength="40">
+      <label for="w-addr">.frostchain name or address</label>
+      <input id="w-addr" type="text" placeholder="jacobfrost.frostchain" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <button class="btn primary wide" type="submit">Watch this address</button>
+    </form>
+    <div id="gate-msg" class="msg"></div>
+  </div>
+  <p class="foot muted small" id="gate-node">Starting node…</p>
+  <p class="foot"><a href="#frostoise" class="link frost">Open Frostoise miner →</a></p>
+</section>
+
+<!-- ================= Wallet ================= -->
+<section id="wallet" class="screen hidden">
+  <header class="bar">
+    <img src="graysons.svg" alt="" class="logo sm">
+    <div class="who">
+      <b id="w-label-top">Wallet</b>
+      <span id="w-name-top" class="muted small">…</span>
+    </div>
+    <span class="pill" id="node-pill"><span class="dot" id="node-dot"></span><span id="node-text">…</span></span>
+  </header>
+
+  <main>
+    <!-- Home -->
+    <div data-page="home">
+      <div class="card balance">
+        <div class="muted small">Balance</div>
+        <div class="big"><span id="bal">–</span> <small>QOIN</small></div>
+        <div class="sub" id="bal-sub"></div>
+        <div class="actions">
+          <button class="btn primary" data-go="send">Send</button>
+          <button class="btn" data-go="receive">Receive</button>
+          <button class="btn frost" data-goto="#frostoise">Mine</button>
+        </div>
+      </div>
+      <div class="card" id="name-card">
+        <div class="muted small">Your address</div>
+        <div class="addr-big copy" id="home-addr" title="Tap to copy">…</div>
+        <div id="claim" class="hidden">
+          <p class="small">Claim a <b>.frostchain</b> name so people can pay you by name. It's free, first come first served, and permanent.</p>
+          <div class="inline">
+            <input id="claim-name" type="text" placeholder="yourname" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="24">
+            <span class="suffix">.frostchain</span>
+          </div>
+          <div class="msg small" id="claim-hint"></div>
+          <button class="btn primary wide" id="claim-btn">Claim name</button>
+        </div>
+        <p class="small muted hidden" id="claim-pending"></p>
+      </div>
+      <div class="card">
+        <div class="row-between"><b>Quantum-safe key</b><span class="tag frost">LMS · RFC 8554</span></div>
+        <div class="keybar"><div id="key-fill"></div></div>
+        <p class="small muted" id="key-text"></p>
+      </div>
+      <div class="card" id="recent-card">
+        <div class="row-between"><b>Recent</b><a class="link small" data-go="history">All activity</a></div>
+        <ul class="txlist" id="recent"></ul>
+      </div>
+    </div>
+
+    <!-- Send -->
+    <div data-page="send" class="hidden">
+      <form class="card" id="f-send">
+        <h2>Send QOIN</h2>
+        <label for="s-to">To</label>
+        <input id="s-to" type="text" placeholder="name.frostchain or fc… address" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <div class="msg small" id="s-to-hint"></div>
+        <label for="s-amount">Amount</label>
+        <div class="inline">
+          <input id="s-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">
+          <button class="btn small" type="button" id="s-max">Max</button>
+        </div>
+        <label for="s-memo">Memo (optional, public)</label>
+        <input id="s-memo" type="text" maxlength="64" autocomplete="off">
+        <button class="btn primary wide" type="submit">Review</button>
+        <div id="s-msg" class="msg"></div>
+      </form>
+      <div class="card hidden" id="review">
+        <h2>Check and send</h2>
+        <dl class="kv">
+          <dt>To</dt><dd id="rv-to"></dd>
+          <dt>Amount</dt><dd id="rv-amount"></dd>
+          <dt>Network fee</dt><dd id="rv-fee"></dd>
+          <dt>Total</dt><dd id="rv-total"></dd>
+          <dt>Left after</dt><dd id="rv-after"></dd>
+          <dt>Memo</dt><dd id="rv-memo"></dd>
+          <dt>Signed with</dt><dd id="rv-key"></dd>
+        </dl>
+        <div class="actions">
+          <button class="btn" id="rv-back">Back</button>
+          <button class="btn primary" id="rv-send">Send now</button>
+        </div>
+        <div id="rv-msg" class="msg"></div>
+      </div>
+    </div>
+
+    <!-- Receive -->
+    <div data-page="receive" class="hidden">
+      <div class="card center">
+        <h2>Receive QOIN</h2>
+        <canvas id="qr" width="264" height="264" aria-label="QR code of your address"></canvas>
+        <div class="addr-big copy" id="rc-name"></div>
+        <div class="muted small" style="margin-top:14px">Full address (works before you have a name)</div>
+        <div class="mono copy" id="rc-raw"></div>
+        <div class="actions">
+          <button class="btn" id="rc-copy">Copy</button>
+          <button class="btn" id="rc-share">Share</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div data-page="history" class="hidden">
+      <div class="card">
+        <h2>Activity</h2>
+        <ul class="txlist" id="history"></ul>
+      </div>
+    </div>
+
+    <!-- Node -->
+    <div data-page="node" class="hidden">
+      <div class="card">
+        <div class="row-between"><h2>Node</h2><span class="tag" id="chain-tag"></span></div>
+        <dl class="kv" id="node-kv"></dl>
+        <label class="check"><input type="checkbox" id="n-offline"> Offline (don't talk to other nodes)</label>
+        <label class="check"><input type="checkbox" id="n-lan"> Find nodes on this Wi-Fi automatically</label>
+        <label for="n-peer">Add a node (host or host:port), e.g. your VPS</label>
+        <div class="inline">
+          <input id="n-peer" type="text" placeholder="your-server-ip:7830" autocomplete="off" autocapitalize="none" spellcheck="false">
+          <button class="btn" id="n-add">Add</button>
+        </div>
+        <ul class="peers" id="peers"></ul>
+      </div>
+      <div class="card">
+        <h2>Bring over Graysons Wallet 2</h2>
+        <p class="small">If Graysons Wallet 2 is on this phone, it runs its own node on port <b>7831</b>. Open it, then tap below so this app copies its chain. When the heights match, restore your wallet here with your 25 words and you can uninstall Graysons Wallet 2.</p>
+        <button class="btn wide" id="n-v2">Sync from Graysons Wallet 2 (127.0.0.1:7831)</button>
+        <div class="msg small" id="n-v2-msg"></div>
+      </div>
+      <div class="card">
+        <h2>Recent blocks</h2>
+        <ul class="blocks" id="blocks"></ul>
+      </div>
+    </div>
+
+    <!-- More -->
+    <div data-page="more" class="hidden">
+      <div class="card">
+        <h2>Wallet</h2>
+        <div class="stack">
+          <button class="btn" id="m-seed">Show my 25 words</button>
+          <button class="btn" id="m-rekey">Rotate to a fresh key</button>
+          <button class="btn" id="m-close">Close wallet / switch</button>
+        </div>
+        <div id="m-msg" class="msg"></div>
+      </div>
+      <div class="card" id="contact-card">
+        <h2>Contact &amp; links</h2>
+        <ul class="peers links">
+          <li><span>Email<br><b class="mono">frostcore@proton.me</b></span><button class="btn small" data-copy="frostcore@proton.me">Copy</button></li>
+          <li><span>Website<br><b>finux.tech</b></span><a class="btn small" href="https://finux.tech" target="_blank" rel="noopener noreferrer">Open</a></li>
+          <li><span>Qoin whitepaper (draft)<br><b>finux.tech/qoin/whitepaper</b></span><a class="btn small" href="https://finux.tech/qoin/whitepaper" target="_blank" rel="noopener noreferrer">Open</a></li>
+          <li><span>Amiah's Doodles<br><b>finux.tech/amiah.doodles</b></span><a class="btn small" href="https://finux.tech/amiah.doodles" target="_blank" rel="noopener noreferrer">Open</a></li>
+        </ul>
+      </div>
+      <div class="card" id="donate-card">
+        <div class="row-between"><h2>Donate</h2><span class="tag">gifts only</span></div>
+        <p class="small muted">Gifts only. Donations buy nothing: no tokens, no sale, no promises, not an investment.</p>
+        <ul class="peers links">
+          <li><span>DOGE<br><b class="mono">DJTDVRxJGtcuSsxwT7GHbkdCabqaTa1C7s</b></span><button class="btn small" data-copy="DJTDVRxJGtcuSsxwT7GHbkdCabqaTa1C7s">Copy</button></li>
+          <li><span>WLD<br><b class="mono">0xe1a532a74bef1c338abe71ccecaad9b41b308648</b></span><button class="btn small" data-copy="0xe1a532a74bef1c338abe71ccecaad9b41b308648">Copy</button></li>
+        </ul>
+      </div>
+      <div class="card" id="etc-card">
+        <div class="row-between"><h2>🪶 ETC contracts</h2><span class="tag">Ethereum Classic · chain 61</span></div>
+        <p class="small muted">Public reference list. Graysons Wallet doesn't hold ETC keys: use MetaMask for these.</p>
+        <ul class="peers links">
+          <li><span>FCN · Frostcoin (8 decimals)<br><b class="mono">0x558b1b3D781B07Df19603d9A7f3411a71Ff3815f</b></span><a class="btn small" href="https://etc.blockscout.com/address/0x558b1b3D781B07Df19603d9A7f3411a71Ff3815f" target="_blank" rel="noopener noreferrer">View</a></li>
+          <li><span>FsZT · Frost Sub-Zero Time (18 decimals)<br><b class="mono">0x9eBd3cC53db59169759c90f74D55D55076D6BF01</b></span><a class="btn small" href="https://etc.blockscout.com/address/0x9eBd3cC53db59169759c90f74D55D55076D6BF01" target="_blank" rel="noopener noreferrer">View</a></li>
+          <li><span>FsZT Ceremony<br><b class="mono">0x14D3f9ebf6B0E210CbdDE61053730cC34Bf2B11f</b></span><a class="btn small" href="https://etc.blockscout.com/address/0x14D3f9ebf6B0E210CbdDE61053730cC34Bf2B11f" target="_blank" rel="noopener noreferrer">View</a></li>
+          <li><span>Genesis / admin<br><b class="mono">0x151f6452c6133250EBB7c7FC875351335bf7f3b9</b></span><a class="btn small" href="https://etc.blockscout.com/address/0x151f6452c6133250EBB7c7FC875351335bf7f3b9" target="_blank" rel="noopener noreferrer">View</a></li>
+        </ul>
+      </div>
+      <div class="card" id="mm-card">
+        <div class="row-between"><h2>Add to MetaMask</h2><span class="tag frost">ETC · FCN · FsZT</span></div>
+        <ol class="steps">
+          <li>In MetaMask, open the network menu → <b>Custom</b> → <b>Add a custom network</b>, and fill it in (tap a value to copy it):
+            <dl class="kv compact mm-kv">
+              <dt>Network name</dt><dd class="copy" data-copy="Ethereum Classic">Ethereum Classic</dd>
+              <dt>RPC URL</dt><dd class="copy mono" data-copy="https://etc.rivet.link">https://etc.rivet.link</dd>
+              <dt>Chain ID</dt><dd class="copy" data-copy="61">61</dd>
+              <dt>Currency symbol</dt><dd class="copy" data-copy="ETC">ETC</dd>
+              <dt>Block explorer</dt><dd class="copy mono" data-copy="https://etc.blockscout.com">https://etc.blockscout.com</dd>
+            </dl>
+          </li>
+          <li>Switch MetaMask to <b>Ethereum Classic</b>, tap <b>Import tokens</b> and paste a token address. MetaMask fills in the symbol and decimals itself.</li>
+        </ol>
+        <div class="actions">
+          <button class="btn" data-copy="0x558b1b3D781B07Df19603d9A7f3411a71Ff3815f">Copy FCN address</button>
+          <button class="btn" data-copy="0x9eBd3cC53db59169759c90f74D55D55076D6BF01">Copy FsZT address</button>
+        </div>
+        <button class="btn mf-primary wide" id="mm-open">Open MetaMask</button>
+        <p class="small muted">MetaMask uses elliptic-curve keys, so it can hold these ETC tokens but not QOIN, which needs quantum-safe signatures. QOIN stays in Graysons Wallet and MyFrost.</p>
+      </div>
+      <div class="card" id="params-card">
+        <div class="row-between"><h2>QOIN whitepaper numbers</h2><span class="tag frost">proposed</span></div>
+        <div class="warnbox small"><b>Proposed, not consensus.</b> These are the draft whitepaper numbers. This chain doesn't use them; nothing below changes how blocks, rewards or balances work.</div>
+        <dl class="kv">
+          <dt>Block reward</dt><dd>13.37 QOIN (proposed)</dd>
+          <dt>Block time</dt><dd>300 s</dd>
+          <dt>Decimals</dt><dd>8 (proposed)</dd>
+          <dt>Yearly drop</dt><dd>−7.14% every 105,120 blocks</dd>
+          <dt>Max supply</dt><dd>≈ 19,684,233.46 QOIN</dd>
+          <dt>Per-block split</dt><dd>35% miners · 15% nodes · 20% treasury · 30% QUID</dd>
+          <dt>Node collateral</dt><dd>masternode 1,000 · micronode 10 QOIN</dd>
+        </dl>
+        <h3 class="small" style="margin:14px 0 4px">What this chain actually uses (live consensus)</h3>
+        <dl class="kv">
+          <dt>Block reward</dt><dd id="live-reward">Monero-style smooth emission (≈263.86 QOIN now, slowly falling)</dd>
+          <dt>Block time</dt><dd>300 s · LWMA-60 difficulty</dd>
+          <dt>Decimals</dt><dd>11</dd>
+          <dt>Premine</dt><dd>13,370.08241991 QOIN to block 1 (jacobfrost.frostchain)</dd>
+          <dt>Mining unlock</dt><dd>after 12 blocks</dd>
+        </dl>
+      </div>
+      <div class="card about">
+        <h2>About this proof of concept</h2>
+        <p><b>Quantum-safe signatures.</b> Every transaction is signed with LMS (RFC 8554, NIST SP 800-208), a hash-based scheme. Shor's algorithm breaks the elliptic curves under Monero and Wownero; it doesn't apply to SHA-256. Each key has 1,024 one-time signatures. The chain makes sure none is ever used twice, and the wallet rotates to a new key before they run out.</p>
+        <p><b>Not private.</b> Balances and transfers are public, like Bitcoin. CryptoNote's ring signatures and stealth addresses use elliptic curves, and no practical quantum-safe replacement exists yet.</p>
+        <p><b>Schumann-gated mining.</b> Frostoise mines only while the phone senses a 7.83 Hz resonator, and each block records that reading. Other nodes can check that the reading is plausible, but they can't prove a physical resonator was there: a synthesized 7.83 Hz signal looks the same.</p>
+        <p class="muted small">Graysons Wallet · Frostoise · MyFrost · Qoin on Frostchain PoC v0.3 · <span id="about-platform"></span></p>
+      </div>
+    </div>
+  </main>
+
+  <nav class="tabbar">
+    <a data-go="home" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+    <a data-go="send"><svg viewBox="0 0 24 24"><path d="M5 19L19 5M9 5h10v10"/></svg>Send</a>
+    <a data-go="receive"><svg viewBox="0 0 24 24"><path d="M19 5L5 19M15 19H5V9"/></svg>Receive</a>
+    <a data-go="history"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Activity</a>
+    <a data-go="node"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M11 7l-5 9M13 7l5 9M7.2 18h9.6"/></svg>Node</a>
+    <a data-go="more"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>More</a>
+  </nav>
+</section>
+
+<!-- ================= Frostoise ================= -->
+<section id="frostoise" class="screen frost-screen hidden">
+  <header class="bar frost-bar">
+    <img src="frostoise.svg" alt="" class="logo sm">
+    <div class="who"><b>Frostoise</b><span class="small">Schumann-gated Qoin miner</span></div>
+    <span class="pill" id="f-node-pill"><span class="dot" id="f-node-dot"></span><span id="f-node-text">…</span></span>
+  </header>
+  <main>
+    <div class="card reso" id="reso-card">
+      <div class="row-between">
+        <span class="lock" id="lock-badge">Sensor off</span>
+        <span class="muted small" id="reso-rate"></span>
+      </div>
+      <div class="hz"><span id="hz">–</span><small> Hz</small></div>
+      <div class="muted small" id="reso-why">Turn on a sensor and put the phone on your resonator.</div>
+      <div class="spectrum" id="spectrum" aria-label="Spectrum from 4 to 12 Hz"></div>
+      <div class="scale"><span>4 Hz</span><span>7.83</span><span>12 Hz</span></div>
+      <div class="seg" role="radiogroup" aria-label="Sensor">
+        <button data-sensor="mag" class="on">Magnetometer<span>coil generators</span></button>
+        <button data-sensor="mic">Microphone<span>pulsing or humming ones</span></button>
+      </div>
+      <button class="btn wide" id="sensor-btn">Start sensor</button>
+      <dl class="kv compact" id="reso-kv"></dl>
+    </div>
+
+    <div class="card">
+      <div class="row-between"><h2>Mining</h2><span class="tag" id="mine-tag">stopped</span></div>
+      <div class="statgrid">
+        <div><span class="label">Hashrate</span><b id="m-rate">0</b></div>
+        <div><span class="label">Block time (est.)</span><b id="m-eta">–</b></div>
+        <div><span class="label">Blocks found</span><b id="m-found">0</b></div>
+        <div><span class="label">Chain height</span><b id="m-height">0</b></div>
+      </div>
+      <p class="small muted" id="m-gate"></p>
+      <label for="m-payout">Pays to</label>
+      <input id="m-payout" type="text" placeholder="open wallet, or any name.frostchain" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <label for="m-threads">Threads: <b id="m-threads-v">1</b> <span class="muted small">(more = faster and warmer)</span></label>
+      <input id="m-threads" type="range" min="1" max="4" value="1">
+      <button class="btn frost wide" id="mine-btn">Start mining</button>
+      <div id="f-msg" class="msg"></div>
+      <p class="small muted">Frostoise only hashes while it is locked on 7.83 Hz. Rewards unlock after 12 blocks. Block 1 pays the 13,370.08241991 QOIN premine and the name jacobfrost.frostchain.</p>
+    </div>
+
+    <div class="card">
+      <div class="row-between"><b>Wallet</b><a class="link small" href="#wallet">Open Graysons Wallet →</a></div>
+      <p class="small" id="f-wallet"></p>
+    </div>
+  </main>
+</section>
+
+<!-- ================= MyFrost ================= -->
+<section id="myfrost" class="screen mf-screen hidden">
+  <header class="bar mf-bar">
+    <img src="myfrost.svg" alt="" class="logo sm">
+    <div class="who"><b>MyFrost</b><span class="small" id="mf-handle-top">send and receive QOIN</span></div>
+    <span class="pill"><span class="dot" id="mf-node-dot"></span><span id="mf-node-text">…</span></span>
+  </header>
+
+  <!-- no wallet open -->
+  <main id="mf-gate" class="hidden">
+    <div class="card">
+      <h2>Unlock your wallet</h2>
+      <p class="small muted">MyFrost sends and receives with a wallet you made in Graysons Wallet.</p>
+      <form id="mf-unlock">
+        <label for="mf-file">Wallet</label>
+        <select id="mf-file"></select>
+        <label for="mf-pass">Password</label>
+        <input id="mf-pass" type="password" autocomplete="current-password">
+        <button class="btn mf-primary wide" type="submit" id="mf-open">Unlock</button>
+      </form>
+      <div class="msg" id="mf-gate-msg"></div>
+      <button class="btn wide" data-goto="#wallet">Create a wallet in Graysons Wallet</button>
+    </div>
+  </main>
+
+  <main id="mf-main" class="hidden">
+    <!-- Home -->
+    <div data-mf="home">
+      <div class="mf-card">
+        <div class="mf-handle" id="mf-handle">@…</div>
+        <div class="mf-bal"><span id="mf-bal">–</span> <small>QOIN</small></div>
+        <div class="mf-sub" id="mf-sub"></div>
+        <div class="mf-actions">
+          <button data-mfgo="send"><span>↗</span>Send</button>
+          <button data-mfgo="receive"><span>↙</span>Receive</button>
+          <button data-mfgo="swap"><span>⇄</span>Swap</button>
+        </div>
+      </div>
+      <div class="card hidden" id="mf-noname">
+        <p class="small" style="margin-top:0">Claim an <b>@name</b> so friends can pay you by name instead of a long address. It's free in Graysons Wallet.</p>
+        <button class="btn wide" data-goto="#wallet">Claim a name in Graysons Wallet</button>
+      </div>
+      <div class="card">
+        <div class="row-between"><b>Activity</b></div>
+        <ul class="txlist" id="mf-activity"></ul>
+      </div>
+      <p class="foot"><a class="link small" id="mf-lock">Lock or switch wallet</a></p>
+    </div>
+
+    <!-- Send -->
+    <div data-mf="send" class="hidden">
+      <form class="card" id="mf-send">
+        <h2>Send QOIN</h2>
+        <label for="mf-to">To</label>
+        <input id="mf-to" type="text" placeholder="@name, name.frostchain or a frostchain: link" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <div class="chips" id="mf-recent"></div>
+        <div class="msg small" id="mf-to-hint"></div>
+        <label for="mf-amount">Amount</label>
+        <div class="inline">
+          <input id="mf-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off">
+          <button class="btn small" type="button" id="mf-max">Max</button>
+        </div>
+        <label for="mf-memo">Note (optional, public)</label>
+        <input id="mf-memo" type="text" maxlength="64" autocomplete="off">
+        <button class="btn mf-primary wide" type="submit">Review</button>
+        <div class="msg" id="mf-send-msg"></div>
+      </form>
+      <div class="card hidden" id="mf-review">
+        <h2>Send it?</h2>
+        <dl class="kv" id="mf-review-kv"></dl>
+        <div class="actions">
+          <button class="btn" id="mf-review-back">Back</button>
+          <button class="btn mf-primary" id="mf-review-send">Send now</button>
+        </div>
+        <div class="msg" id="mf-review-msg"></div>
+      </div>
+    </div>
+
+    <!-- Receive -->
+    <div data-mf="receive" class="hidden">
+      <div class="card center">
+        <h2>Receive QOIN</h2>
+        <canvas id="mf-qr" width="264" height="264" aria-label="QR code to pay you"></canvas>
+        <div class="addr-big copy" id="mf-rc-name" title="Tap to copy"></div>
+        <div class="muted small" id="mf-rc-full"></div>
+        <label for="mf-req">Ask for an amount (optional)</label>
+        <input id="mf-req" type="text" inputmode="decimal" placeholder="e.g. 25" autocomplete="off">
+        <div class="msg small" id="mf-req-msg"></div>
+        <div class="mono copy" id="mf-req-link" style="margin-top:6px"></div>
+        <p class="small muted">Friends scan this with their camera or paste the link into MyFrost's Send.</p>
+        <div class="actions">
+          <button class="btn" id="mf-rc-copy">Copy link</button>
+          <button class="btn" id="mf-rc-share">Share</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Swap -->
+    <div data-mf="swap" class="hidden">
+      <div class="card" id="mf-get">
+        <div class="row-between"><h2>Get Qoin</h2><span class="tag frost" id="mf-rate-tag"></span></div>
+        <p class="small">Qoin is offered on <b>finux.tech/getqoin</b>, not in this app. Your name to give there: <b class="copy" id="mf-your-name">…</b></p>
+        <button class="btn mf-primary wide" id="mf-open-get">Open finux.tech/getqoin</button>
+      </div>
+      <div class="card hidden" id="mf-desk">
+        <div class="row-between"><h2>Swap desk</h2><span class="tag good">you run it</span></div>
+        <p class="small muted">Saw a DOGE payment for a piece of the Frostπ? Pay the buyer here. The note on their QOIN records the swap.</p>
+        <label for="mf-desk-to">Buyer</label>
+        <input id="mf-desk-to" type="text" placeholder="@name from their MyDoge note" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <label for="mf-desk-doge">DOGE received</label>
+        <input id="mf-desk-doge" type="text" inputmode="decimal" autocomplete="off">
+        <label for="mf-desk-ref">DOGE transaction id (optional, first characters)</label>
+        <input id="mf-desk-ref" type="text" autocomplete="off" autocapitalize="none" spellcheck="false">
+        <div class="mf-quote">Pays <b id="mf-desk-quote">–</b> QOIN</div>
+        <button class="btn mf-primary wide" id="mf-desk-review">Review payout</button>
+        <div class="msg" id="mf-desk-msg"></div>
+        <h3 style="margin-top:16px">Recent swaps</h3>
+        <ul class="txlist" id="mf-desk-log"></ul>
+      </div>
+    </div>
+  </main>
+
+  <nav class="tabbar mf-tabbar hidden" id="mf-tabbar">
+    <a data-mfgo="home" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+    <a data-mfgo="send"><svg viewBox="0 0 24 24"><path d="M5 19L19 5M9 5h10v10"/></svg>Send</a>
+    <a data-mfgo="receive"><svg viewBox="0 0 24 24"><path d="M19 5L5 19M15 19H5V9"/></svg>Receive</a>
+    <a data-mfgo="swap"><svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>Swap</a>
+  </nav>
+</section>
+
+<!-- ================= modal ================= -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="card" id="modal-body"></div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="qr.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

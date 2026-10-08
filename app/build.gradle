@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.application' version '8.7.3'
+}
+
+// Signing: put your release key details in keystore.properties next to settings.gradle (never commit it):
+//   storeFile=/path/to/release.jks
+//   storePassword=...
+//   keyAlias=...
+//   keyPassword=...
+// Every release must use the same key, or phones won't accept it as an update.
+def keystoreFile = rootProject.file('keystore.properties')
+def keystore = new Properties()
+if (keystoreFile.exists()) {
+    keystoreFile.withInputStream { keystore.load(it) }
+}
+
+android {
+    namespace 'com.frostether.graysons'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.frostether.graysons'
+        minSdk 26
+        targetSdk 34
+        versionCode 3
+        versionName '0.3.0-poc'
+    }
+
+    signingConfigs {
+        release {
+            if (keystoreFile.exists()) {
+                storeFile file(keystore['storeFile'])
+                storePassword keystore['storePassword']
+                keyAlias keystore['keyAlias']
+                keyPassword keystore['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (keystoreFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation project(':core')
+}

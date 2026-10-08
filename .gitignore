@@ -1,0 +1,15 @@
+# Build output
+build/
+.gradle/
+*.apk.tmp
+
+# Local machine settings and secrets
+local.properties
+keystore.properties
+*.jks
+*.keystore
+
+# Editors
+.idea/
+*.iml
+.vscode/
