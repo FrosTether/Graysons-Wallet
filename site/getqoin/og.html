@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Get Qoin link preview</title>
+<style>
+@font-face { font-family: "Archivo"; src: url("../fonts/archivo.woff") format("woff"); font-weight: 100 900; font-stretch: 62% 125%; }
+@font-face { font-family: "Martian Mono"; src: url("../fonts/martian-mono.woff") format("woff"); font-weight: 100 800; font-stretch: 75% 112.5%; }
+html, body { margin: 0; }
+body { width: 1200px; height: 630px; background: #150e1a; color: #f1eaf7; font-family: "Archivo", sans-serif; overflow: hidden; position: relative; }
+.pad { position: absolute; inset: 64px 72px; display: flex; flex-direction: column; }
+h1 { margin: 0; font-size: 168px; line-height: 0.9; font-weight: 800; font-variation-settings: "wdth" 125; letter-spacing: -0.015em; }
+.lede { margin: 22px 0 0; font-size: 34px; color: #cba6f7; font-variation-settings: "wdth" 100; }
+.lamps { display: flex; gap: 22px; margin-top: auto; }
+.lamp { display: flex; align-items: center; gap: 16px; padding: 18px 26px; border-radius: 20px; border: 2px solid #3a2a48; background: #20152a; font-family: "Martian Mono", monospace; font-size: 40px; font-weight: 600; }
+.lamp small { font-size: 22px; font-weight: 400; color: #b4a5c3; margin-left: -6px; }
+.bulb { width: 24px; height: 24px; border-radius: 50%; background: #ffb547; box-shadow: 0 0 0 6px rgba(255,181,71,.18), 0 0 30px 8px rgba(255,181,71,.5); }
+.foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 28px; font-size: 28px; color: #b4a5c3; }
+.foot b { color: #ffb547; font-weight: 600; }
+svg { position: absolute; left: 72px; top: 296px; width: 1056px; height: 104px; opacity: .6; }
+path { vector-effect: non-scaling-stroke; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true"><path id="env" fill="rgba(203,166,247,.16)" stroke="#cba6f7" stroke-width="3"></path></svg>
+<div class="pad">
+  <h1>Get Qoin</h1>
+  <p class="lede">Mined on phones, only while they hear a tone.</p>
+  <div class="lamps">
+    <span class="lamp"><span class="bulb"></span>4.0<small>Hz</small></span>
+    <span class="lamp"><span class="bulb"></span>7.83<small>Hz</small></span>
+    <span class="lamp"><span class="bulb"></span>11.11<small>Hz</small></span>
+  </div>
+  <div class="foot"><span>Mining opens <b>Friday 9 October, 13:37 Eastern</b></span><span>finux.tech</span></div>
+</div>
+<script>
+  (function () {
+    var top = [], bottom = [], hz = 7.83;
+    for (var i = 0; i <= 400; i++) {
+      var t = i / 400, e = 0.06 + 0.94 * (0.5 - 0.5 * Math.cos(2 * Math.PI * hz * t)), x = (t * 1000).toFixed(1);
+      top.push(x + ' ' + (110 - 100 * e).toFixed(1)); bottom.unshift(x + ' ' + (110 + 100 * e).toFixed(1));
+    }
+    document.getElementById('env').setAttribute('d', 'M' + top.join(' L') + ' L' + bottom.join(' L') + ' Z');
+  })();
+</script>
+</body>
+</html>

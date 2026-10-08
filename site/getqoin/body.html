@@ -1,0 +1,136 @@
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="https://finux.tech/">finux</a>
+    <nav aria-label="finux">
+      <a href="https://finux.tech/projects">Projects</a>
+      <a href="https://finux.tech/opensource">Open source</a>
+      <a href="https://finux.tech/contact">Contact</a>
+      <a href="https://github.com/FrosTether">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>Get Qoin</h1>
+        <p class="lede">Qoin is mined on phones, and only while the phone hears a tone. Install Graysons Wallet, play a tone nearby, and your phone starts mining.</p>
+        <div class="cta">
+          <a class="btn" href="{{APK_URL}}">Download Graysons Wallet</a>
+          <a href="{{RELEASE_URL}}">Release notes and checksums</a>
+        </div>
+        <p class="fine">For Android 8.0 or newer. Your phone will ask you to allow the install, since the app isn't on the Play Store.</p>
+      </div>
+      <figure class="qr">
+        <span class="tile">{{QR_SVG}}</span>
+        <figcaption>On a computer? Scan this with your Android phone to download the app there.</figcaption>
+      </figure>
+    </div>
+
+    <div class="launch" id="launch">
+      <p>
+        <span class="when before">Mining opens Friday 9 October at 13:37 Eastern.</span>
+        <span class="when after">Mining is open. The chain started Friday 9 October at 13:37 Eastern.</span>
+        <span class="local" id="local-time"></span>
+      </p>
+      <p class="countdown mono before" id="countdown" aria-live="off"></p>
+    </div>
+
+    <section id="tones" aria-labelledby="tones-h">
+      <h2 id="tones-h">Mine with a tone</h2>
+      <p class="intro">Frostoise, the miner that comes with Graysons Wallet, only works while your phone hears one of these tones. The tone sets how hard the phone works. Every block pays the same.</p>
+
+      <div class="station" id="station">
+        <fieldset class="lamps">
+          <legend class="sr-only">Pick a tone</legend>
+          <label class="lamp">
+            <input type="radio" name="tone" value="4">
+            <span class="bulb" aria-hidden="true"></span>
+            <span class="hz mono">4.0<small>Hz</small></span>
+            <span class="what"><b>Delta</b>. Low: up to 2 threads.</span>
+          </label>
+          <label class="lamp">
+            <input type="radio" name="tone" value="7.83" checked>
+            <span class="bulb" aria-hidden="true"></span>
+            <span class="hz mono">7.83<small>Hz</small></span>
+            <span class="what"><b>Theta</b>, the Schumann resonance. Medium: half your threads.</span>
+          </label>
+          <label class="lamp">
+            <input type="radio" name="tone" value="11.11">
+            <span class="bulb" aria-hidden="true"></span>
+            <span class="hz mono">11.11<small>Hz</small></span>
+            <span class="what"><b>Alpha</b>. High: all your threads.</span>
+          </label>
+        </fieldset>
+
+        <figure class="scope">
+          <svg viewBox="0 0 1000 240" aria-hidden="true" focusable="false">
+            <path class="env" id="env" d=""></path>
+            <line class="axis" x1="0" y1="226" x2="1000" y2="226"></line>
+            <line class="head" x1="2" y1="6" x2="2" y2="214"></line>
+          </svg>
+          <div class="ticks mono" aria-hidden="true"><span>0 s</span><span>1 s</span></div>
+          <figcaption id="scope-cap">One second of the 7.83 Hz pulse: the sound swells and fades 7.83 times.</figcaption>
+        </figure>
+
+        <div class="controls">
+          <button class="btn play" id="play" type="button" aria-pressed="false">Play 7.83 Hz</button>
+          <label class="vol" for="vol">Volume <input id="vol" type="range" min="0" max="100" value="60"></label>
+        </div>
+        <p class="howto">Play it out loud from a laptop, a speaker or another phone, with the mining phone close by. Open Frostoise, allow the microphone and wait for LOCKED. Headphones won't work, because the phone has to hear it.</p>
+        <p class="msg" id="tone-msg" role="status"></p>
+      </div>
+    </section>
+
+    <section id="start" aria-labelledby="start-h">
+      <h2 id="start-h">How to start</h2>
+      <ol class="steps">
+        <li><b>Install Graysons Wallet.</b><span>One install adds three apps: Graysons Wallet, Frostoise and MyFrost.</span></li>
+        <li><b>Create a wallet.</b><span>Tap Create wallet and write down your 25 words. They're the only way back into your coins, so keep them offline and never share them. Coming from 0.3? Uninstall it first. 0.4 is a new chain, so everyone starts with a new wallet.</span></li>
+        <li><b>Mine.</b><span>Open Frostoise, play a tone and tap Start mining. Phones on the same Wi-Fi find each other. To reach everyone else, add a public node from the <a href="https://github.com/FrosTether/Graysons-Wallet/discussions">project discussions</a>. Mined coins unlock after 12 blocks, about an hour.</span></li>
+        <li><b>Claim your name.</b><span>Pick a <span class="mono">.frostchain</span> name, so people can pay you as @you instead of a long address.</span></li>
+      </ol>
+    </section>
+
+    <section id="buy" aria-labelledby="buy-h">
+      <h2 id="buy-h">Or buy a starter bundle</h2>
+      <div class="deal">
+        <div>
+          <p class="price">10 QOIN<span>for $5</span></p>
+          <p class="opens"><span class="before">Orders open at launch, Friday 9 October at 13:37 Eastern.</span><span class="after">Orders are open.</span> Coins go out once my first mined blocks unlock, about an hour after launch.</p>
+          <div class="cta"><a class="btn quiet" href="https://finux.tech/contact">Message me</a></div>
+        </div>
+        <ul class="pay">
+          <li><h3>Chime</h3><p>Message me and I'll send my Chime details.</p></li>
+          <li><h3>Dogecoin</h3><p>$5 of DOGE at the day's rate, sent to <b>@frostcoin</b> on MyDoge. Message me for the exact amount before you send.</p></li>
+        </ul>
+      </div>
+      <p class="then">With your payment, send me your <span class="mono">.frostchain</span> name or Receive address, and I'll send the 10 QOIN there.</p>
+      <p class="note">Pay here, not in the app. MyFrost doesn't do swaps, so don't send DOGE through it.</p>
+    </section>
+
+    <section id="chain" aria-labelledby="chain-h">
+      <h2 id="chain-h">The chain</h2>
+      <dl class="facts">
+        <div><dt>Blocks</dt><dd>One every 5 minutes, so two Frost blocks for every Bitcoin Cash block.</dd></div>
+        <div><dt>Reward</dt><dd>About <span class="mono">263.88</span> QOIN a block at launch, shrinking slowly as coins are mined.</dd></div>
+        <div><dt>Unlock</dt><dd>Mined coins can be spent after 12 more blocks.</dd></div>
+        <div><dt>Mining tones</dt><dd><span class="mono">3.75–4.25</span>, <span class="mono">7.50–8.20</span> or <span class="mono">10.80–11.40</span> Hz. Every block carries a record of the reading.</dd></div>
+        <div><dt>Signatures</dt><dd>Hash-based LMS keys (RFC 8554), built to hold up against quantum computers.</dd></div>
+        <div><dt>Units</dt><dd>QOIN, divisible to 11 decimal places.</dd></div>
+        <div><dt>Source</dt><dd>Open source under GPL-3.0, on <a href="https://github.com/FrosTether/Graysons-Wallet">GitHub</a>.</dd></div>
+      </dl>
+    </section>
+
+    <section id="fine-print" aria-labelledby="print-h">
+      <h2 id="print-h">Fine print</h2>
+      <p class="print">Qoin is an early proof of concept I'm building myself. QOIN has no guaranteed value and isn't an investment. Only buy some if you'd enjoy trying a homemade blockchain, and only spend what you're fine losing. The tones are for mining. They aren't health or wellness advice.</p>
+    </section>
+  </main>
+
+  <footer>
+    <a href="https://finux.tech/">finux.tech</a>
+    <a href="https://finux.tech/contact">Contact</a>
+    <a href="https://github.com/FrosTether/Graysons-Wallet">Source and issues</a>
+    <a href="https://github.com/FrosTether">GitHub @FrosTether</a>
+  </footer>
+</div>
