@@ -1,12 +1,24 @@
 name: Build
 
-# Every push to main runs the chain tests, builds the app and frostnode, and refreshes the
-# "v0.4.0-test" pre-release with the files. Builds are debug-signed until a release key is
-# added as repository secrets (see BUILDING.md).
+# Every push to main that touches the code runs the chain tests, then builds the app and
+# frostnode and refreshes the release for the current version (v<versionName>), so
+#   https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk
+# always serves the newest build.
+#
+# Signing: with the SIGNING_* repository secrets set (see BUILDING.md), the app is signed with
+# the release key. Without them it's signed with a throwaway test key, and the release says so.
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'app/**'
+      - 'core/**'
+      - 'node/**'
+      - 'gradle/**'
+      - '*.gradle'
+      - 'gradlew'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +45,7 @@ jobs:
 
   build:
     name: App and frostnode
+    needs: test-core
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -42,27 +55,56 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: gradle
-      - name: Build the app (test build, debug-signed)
-        run: ./gradlew --no-daemon :app:assembleDebug
+      - name: Use the release key, if the repository has one
+        env:
+          SIGNING_KEYSTORE_B64: ${{ secrets.SIGNING_KEYSTORE_B64 }}
+        run: |
+          echo "VERSION=$(sed -n "s/.*versionName '\(.*\)'.*/\1/p" app/build.gradle)" >> "$GITHUB_ENV"
+          if [ -n "$SIGNING_KEYSTORE_B64" ]; then
+            printf '%s' "$SIGNING_KEYSTORE_B64" | tr -d ' \r\n' | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "SIGNING_STORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+            echo "BUILD_KIND=release" >> "$GITHUB_ENV"
+          else
+            echo "BUILD_KIND=test" >> "$GITHUB_ENV"
+          fi
+      - name: Build the app
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          if [ "$BUILD_KIND" = release ]; then
+            ./gradlew --no-daemon :app:assembleRelease
+          else
+            ./gradlew --no-daemon :app:assembleRelease -PtestSigning
+          fi
       - name: Build frostnode
         run: ./gradlew --no-daemon :node:distZip
       - name: Collect the files
         run: |
           mkdir -p out
-          cp app/build/outputs/apk/debug/app-debug.apk out/GraysonsWallet-0.4.0-test.apk
-          cp node/build/distributions/*.zip out/frostnode-0.4.0.zip
+          cp app/build/outputs/apk/release/app-release.apk out/GraysonsWallet.apk
+          cp node/build/distributions/*.zip out/frostnode.zip
           cd out && sha256sum * | tee SHA256SUMS
-          { echo '### Files'; echo '```'; cat SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "### Graysons Wallet $VERSION ($BUILD_KIND key)"; echo '```'; cat SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
-          name: graysons-wallet-0.4.0-test
+          name: graysons-wallet-${{ env.VERSION }}-${{ env.BUILD_KIND }}
           path: out/*
-      - name: Publish the test pre-release
+      - name: Publish the release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release delete v0.4.0-test --yes --cleanup-tag || true
-          gh release create v0.4.0-test out/* --prerelease --target "$GITHUB_SHA" \
-            --title "Graysons Wallet 0.4.0 (test build)" \
-            --notes-file .github/test-release-notes.md
+          if [ "$BUILD_KIND" = release ]; then
+            TITLE="Graysons Wallet $VERSION"
+            KEY_NOTE="Signed with the Graysons Wallet release key. Later versions install over it as normal updates."
+          else
+            TITLE="Graysons Wallet $VERSION (test key)"
+            KEY_NOTE="**Test key.** This build is signed with a temporary test key. When the release key arrives, you'll uninstall once more and restore with your 25 words."
+          fi
+          { cat .github/release-notes.md; echo; echo "$KEY_NOTE"; } > "$RUNNER_TEMP/notes.md"
+          gh release delete "v$VERSION-test" --yes --cleanup-tag || true
+          gh release delete "v$VERSION" --yes --cleanup-tag || true
+          gh release create "v$VERSION" out/* --latest --target "$GITHUB_SHA" \
+            --title "$TITLE" --notes-file "$RUNNER_TEMP/notes.md"

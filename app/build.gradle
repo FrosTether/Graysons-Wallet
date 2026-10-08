@@ -2,17 +2,29 @@ plugins {
     id 'com.android.application' version '8.7.3'
 }
 
-// Signing: put your release key details in keystore.properties next to settings.gradle (never commit it):
-//   storeFile=/path/to/release.jks
-//   storePassword=...
-//   keyAlias=...
-//   keyPassword=...
+// Release signing comes from one of two places (never commit either):
+//
+// 1. keystore.properties next to settings.gradle, for builds on your own machine:
+//      storeFile=/path/to/release.jks
+//      storePassword=...
+//      keyAlias=...
+//      keyPassword=...
+// 2. SIGNING_* environment variables, which the GitHub build sets from repository secrets.
+//
 // Every release must use the same key, or phones won't accept it as an update.
-def keystoreFile = rootProject.file('keystore.properties')
+// Without a key, `assembleRelease -PtestSigning` signs with this machine's debug key: a test build.
 def keystore = new Properties()
+def keystoreFile = rootProject.file('keystore.properties')
 if (keystoreFile.exists()) {
     keystoreFile.withInputStream { keystore.load(it) }
+} else if (System.getenv('SIGNING_STORE_FILE')) {
+    def env = { String name -> System.getenv(name) ?: '' }
+    keystore.setProperty('storeFile', env('SIGNING_STORE_FILE'))
+    keystore.setProperty('storePassword', env('SIGNING_STORE_PASSWORD'))
+    keystore.setProperty('keyAlias', env('SIGNING_KEY_ALIAS'))
+    keystore.setProperty('keyPassword', env('SIGNING_KEY_PASSWORD') ?: env('SIGNING_STORE_PASSWORD'))
 }
+def hasReleaseKey = keystore.getProperty('storeFile') != null
 
 android {
     namespace 'com.frostether.graysons'
@@ -28,11 +40,11 @@ android {
 
     signingConfigs {
         release {
-            if (keystoreFile.exists()) {
-                storeFile file(keystore['storeFile'])
-                storePassword keystore['storePassword']
-                keyAlias keystore['keyAlias']
-                keyPassword keystore['keyPassword']
+            if (hasReleaseKey) {
+                storeFile file(keystore.getProperty('storeFile'))
+                storePassword keystore.getProperty('storePassword')
+                keyAlias keystore.getProperty('keyAlias')
+                keyPassword keystore.getProperty('keyPassword')
             }
         }
     }
@@ -40,10 +52,18 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            if (keystoreFile.exists()) {
+            if (hasReleaseKey) {
                 signingConfig signingConfigs.release
+            } else if (project.hasProperty('testSigning')) {
+                signingConfig signingConfigs.debug
             }
         }
+    }
+
+    lint {
+        // The app targets Android 14 on purpose and isn't published on Play,
+        // so Play's target-SDK deadline mustn't stop a release build.
+        checkReleaseBuilds false
     }
 
     compileOptions {

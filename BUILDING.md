@@ -17,25 +17,53 @@ You need the Android SDK. The simplest route is Android Studio: open this folder
 Without Android Studio, install the Android command-line tools and set `ANDROID_HOME`.
 
 ```bash
-./gradlew :app:assembleDebug      # unsigned debug build
-./gradlew :app:assembleRelease    # signed release build, needs keystore.properties
+./gradlew :app:assembleRelease                # release build, signed with your key (see Signing)
+./gradlew :app:assembleRelease -PtestSigning  # release build signed with this machine's debug key, for testing
+./gradlew :app:assembleDebug                  # debug build
 ```
 
 The APK lands in `app/build/outputs/apk/`.
 
+### Builds on GitHub
+
+Every push to `main` that changes the code runs the chain tests, builds the app and `frostnode`, and replaces the release for the current version.
+This link always serves the newest build:
+
+https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk
+
+Until the repository has the release key, those builds are signed with a throwaway test key, and the release title says "(test key)".
+
 ### Signing
 
 Phones only accept an update signed with the same key as the version already installed.
-Create `keystore.properties` next to `settings.gradle`, and never commit it:
+Keep a backup of the keystore and its password somewhere other than the build machine. Losing the key means every phone has to uninstall before it can update.
+
+**Make the key** (in Termux on the phone, or on any machine with Java):
+
+```bash
+pkg install openjdk-17        # Termux only
+keytool -genkeypair -keystore graysons-release.jks -alias graysons -keyalg EC -groupname secp256r1 -validity 36500
+base64 -w0 graysons-release.jks > graysons-release.b64
+```
+
+**For GitHub builds**, add four repository secrets at
+[Settings → Secrets and variables → Actions](https://github.com/FrosTether/Graysons-Wallet/settings/secrets/actions/new):
+
+| Secret | Value |
+|---|---|
+| `SIGNING_KEYSTORE_B64` | the contents of `graysons-release.b64` |
+| `SIGNING_STORE_PASSWORD` | the keystore password |
+| `SIGNING_KEY_ALIAS` | `graysons` |
+| `SIGNING_KEY_PASSWORD` | the same password (keytool uses one password for both) |
+
+**For builds on your own machine**, create `keystore.properties` next to `settings.gradle`, and never commit it:
 
 ```properties
 storeFile=/home/you/keys/graysons-release.jks
 storePassword=...
-keyAlias=...
+keyAlias=graysons
 keyPassword=...
 ```
-
-Keep a backup of the keystore somewhere other than the build machine. Losing it means every phone has to uninstall before it can update.
 
 ## The chain core and its tests
 

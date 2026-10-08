@@ -88,7 +88,7 @@
             android:foregroundServiceType="specialUse|microphone">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="Frostoise keeps the Frostchain node running and mines while the phone senses a 7.83 Hz resonator" />
+                android:value="Frostoise keeps the Frostchain node running and mines while the phone senses a mining tone" />
         </service>
     </application>
 </manifest>
