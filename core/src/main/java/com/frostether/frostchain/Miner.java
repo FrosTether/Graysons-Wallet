@@ -8,6 +8,9 @@ import java.util.Map;
 
 public final class Miner {
     public static final long MAX_READING_AGE_MS = 20000;
+    /** When genesis happens, in Eastern time, for the Frostoise screen. */
+    static final String LAUNCH = java.time.format.DateTimeFormatter.ofPattern("EEE d MMM yyyy, HH:mm", Locale.ENGLISH)
+            .format(java.time.Instant.ofEpochSecond(Consensus.GENESIS_TIME).atZone(java.time.ZoneId.of("America/New_York"))) + " Eastern";
     private volatile int accepted;
     private volatile Template current;
     private volatile int found;
@@ -223,6 +226,11 @@ public final class Miner {
         ResonanceSource resonanceSource = this.source;
         Resonance.Reading latest = resonanceSource == null ? null : resonanceSource.latest();
         long now = this.node.chain.now() * 1000;
+        if (this.node.chain.height() == 0 && this.node.chain.now() < Consensus.GENESIS_TIME) {
+            // A block can't be older than genesis, so mining opens at the launch moment.
+            this.gateWhy = "mining opens at launch: " + LAUNCH;
+            return null;
+        }
         if (latest == null) {
             this.gateWhy = "resonance sensor is off";
             return null;

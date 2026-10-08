@@ -90,6 +90,21 @@ public class MinerTest {
     }
 
     @Test
+    public void miningOpensAtLaunch() throws Exception {
+        TestKit.FakeClock clock = new TestKit.FakeClock(Consensus.GENESIS_TIME - 3600);
+        Node node = new Node(Files.createTempDirectory("miner-early").toFile(), clock);
+        node.miner.setSource(() -> lockedReading(clock.nowSec() * 1000, 7.83));
+        node.miner.start(TestKit.id(TestKit.key(55)), 1);
+        try {
+            assertTrue(waitFor(() -> String.valueOf(node.miner.status().get("gate")).startsWith("mining opens at launch"), 10_000));
+            assertEquals("mining opens at launch: Fri 9 Oct 2026, 13:37 Eastern", node.miner.status().get("gate"));
+            assertEquals(Boolean.FALSE, node.miner.status().get("mining"));
+        } finally {
+            node.miner.stop();
+        }
+    }
+
+    @Test
     public void startNeedsAPayoutAddress() throws Exception {
         Node node = new Node(Files.createTempDirectory("miner2").toFile(), null);
         try {
