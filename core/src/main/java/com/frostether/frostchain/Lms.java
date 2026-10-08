@@ -46,7 +46,7 @@ public final class Lms {
                 case 7:
                     this.h = 15;
                     break;
-                case Swap.DOGE_DECIMALS /* 8 */:
+                case 8:
                     this.h = 20;
                     break;
                 case 9:

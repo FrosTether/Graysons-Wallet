@@ -218,3 +218,26 @@ ol.steps .copy { border-bottom: 1px dashed currentColor; }
 .rez-legend { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; flex-wrap: wrap; gap: 2px 12px; color: #9c96cb; font-size: 12px; pointer-events: none; }
 .rez-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
 .rez-legend i.d { background: #ffb547; } .rez-legend i.t { background: #3fe9ff; } .rez-legend i.a { background: #ff52d9; }
+
+/* Temporal: gold, the color of old clocks */
+.tp-screen { background: linear-gradient(180deg, var(--gold-soft), var(--bg) 320px); }
+.tp-bar { background: var(--gold-soft); background: color-mix(in srgb, var(--gold-soft) 92%, transparent); }
+.tp-bar .who span { color: var(--gold); }
+.btn.tp-primary { background: var(--gold); color: #fff; border-color: var(--gold); }
+@media (prefers-color-scheme: dark) { .btn.tp-primary { color: #2a1d00; } }
+.tag.tp { background: var(--gold-soft); color: var(--gold); border-color: transparent; }
+input[type=datetime-local] { width: 100%; padding: 11px 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; min-height: 44px; font-family: var(--mono); font-size: 14px; }
+input[type=range] { width: 100%; accent-color: var(--gold); margin: 6px 0 10px; }
+.tp-dial { margin-top: 8px; color: var(--gold); font-family: var(--mono); font-size: 13px; min-height: 18px; }
+.tp-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.tp-cap { padding: 12px 0; border-top: 1px solid var(--line); }
+.tp-cap:first-child { border-top: none; }
+.tp-state { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 2px 9px; border-radius: 999px; background: var(--panel-2); color: var(--muted); }
+.tp-state.open { background: var(--gold-soft); color: var(--gold); }
+.tp-opens { margin: 6px 0 2px; font-weight: 600; }
+.tp-text { margin: 8px 0; padding: 10px 12px; border-left: 3px solid var(--gold); background: var(--panel-2); border-radius: 0 10px 10px 0; overflow-wrap: anywhere; }
+.tp-ok { color: var(--good); }
+.tp-cap .actions { margin-top: 10px; }
+.tp-stamp { color: var(--gold); font-size: 13px; }
+.tp-ride { margin-top: 10px; min-height: 18px; }
+.tp-tabbar a.on svg { stroke: var(--gold); }

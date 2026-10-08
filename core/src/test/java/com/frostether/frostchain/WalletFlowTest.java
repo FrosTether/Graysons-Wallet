@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.util.Map;
 import org.junit.Test;
 
-/** What a person actually does: mine into a wallet, send QOIN by name, claim a name. */
+/** What a person actually does: mine into a wallet, send QNR by name, claim a name. */
 public class WalletFlowTest {
 
     @Test
@@ -32,7 +32,7 @@ public class WalletFlowTest {
         assertEquals(null, node.chain.nameOf(miner));
         assertArrayEquals(Consensus.founderAccount(), node.chain.lookupName("jacobfrost"));
 
-        // Preview, then send 250 QOIN to the friend by their raw address.
+        // Preview, then send 250 QNR to the friend by their raw address.
         Map<String, Object> preview = w.send(Address.raw(friend), "250", "first send", true);
         assertEquals("0.0001", ((String) preview.get("feeText")).replaceAll("0+$", ""));
         Map<String, Object> sent = w.send(Address.raw(friend), "250", "first send", false);
@@ -62,7 +62,7 @@ public class WalletFlowTest {
             w.send("oofmaster", "999999", "", false);
             throw new AssertionError("overspend accepted");
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage(), e.getMessage().startsWith("not enough unlocked QOIN"));
+            assertTrue(e.getMessage(), e.getMessage().startsWith("not enough unlocked QNR"));
         }
     }
 }

@@ -82,6 +82,22 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".TemporalActivity"
+            android:configChanges="fontScale|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard"
+            android:exported="true"
+            android:icon="@mipmap/ic_temporal"
+            android:label="Temporal"
+            android:launchMode="singleTask"
+            android:roundIcon="@mipmap/ic_temporal"
+            android:taskAffinity="com.frostether.graysons.temporal"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".NodeService"
             android:exported="false"

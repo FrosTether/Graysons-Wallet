@@ -267,7 +267,7 @@ public abstract class WebActivity extends Activity {
             WebActivity.this.runOnUiThread(new Runnable() {
                 @Override // java.lang.Runnable
                 public void run() {
-                    WebActivity.this.setTitle("frostoise".equals(str) ? "Frostoise" : "myfrost".equals(str) ? "MyFrost" : "Graysons Wallet");
+                    WebActivity.this.setTitle("frostoise".equals(str) ? "Frostoise" : "myfrost".equals(str) ? "MyFrost" : "temporal".equals(str) ? "Temporal" : "Graysons Wallet");
                 }
             });
         }
@@ -280,6 +280,8 @@ public abstract class WebActivity extends Activity {
                     Class cls;
                     if ("frostoise".equals(str)) {
                         cls = FrostoiseActivity.class;
+                    } else if ("temporal".equals(str)) {
+                        cls = TemporalActivity.class;
                     } else {
                         cls = "myfrost".equals(str) ? MyFrostActivity.class : WalletActivity.class;
                     }

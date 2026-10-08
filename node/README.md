@@ -61,19 +61,21 @@ A name like `node.finux.tech` pointing at the server is easier to share and surv
 
 frostnode serves FrostExplorer on port 7831: the live chain in the same look as the app.
 
-- Height, a countdown to the next block window (blocks every 5 minutes, never within 270 seconds), QOIN mined so far and the difficulty.
+- Height, a countdown to the next block window (blocks every 5 minutes, never within 270 seconds), QNR mined so far, QNR burned by Temporal, and the difficulty.
 - Every block's resonance proof: the tone it was mined on, its band, its spectrum, and a button that plays the tone back.
 - Search by block number, block hash, address or `.frostchain` name. An account shows its balance and history.
 
 Open `http://<server>:7831/` (on Oracle Cloud, open port 7831 the same way as 7830, or use the tunnel below). It only reads the chain, so it's safe on the open internet.
-Other sites can use the same data. It's JSON with CORS open:
+Other sites can use the same data, like [Temporal](https://get.finux.tech/temporal/) does. It's JSON with CORS open:
 
 | Path | Returns |
 |---|---|
-| `/api/explorer/status` | Height, tip, seconds until the next block window, difficulty, QOIN mined |
+| `/api/explorer/status` | Height, tip, seconds until the next block window, difficulty, QNR mined, QNR burned |
 | `/api/explorer/blocks?before=HEIGHT&count=30` | The newest blocks, up to 100 at a time |
 | `/api/explorer/block?h=HEIGHT` | One block with its transactions |
 | `/api/explorer/search?q=TEXT` | A block, or an account with its balance and history |
+| `/api/explorer/at?t=UNIX` | The chain at a moment: the block mined by then, QNR mined by then, capsules sealed by then |
+| `/api/explorer/temporal` | Temporal's burn address, QNR burned and the newest seals. `?fp=FINGERPRINT` finds one capsule's seal |
 
 ### Put it on explorer.finux.tech
 

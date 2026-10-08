@@ -110,3 +110,17 @@ jobs:
           gh release delete "v$VERSION" --yes --cleanup-tag || true
           gh release create "v$VERSION" out/* --latest --target "$GITHUB_SHA" \
             --title "$TITLE" --notes-file "$RUNNER_TEMP/notes.md"
+      - name: Point the old 0.3.0 download link at this build
+        # The first finux.tech pages linked releases/GraysonsWallet-0.3.0-poc.apk straight from main. That build runs
+        # a dead chain, so the file there is always the newest app. The original is kept in releases/0.3.0/.
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin main
+          git checkout -q -B main origin/main
+          cp out/GraysonsWallet.apk releases/GraysonsWallet-0.3.0-poc.apk
+          if git diff --quiet -- releases/GraysonsWallet-0.3.0-poc.apk; then exit 0; fi
+          git add releases/GraysonsWallet-0.3.0-poc.apk
+          git commit -q -m "Old 0.3.0 download link now gets $VERSION [skip ci]"
+          git push -q origin main

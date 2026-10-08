@@ -8,7 +8,8 @@ import java.util.List;
 public final class Consensus {
     public static final long BLOCK_TIME = 300;
     public static final String CHAIN_NAME = "Frostchain v0.4";
-    public static final String COIN = "QOIN";
+    /** The ticker the apps show: QNR, for Qoin's CryptoNote roots (0.4.2; it was QOIN). Display only, never hashed. */
+    public static final String COIN = "QNR";
     public static final int COINBASE_MATURITY = 12;
     public static final int EMISSION_SPEED_FACTOR = 20;
     public static final String FOUNDER_NAME = "jacobfrost";

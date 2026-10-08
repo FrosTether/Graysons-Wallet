@@ -13,7 +13,7 @@
 <section id="gate" class="screen hidden">
   <header class="gate-head">
     <img src="graysons.svg" alt="" class="logo">
-    <div><h1>Graysons Wallet</h1><p class="muted">Qoin (QOIN) on <b>.frostchain</b> · quantum-safe signatures</p></div>
+    <div><h1>Graysons Wallet</h1><p class="muted">Qoin (QNR) on <b>.frostchain</b> · quantum-safe signatures</p></div>
   </header>
   <div class="card">
     <div class="tabs" role="tablist">
@@ -79,7 +79,7 @@
     <div data-page="home">
       <div class="card balance">
         <div class="muted small">Balance</div>
-        <div class="big"><span id="bal">–</span> <small>QOIN</small></div>
+        <div class="big"><span id="bal">–</span> <small>QNR</small></div>
         <div class="sub" id="bal-sub"></div>
         <div class="actions">
           <button class="btn primary" data-go="send">Send</button>
@@ -115,7 +115,7 @@
     <!-- Send -->
     <div data-page="send" class="hidden">
       <form class="card" id="f-send">
-        <h2>Send QOIN</h2>
+        <h2>Send QNR</h2>
         <label for="s-to">To</label>
         <input id="s-to" type="text" placeholder="name.frostchain or fc… address" autocomplete="off" autocapitalize="none" spellcheck="false">
         <div class="msg small" id="s-to-hint"></div>
@@ -151,7 +151,7 @@
     <!-- Receive -->
     <div data-page="receive" class="hidden">
       <div class="card center">
-        <h2>Receive QOIN</h2>
+        <h2>Receive QNR</h2>
         <canvas id="qr" width="264" height="264" aria-label="QR code of your address"></canvas>
         <div class="addr-big copy" id="rc-name"></div>
         <div class="muted small" style="margin-top:14px">Full address (works before you have a name)</div>
@@ -260,23 +260,23 @@
           <button class="btn" data-copy="0x9eBd3cC53db59169759c90f74D55D55076D6BF01">Copy FsZT address</button>
         </div>
         <button class="btn mf-primary wide" id="mm-open">Open MetaMask</button>
-        <p class="small muted">MetaMask uses elliptic-curve keys, so it can hold these ETC tokens but not QOIN, which needs quantum-safe signatures. QOIN stays in Graysons Wallet and MyFrost.</p>
+        <p class="small muted">MetaMask uses elliptic-curve keys, so it can hold these ETC tokens but not QNR, which needs quantum-safe signatures. QNR stays in Graysons Wallet and MyFrost.</p>
       </div>
       <div class="card" id="params-card">
-        <div class="row-between"><h2>QOIN whitepaper numbers</h2><span class="tag frost">proposed</span></div>
+        <div class="row-between"><h2>QNR whitepaper numbers</h2><span class="tag frost">proposed</span></div>
         <div class="warnbox small"><b>Proposed, not consensus.</b> These are the draft whitepaper numbers. This chain doesn't use them; nothing below changes how blocks, rewards or balances work.</div>
         <dl class="kv">
-          <dt>Block reward</dt><dd>13.37 QOIN (proposed)</dd>
+          <dt>Block reward</dt><dd>13.37 QNR (proposed)</dd>
           <dt>Block time</dt><dd>300 s</dd>
           <dt>Decimals</dt><dd>8 (proposed)</dd>
           <dt>Yearly drop</dt><dd>−7.14% every 105,120 blocks</dd>
-          <dt>Max supply</dt><dd>≈ 19,684,233.46 QOIN</dd>
+          <dt>Max supply</dt><dd>≈ 19,684,233.46 QNR</dd>
           <dt>Per-block split</dt><dd>35% miners · 15% nodes · 20% treasury · 30% QUID</dd>
-          <dt>Node collateral</dt><dd>masternode 1,000 · micronode 10 QOIN</dd>
+          <dt>Node collateral</dt><dd>masternode 1,000 · micronode 10 QNR</dd>
         </dl>
         <h3 class="small" style="margin:14px 0 4px">What this chain actually uses (live consensus)</h3>
         <dl class="kv">
-          <dt>Block reward</dt><dd id="live-reward">Monero-style smooth emission (≈263.88 QOIN now, slowly falling)</dd>
+          <dt>Block reward</dt><dd id="live-reward">Monero-style smooth emission (≈263.88 QNR now, slowly falling)</dd>
           <dt>Block time</dt><dd>300 s · LWMA-60 difficulty</dd>
           <dt>Decimals</dt><dd>11</dd>
           <dt>Block 1</dt><dd>Normal reward, like every block. jacobfrost.frostchain belongs to Jacob's wallet from genesis</dd>
@@ -376,7 +376,7 @@
 <section id="myfrost" class="screen mf-screen hidden">
   <header class="bar mf-bar">
     <img src="myfrost.svg" alt="" class="logo sm">
-    <div class="who"><b>MyFrost</b><span class="small" id="mf-handle-top">send and receive QOIN</span></div>
+    <div class="who"><b>MyFrost</b><span class="small" id="mf-handle-top">send and receive QNR</span></div>
     <span class="pill"><span class="dot" id="mf-node-dot"></span><span id="mf-node-text">…</span></span>
   </header>
 
@@ -402,12 +402,12 @@
     <div data-mf="home">
       <div class="mf-card">
         <div class="mf-handle" id="mf-handle">@…</div>
-        <div class="mf-bal"><span id="mf-bal">–</span> <small>QOIN</small></div>
+        <div class="mf-bal"><span id="mf-bal">–</span> <small>QNR</small></div>
         <div class="mf-sub" id="mf-sub"></div>
         <div class="mf-actions">
           <button data-mfgo="send"><span>↗</span>Send</button>
           <button data-mfgo="receive"><span>↙</span>Receive</button>
-          <button data-mfgo="swap"><span>⇄</span>Swap</button>
+          <button data-goto="#temporal"><span>⧗</span>Temporal</button>
         </div>
       </div>
       <div class="card hidden" id="mf-noname">
@@ -424,7 +424,7 @@
     <!-- Send -->
     <div data-mf="send" class="hidden">
       <form class="card" id="mf-send">
-        <h2>Send QOIN</h2>
+        <h2>Send QNR</h2>
         <label for="mf-to">To</label>
         <input id="mf-to" type="text" placeholder="@name, name.frostchain or a frostchain: link" autocomplete="off" autocapitalize="none" spellcheck="false">
         <div class="chips" id="mf-recent"></div>
@@ -453,7 +453,7 @@
     <!-- Receive -->
     <div data-mf="receive" class="hidden">
       <div class="card center">
-        <h2>Receive QOIN</h2>
+        <h2>Receive QNR</h2>
         <canvas id="mf-qr" width="264" height="264" aria-label="QR code to pay you"></canvas>
         <div class="addr-big copy" id="mf-rc-name" title="Tap to copy"></div>
         <div class="muted small" id="mf-rc-full"></div>
@@ -468,37 +468,97 @@
         </div>
       </div>
     </div>
-
-    <!-- Swap -->
-    <div data-mf="swap" class="hidden">
-      <div class="card" id="mf-get">
-        <div class="row-between"><h2>Get Qoin</h2><span class="tag frost" id="mf-rate-tag"></span></div>
-        <p class="small">Qoin is offered on <b>finux.tech/getqoin</b>, not in this app. Your name to give there: <b class="copy" id="mf-your-name">…</b></p>
-        <button class="btn mf-primary wide" id="mf-open-get">Open finux.tech/getqoin</button>
-      </div>
-      <div class="card hidden" id="mf-desk">
-        <div class="row-between"><h2>Swap desk</h2><span class="tag good">you run it</span></div>
-        <p class="small muted">Saw a DOGE payment for a piece of the Frostπ? Pay the buyer here. The note on their QOIN records the swap.</p>
-        <label for="mf-desk-to">Buyer</label>
-        <input id="mf-desk-to" type="text" placeholder="@name from their MyDoge note" autocomplete="off" autocapitalize="none" spellcheck="false">
-        <label for="mf-desk-doge">DOGE received</label>
-        <input id="mf-desk-doge" type="text" inputmode="decimal" autocomplete="off">
-        <label for="mf-desk-ref">DOGE transaction id (optional, first characters)</label>
-        <input id="mf-desk-ref" type="text" autocomplete="off" autocapitalize="none" spellcheck="false">
-        <div class="mf-quote">Pays <b id="mf-desk-quote">–</b> QOIN</div>
-        <button class="btn mf-primary wide" id="mf-desk-review">Review payout</button>
-        <div class="msg" id="mf-desk-msg"></div>
-        <h3 style="margin-top:16px">Recent swaps</h3>
-        <ul class="txlist" id="mf-desk-log"></ul>
-      </div>
-    </div>
   </main>
 
   <nav class="tabbar mf-tabbar hidden" id="mf-tabbar">
     <a data-mfgo="home" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
     <a data-mfgo="send"><svg viewBox="0 0 24 24"><path d="M5 19L19 5M9 5h10v10"/></svg>Send</a>
     <a data-mfgo="receive"><svg viewBox="0 0 24 24"><path d="M19 5L5 19M15 19H5V9"/></svg>Receive</a>
-    <a data-mfgo="swap"><svg viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>Swap</a>
+  </nav>
+</section>
+
+<!-- ================= Temporal ================= -->
+<section id="temporal" class="screen tp-screen hidden">
+  <header class="bar tp-bar">
+    <img src="temporal.svg" alt="" class="logo sm">
+    <div class="who"><b>Temporal</b><span class="small" id="tp-sub">a time machine that runs on QNR</span></div>
+    <span class="pill"><span class="dot" id="tp-node-dot"></span><span id="tp-node-text">…</span></span>
+  </header>
+
+  <main>
+    <!-- Seal -->
+    <div data-tp="seal">
+      <div class="card tp-gate hidden" id="tp-gate">
+        <h2>Unlock a wallet to pay the gas</h2>
+        <p class="small muted">Each seal burns 1 QNR from a wallet you made in Graysons Wallet. Going back in time works without one.</p>
+        <form id="tp-unlock">
+          <label for="tp-file">Wallet</label>
+          <select id="tp-file"></select>
+          <label for="tp-pass">Password</label>
+          <input id="tp-pass" type="password" autocomplete="current-password">
+          <button class="btn tp-primary wide" type="submit" id="tp-open">Unlock</button>
+        </form>
+        <div class="msg" id="tp-gate-msg"></div>
+      </div>
+      <form class="card" id="tp-seal">
+        <h2>Seal a capsule</h2>
+        <p class="small muted">Write something for later. Its fingerprint goes on the chain with 1 QNR burned as gas, which proves you wrote it before that block. Temporal keeps the words shut until the day you pick.</p>
+        <label for="tp-text">Your message</label>
+        <textarea id="tp-text" rows="6" maxlength="4000" placeholder="What do you want to tell the future?"></textarea>
+        <label for="tp-opens">Opens on</label>
+        <input id="tp-opens" type="datetime-local">
+        <div class="tp-dial" id="tp-dial"></div>
+        <button class="btn tp-primary wide" type="submit" id="tp-review">Review the seal</button>
+        <div class="msg" id="tp-seal-msg"></div>
+      </form>
+    </div>
+
+    <!-- Capsules -->
+    <div data-tp="capsules" class="hidden">
+      <div class="card">
+        <div class="row-between"><b>Your capsules</b><span class="tag tp" id="tp-count"></span></div>
+        <ul class="tp-list" id="tp-list"></ul>
+      </div>
+      <div class="card">
+        <h3>Add a capsule</h3>
+        <p class="small muted">Paste a capsule code: one you copied before reinstalling, or one from get.finux.tech/temporal.</p>
+        <textarea id="tp-code" rows="3" placeholder="temporal1:…" autocapitalize="none" spellcheck="false"></textarea>
+        <button class="btn wide" id="tp-add">Add it</button>
+        <div class="msg" id="tp-add-msg"></div>
+      </div>
+    </div>
+
+    <!-- Go back -->
+    <div data-tp="back" class="hidden">
+      <form class="card" id="tp-travel">
+        <h2>Go back</h2>
+        <p class="small muted">Pick any moment since the chain started, 13:37 Eastern on 8 October 2026. Temporal finds the block mined then and plays the tone it was mined on.</p>
+        <input id="tp-slide" type="range" min="0" max="1000" value="1000" aria-label="When">
+        <input id="tp-when" type="datetime-local">
+        <button class="btn tp-primary wide" type="submit">Go</button>
+      </form>
+      <div class="card hidden" id="tp-arrival">
+        <div class="tp-stamp mono" id="tp-a-when"></div>
+        <h2 id="tp-a-title"></h2>
+        <dl class="kv" id="tp-a-kv"></dl>
+        <div class="actions">
+          <button class="btn" id="tp-a-play">Play its tone</button>
+          <button class="btn" id="tp-a-ride">Ride forward an hour</button>
+        </div>
+        <div class="small muted mono tp-ride" id="tp-a-ride-now"></div>
+      </div>
+      <div class="card">
+        <div class="row-between"><b>The gas</b><span class="tag tp">burned for good</span></div>
+        <dl class="kv" id="tp-gas"></dl>
+        <p class="small muted">The burn address is the SHA-256 of the words <b>frostchain/burn</b> and <b>temporal/v1</b>, not of any key, so nobody can ever spend from it.</p>
+      </div>
+    </div>
+  </main>
+
+  <nav class="tabbar tp-tabbar" id="tp-tabbar">
+    <a data-tpgo="seal" class="on"><svg viewBox="0 0 24 24"><path d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9"/></svg>Seal</a>
+    <a data-tpgo="capsules"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M4 11h16M9 4h6v3H9z"/></svg>Capsules</a>
+    <a data-tpgo="back"><svg viewBox="0 0 24 24"><path d="M11 6L5 12l6 6M19 6l-6 6 6 6"/></svg>Go back</a>
   </nav>
 </section>
 

@@ -9,6 +9,7 @@ import java.util.Map;
 public final class Api {
     private final Node node;
     private final Platform platform;
+    private final TemporalStore capsules;
 
     public interface Platform {
         Resonance.Reading latestReading();
@@ -32,6 +33,7 @@ public final class Api {
     public Api(Node node, Platform platform) {
         this.node = node;
         this.platform = platform;
+        this.capsules = new TemporalStore(node.dir);
         node.miner.setSource(new Miner.ResonanceSource() {
             @Override // com.frostether.frostchain.Miner.ResonanceSource
             public Resonance.Reading latest() {
@@ -112,19 +114,6 @@ public final class Api {
         if (str.equals("wallet.max")) {
             return wallets.max();
         }
-        if (str.equals("swap.info")) {
-            return Swap.info(this.node);
-        }
-        if (str.equals("swap.quote")) {
-            long quote = Swap.quote(Json.str(map, "doge", ""));
-            return Json.o("qoin", U64.str(quote), "qoinText", U64.format(quote));
-        }
-        if (str.equals("swap.pay")) {
-            return Swap.pay(this.node, Json.str(map, "to", ""), Json.str(map, "doge", ""), Json.str(map, "ref", ""), Json.bool(map, "dry", false));
-        }
-        if (str.equals("swap.history")) {
-            return Swap.history(this.node);
-        }
         if (str.equals("wallet.rekey")) {
             return wallets.rekey();
         }
@@ -133,6 +122,9 @@ public final class Api {
         }
         if (str.equals("account")) {
             return this.node.accountJson(this.node.resolve(Json.str(map, "addr", "")));
+        }
+        if (str.startsWith("temporal.")) {
+            return temporal(str.substring(9), map);
         }
         if (str.equals("node.peers")) {
             return this.node.peerList();
@@ -190,8 +182,8 @@ public final class Api {
         objArr[3] = this.node.wallets.info();
         objArr[4] = "miner";
         objArr[5] = this.node.miner.status();
-        objArr[6] = "swap";
-        objArr[7] = Swap.info(this.node);
+        objArr[6] = "temporal";
+        objArr[7] = Temporal.info(this.node.chain);
         objArr[8] = "resonance";
         objArr[9] = latestReading == null ? null : latestReading.toJson();
         objArr[10] = "sensors";
@@ -203,6 +195,123 @@ public final class Api {
         objArr[16] = "now";
         objArr[17] = Long.valueOf(System.currentTimeMillis() / 1000);
         return Json.o(objArr);
+    }
+
+    /** Temporal, the time machine: see Temporal for the rules. Capsule words only leave here once they've opened. */
+    private Object temporal(String what, Map<String, Object> map) throws Exception {
+        Chain chain = this.node.chain;
+        long now = chain.now();
+        switch (what) {
+            case "info": {
+                Map<String, Object> o = Temporal.info(chain);
+                o.put("now", Long.valueOf(now));
+                o.put("genesis", Long.valueOf(Consensus.GENESIS_TIME));
+                return o;
+            }
+            case "at": {
+                Temporal.At at = Temporal.at(chain, Json.num(map, "time", now));
+                Map<String, Object> o = Json.o("block", blockRow(at.block), "mined", U64.str(at.mined), "minedText", U64.format(at.mined),
+                        "seals", Long.valueOf(at.seals));
+                byte[] account = this.node.wallets.openAccount();
+                if (account != null) {
+                    long had = balanceAt(account, at.block.time);
+                    o.put("balance", U64.str(had));
+                    o.put("balanceText", U64.format(had));
+                }
+                return o;
+            }
+            case "seal": {
+                long opens = Json.num(map, "opens", 0L);
+                if (opens < now + Temporal.MIN_LEAD) {
+                    throw new IllegalArgumentException("pick an opening time at least 15 minutes from now, so the seal lands in a block before it opens");
+                }
+                String salt = Json.str(map, "salt", "");
+                Map<String, Object> c = TemporalStore.capsule(opens, salt.isEmpty() ? Temporal.newSalt() : salt, Json.str(map, "text", ""));
+                String fp = (String) c.get("fingerprint");
+                String memo = Temporal.memo(opens, fp);
+                boolean dry = Json.bool(map, "dry", false);
+                Map<String, Object> r = this.node.wallets.send(Temporal.BURN_ADDRESS, U64.format(Temporal.GAS), memo, dry);
+                r.put("fingerprint", fp);
+                r.put("salt", c.get("salt"));
+                r.put("opens", Long.valueOf(opens));
+                r.put("burnAddress", Temporal.BURN_ADDRESS);
+                if (!dry) {
+                    c.put("made", Long.valueOf(now));
+                    c.put("txid", r.get("txid"));
+                    this.capsules.put(c);
+                }
+                return r;
+            }
+            case "capsules": {
+                List<Object> out = new ArrayList<>();
+                for (Map<String, Object> c : this.capsules.all()) {
+                    out.add(capsuleView(c, now));
+                }
+                return out;
+            }
+            case "code": {
+                Map<String, Object> c = this.capsules.get(Json.str(map, "fingerprint", ""));
+                if (c == null) {
+                    throw new IllegalArgumentException("no capsule with that fingerprint here");
+                }
+                return Json.o("code", TemporalStore.code(c));
+            }
+            case "add": {
+                Map<String, Object> c = TemporalStore.decode(Json.str(map, "code", ""));
+                if (this.capsules.get((String) c.get("fingerprint")) == null) {
+                    c.put("made", Long.valueOf(now));
+                    this.capsules.put(c);
+                }
+                return capsuleView(this.capsules.get((String) c.get("fingerprint")), now);
+            }
+            case "after": {
+                // the blocks after one, for riding forward in time
+                long from = Json.num(map, "height", 0L);
+                int count = (int) Math.max(1L, Math.min(24L, Json.num(map, "count", 12L)));
+                List<Object> out = new ArrayList<>();
+                for (long h = from + 1; h <= Math.min(chain.height(), from + count); h++) {
+                    out.add(blockRow(chain.at(h)));
+                }
+                return out;
+            }
+            case "forget":
+                return Json.o("forgotten", Boolean.valueOf(this.capsules.remove(Json.str(map, "fingerprint", ""))));
+            default:
+                throw new IllegalArgumentException("unknown method temporal." + what);
+        }
+    }
+
+    private Map<String, Object> capsuleView(Map<String, Object> c, long now) {
+        String fp = String.valueOf(c.get("fingerprint"));
+        long opens = Json.num(c, "opens", 0L);
+        boolean open = now >= opens;
+        Temporal.Seal seal = Temporal.find(this.node.chain, fp);
+        Map<String, Object> o = Json.o("fingerprint", fp, "opens", Long.valueOf(opens), "open", Boolean.valueOf(open),
+                "made", Long.valueOf(Json.num(c, "made", 0L)), "txid", Json.str(c, "txid", ""));
+        o.put("seal", seal == null ? null : seal.toJson());
+        o.put("chars", Long.valueOf(Json.str(c, "text", "").length()));
+        if (open) {
+            o.put("text", Json.str(c, "text", ""));
+        }
+        return o;
+    }
+
+    /** What this account held at a moment: everything in, less everything out, up to that time. */
+    private long balanceAt(byte[] account, long time) {
+        long had = 0;
+        for (Chain.Event e : this.node.chain.history(account)) {
+            if (e.time > time) {
+                break;
+            }
+            if ("mined".equals(e.kind) || "received".equals(e.kind)) {
+                had += e.amount;
+            } else if ("sent".equals(e.kind)) {
+                had -= e.amount + e.fee;
+            } else {
+                had -= e.fee;
+            }
+        }
+        return Math.max(0L, had);
     }
 
     private Map<String, Object> startMining(Map<String, Object> map) throws Exception {
@@ -230,32 +339,37 @@ public final class Api {
                 break;
             }
             Block at = this.node.chain.at(j);
-            String nameOf = this.node.chain.nameOf(at.miner);
-            Object[] objArr = new Object[18];
-            objArr[0] = "height";
-            objArr[1] = Long.valueOf(at.height);
-            objArr[2] = "hash";
-            objArr[3] = at.hashHex();
-            objArr[4] = "time";
-            objArr[5] = Long.valueOf(at.time);
-            objArr[6] = "txs";
-            objArr[7] = Long.valueOf(at.txs.size());
-            objArr[8] = "miner";
-            objArr[9] = nameOf != null ? Address.display(nameOf) : Address.raw(at.miner);
-            objArr[10] = "paid";
-            objArr[11] = U64.format(at.paid);
-            objArr[12] = "hz";
-            objArr[13] = Double.valueOf(at.reso == null ? 0.0d : at.reso.hzMilli / 1000.0d);
-            objArr[14] = "sensor";
-            objArr[15] = at.reso == null ? "" : at.reso.sensor;
-            objArr[16] = "difficulty";
-            objArr[17] = U64.str(at.difficulty);
-            Map<String, Object> row = Json.o(objArr);
-            int band = at.reso == null ? -1 : Resonance.bandOfMilli(at.reso.hzMilli);
-            row.put("band", band >= 0 ? Resonance.BAND_NAMES[band] : "");
+            Map<String, Object> row = blockRow(at);
             arrayList.add(row);
             height = j - 1;
         }
         return arrayList;
+    }
+
+    private Map<String, Object> blockRow(Block at) {
+        String nameOf = at.height == 0 ? null : this.node.chain.nameOf(at.miner);
+        Object[] objArr = new Object[18];
+        objArr[0] = "height";
+        objArr[1] = Long.valueOf(at.height);
+        objArr[2] = "hash";
+        objArr[3] = at.hashHex();
+        objArr[4] = "time";
+        objArr[5] = Long.valueOf(at.time);
+        objArr[6] = "txs";
+        objArr[7] = Long.valueOf(at.txs.size());
+        objArr[8] = "miner";
+        objArr[9] = at.height == 0 ? "" : nameOf != null ? Address.display(nameOf) : Address.raw(at.miner);
+        objArr[10] = "paid";
+        objArr[11] = U64.format(at.paid);
+        objArr[12] = "hz";
+        objArr[13] = Double.valueOf(at.reso == null ? 0.0d : at.reso.hzMilli / 1000.0d);
+        objArr[14] = "sensor";
+        objArr[15] = at.reso == null ? "" : at.reso.sensor;
+        objArr[16] = "difficulty";
+        objArr[17] = U64.str(at.difficulty);
+        Map<String, Object> row = Json.o(objArr);
+        int band = at.reso == null ? -1 : Resonance.bandOfMilli(at.reso.hzMilli);
+        row.put("band", band >= 0 ? Resonance.BAND_NAMES[band] : "");
+        return row;
     }
 }

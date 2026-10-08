@@ -3,12 +3,14 @@
 Where Qoin is today, and what it takes to earn the kind of trust Monero has.
 Monero is trusted because its code is open, it launched with no premine and no sale, anyone with a CPU can mine it, and its privacy has been reviewed for years. Each phase below moves Qoin toward that.
 
-## Now: proof of concept (v0.3.x)
+## Now: proof of concept (v0.4.2)
 
-- Two phone nodes on Frostchain.
-- Tone-gated mining at 7.83 Hz on phones.
+- The v0.4 chain, relaunched 8 October 2026 with a fair block 1 and three mining tones ([plan](docs/v0.4-plan.md)).
+- Tone-gated mining on phones, blocks every 5 minutes.
 - Public accounts with `.frostchain` names and LMS post-quantum signatures.
-- Next: the [v0.4 relaunch](docs/v0.4-plan.md), a new chain with a fair block 1, three tone bands, a sound layer and a visual explorer.
+- frostnode with FrostExplorer, and a one-line server installer at [get.finux.tech/node](https://get.finux.tech/node/).
+- Temporal, the time machine, burning QNR as gas.
+- Next: the QNR parameters, taking from Monero, Zcash, Dash and Steem: tail emission, view keys, node rewards and governance.
 
 ## 1. Open and reachable
 
@@ -39,8 +41,8 @@ Monero is trusted because its code is open, it launched with no premine and no s
 
 ## 5. Ecosystem
 
-- [ ] **Oofcoins**: reward points for finux games like FrostGames and FrostMines. They're earned and spent inside games only. They're never sold and never swap for QOIN, which keeps them safe for kids. Start them off-chain, then move them onto Frostchain as a balance that can't be transferred.
-- [ ] **GCII, wrapped QOIN on Ethereum Classic**, once Frostchain has outside users. It's already designed as a 1:1 wrapper and stays the only one. A wrapper is a vault: every wrapped coin must be backed by QOIN locked at a public Frostchain address, and the key that mints wrapped coins is the most valuable key in the project.
+- [ ] **Oofcoins**: reward points for finux games like FrostGames and FrostMines. They're earned and spent inside games only. They're never sold and never swap for QNR, which keeps them safe for kids. Start them off-chain, then move them onto Frostchain as a balance that can't be transferred.
+- [ ] **GCII, wrapped QNR on Ethereum Classic**, once Frostchain has outside users. It's already designed as a 1:1 wrapper and stays the only one. A wrapper is a vault: every wrapped coin must be backed by QNR locked at a public Frostchain address, and the key that mints wrapped coins is the most valuable key in the project.
 
 ## How to help
 

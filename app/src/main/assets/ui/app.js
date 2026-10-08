@@ -1,4 +1,4 @@
-/* Graysons Wallet + Frostoise + MyFrost UI. Talks to the Frostchain node through
+/* Graysons Wallet + Frostoise + MyFrost + Temporal UI. Talks to the Frostchain node through
    window.FrostBridge on Android, or POST /wallet/api on desktop. No external libraries. */
 (function () {
   'use strict';
@@ -63,7 +63,7 @@
   }
   /** For confirmations: @name, or the full raw address (never shortened). */
   function who(t) { return RAW_RE.test(t || '') ? t : atName(t); }
-  /** "1,000.50" -> "1000.5"; null if it isn't a positive QOIN amount (max 11 decimals). */
+  /** "1,000.50" -> "1000.5"; null if it isn't a positive QNR amount (max 11 decimals). */
   function cleanAmount(v) {
     var t = String(v == null ? '' : v).replace(/[\s,_]/g, '');
     if (!/^(\d+(\.\d{0,11})?|\.\d{1,11})$/.test(t)) return null;
@@ -120,11 +120,11 @@
   // ---------------- state ----------------
   var S = { status: null, wallet: null, page: 'home', lastHeight: -1, sensor: 'mag', review: null, cores: 4 };
 
-  // ---------------- routing: one page, three apps ----------------
-  var TITLES = { wallet: 'Graysons Wallet', frostoise: 'Frostoise', myfrost: 'MyFrost' };
+  // ---------------- routing: one page, four apps ----------------
+  var TITLES = { wallet: 'Graysons Wallet', frostoise: 'Frostoise', myfrost: 'MyFrost', temporal: 'Temporal' };
   function mode() {
     var h = location.hash || '#wallet';
-    return h.indexOf('#frostoise') === 0 ? 'frostoise' : h.indexOf('#myfrost') === 0 ? 'myfrost' : 'wallet';
+    return h.indexOf('#frostoise') === 0 ? 'frostoise' : h.indexOf('#myfrost') === 0 ? 'myfrost' : h.indexOf('#temporal') === 0 ? 'temporal' : 'wallet';
   }
   function route() {
     var m = mode();
@@ -139,8 +139,10 @@
     $('wallet').classList.toggle('hidden', m !== 'wallet' || !open);
     $('gate').classList.toggle('hidden', m !== 'wallet' || !!open);
     $('myfrost').classList.toggle('hidden', m !== 'myfrost');
+    $('temporal').classList.toggle('hidden', m !== 'temporal');
     if (m === 'wallet' && !open) loadWalletList();
     if (m === 'myfrost') mfShow();
+    if (m === 'temporal') tpShow();
   }
   /** Switch app. On Android each app is its own launcher icon and task, so open that one. */
   function goApp(target) {
@@ -238,7 +240,7 @@
   function showSeed(seed, fresh, done) {
     var words = seed.split(' ');
     modal('<h2>' + (fresh ? 'Write down your 25 words' : 'Your 25 words') + '</h2>' +
-      '<p class="small">These words are the wallet. Anyone who has them can spend your QOIN; if you lose them and this phone, the QOIN is gone.</p>' +
+      '<p class="small">These words are the wallet. Anyone who has them can spend your QNR; if you lose them and this phone, the QNR is gone.</p>' +
       '<div class="seedgrid">' + words.map(function (w) { return '<span>' + esc(w) + '</span>'; }).join('') + '</div>' +
       '<div class="warnbox">Write them on paper. Don\'t screenshot them or paste them into chats.</div>' +
       (fresh ? '<label class="check"><input type="checkbox" id="seed-ok"> I wrote all 25 words down</label>' : '') +
@@ -291,15 +293,16 @@
       }
       if (mode() === 'myfrost' && s.wallet.open) mfRefresh(s);
       if (mode() === 'frostoise') renderFrostoise(s);
+      if (mode() === 'temporal') tpRefresh(s);
     }).catch(function () {
-      $('node-text').textContent = $('f-node-text').textContent = $('mf-node-text').textContent = 'no node';
+      $('node-text').textContent = $('f-node-text').textContent = $('mf-node-text').textContent = $('tp-node-text').textContent = 'no node';
     });
   }
   function renderNode(s) {
     var n = s.node, ok = !n.offline && n.peers > 0 && n.sync.indexOf('0 of') !== 0;
     var cls = n.offline ? 'warn' : (ok ? 'good' : 'warn');
     var text = n.offline ? 'offline · #' + n.height : (n.peers ? n.peers + ' peer' + (n.peers > 1 ? 's' : '') + ' · #' + n.height : 'solo · #' + n.height);
-    ['node', 'f-node', 'mf-node'].forEach(function (p) { $(p + '-dot').className = 'dot ' + cls; $(p + '-text').textContent = text; });
+    ['node', 'f-node', 'mf-node', 'tp-node'].forEach(function (p) { $(p + '-dot').className = 'dot ' + cls; $(p + '-text').textContent = text; });
     $('gate-node').textContent = 'Node: block ' + n.height + ' · ' + (n.offline ? 'offline' : n.sync) + ' · chain ' + n.chain;
   }
 
@@ -327,18 +330,19 @@
   $('home-addr').addEventListener('click', function () { copy(this.textContent); });
 
   // ---------------- history ----------------
-  /** One activity row. MyFrost passes atName to show people as @name and to label DOGE swaps. */
+  /** One activity row. MyFrost passes atName to show people as @name. Payments to Temporal's burn address read as seals. */
   function txItem(e, nameFn) {
     if (typeof nameFn !== 'function') nameFn = null;   // Array.map passes the index here
     var k = e.kind, inc = k === 'received' || k === 'mined', icon = { sent: '↗', received: '↙', mined: '❄', name: '@', rekey: '⟳' }[k] || '•';
     var other = nameFn ? nameFn(e.otherText) : e.otherText;
     var title = { sent: 'To ' + other, received: 'From ' + other, mined: 'Mined block ' + e.height,
       name: 'Claimed ' + (nameFn ? '@' + e.name : e.name + '.frostchain'), rekey: 'Rotated to a fresh key' }[k];
-    var sw = nameFn && (k === 'sent' || k === 'received') ? /^swap ([0-9.]+) DOGE/.exec(e.memo || '') : null;
-    if (sw) { icon = '⇄'; title = k === 'received' ? 'Bought with ' + sw[1] + ' DOGE' : 'Swap: ' + sw[1] + ' DOGE from ' + other; }
+    var seal = k === 'sent' && tpIsBurn(e.otherText) ? /^T1 (\d{1,12}) [0-9a-f]{40}$/.exec(e.memo || '') : null;
+    if (seal) { icon = '⧗'; title = 'Sealed a capsule'; }
     var when = e.pending ? 'pending' : ago(e.time);
     if (k === 'mined' && S.status && e.unlocksAt > S.status.node.height) when += ' · unlocks at block ' + e.unlocksAt;
-    if (e.memo) when += ' · “' + e.memo + '”';
+    if (seal) when += ' · opens ' + tpWhen(+seal[1]);
+    else if (e.memo) when += ' · “' + e.memo + '”';
     var amt = (k === 'name' || k === 'rekey') ? '' : (inc ? '+' : '−') + short(e.amountText);
     return '<li><span class="ic ' + (k === 'mined' ? 'mined' : inc ? 'in' : '') + '">' + icon + '</span><span class="t"><b>' + esc(title) + '</b><span>' + esc(when) +
       '</span></span><span class="amt' + (inc ? ' in' : '') + '">' + esc(amt) + '</span></li>';
@@ -382,10 +386,10 @@
     call('wallet.send', p).then(function (r) {
       S.review = p;
       $('rv-to').textContent = r.to;
-      $('rv-amount').textContent = r.amountText + ' QOIN';
-      $('rv-fee').textContent = r.feeText + ' QOIN' + (r.rekey ? ' (includes rotating to a fresh key)' : '');
-      $('rv-total').textContent = r.totalText + ' QOIN';
-      $('rv-after').textContent = r.after + ' QOIN';
+      $('rv-amount').textContent = r.amountText + ' QNR';
+      $('rv-fee').textContent = r.feeText + ' QNR' + (r.rekey ? ' (includes rotating to a fresh key)' : '');
+      $('rv-total').textContent = r.totalText + ' QNR';
+      $('rv-after').textContent = r.after + ' QNR';
       $('rv-memo').textContent = r.memo || '—';
       $('rv-key').textContent = 'LMS key #' + r.keyIndex + ', one-time signature ' + (r.leaf + 1) + ' of 1024';
       msg('rv-msg', '');
@@ -402,7 +406,7 @@
       $('s-to').value = $('s-amount').value = $('s-memo').value = '';
       msg('s-to-hint', ''); msg('s-msg', '');
       $('review').classList.add('hidden'); $('f-send').classList.remove('hidden');
-      toast('Sent ' + r.amountText + ' QOIN to ' + r.to);
+      toast('Sent ' + r.amountText + ' QNR to ' + r.to);
       refresh().then(function () { go('home'); });
     }).catch(function (err) { msg('rv-msg', err.message, 'err'); }).then(function () { busy(btn, false); });
   });
@@ -418,7 +422,7 @@
   $('rc-raw').addEventListener('click', function () { copy(this.textContent); });
   $('rc-share').addEventListener('click', function () {
     var w = S.wallet;
-    share('Pay me QOIN at ' + (w.name || w.raw + '.frostchain'));
+    share('Pay me QNR at ' + (w.name || w.raw + '.frostchain'));
   });
 
   // ---------------- more ----------------
@@ -426,7 +430,7 @@
     var s = S.status; if (!s) return;
     $('about-platform').textContent = s.platform;
     call('node.blocks', { count: 1 }).then(function (l) {
-      if (l.length) $('live-reward').textContent = 'Monero-style smooth emission · block #' + l[0].height + ' paid ' + short(l[0].paid) + ' QOIN';
+      if (l.length) $('live-reward').textContent = 'Monero-style smooth emission · block #' + l[0].height + ' paid ' + short(l[0].paid) + ' QNR';
     }).catch(function () {});
   }
   function loadNode() {
@@ -434,7 +438,7 @@
     var n = s.node;
     $('chain-tag').textContent = 'chain ' + n.chain;
     $('node-kv').innerHTML = [['Block height', n.height], ['Network', n.offline ? 'offline' : n.sync], ['Listening on port', n.port],
-      ['Waiting transactions', n.mempool], ['Next difficulty', Number(n.difficulty).toLocaleString()], ['QOIN mined so far', n.generated],
+      ['Waiting transactions', n.mempool], ['Next difficulty', Number(n.difficulty).toLocaleString()], ['QNR mined so far', n.generated],
       ['Accounts', n.accounts]].map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
     $('n-offline').checked = n.offline;
     $('n-lan').checked = n.discovery;
@@ -447,7 +451,7 @@
     });
     call('node.blocks', { count: 8 }).then(function (l) {
       $('blocks').innerHTML = l.length ? l.map(function (b) {
-        return '<li><span>#' + b.height + ' · ' + esc(b.miner) + '</span><span>' + esc(b.paid) + ' QOIN · ' + b.hz.toFixed(2) + ' Hz ' + esc(b.sensor) + '<br>' + ago(b.time) + '</span></li>';
+        return '<li><span>#' + b.height + ' · ' + esc(b.miner) + '</span><span>' + esc(b.paid) + ' QNR · ' + b.hz.toFixed(2) + ' Hz ' + esc(b.sensor) + '<br>' + ago(b.time) + '</span></li>';
       }).join('') : '<li class="muted small">No blocks yet. Mining is open: play a tone in Frostoise to find block 1.</li>';
     });
     loadExplorer();
@@ -487,7 +491,7 @@
       ? '<dt>Block</dt><dd>#' + b.height + ' · ' + ago(b.time) + '</dd>' +
         '<dt>Miner</dt><dd>' + esc(b.miner) + '</dd>' +
         '<dt>Tone</dt><dd>' + b.hz.toFixed(2) + ' Hz ' + esc(rezBand(b)) + ' · ' + esc(b.sensor) + '</dd>' +
-        '<dt>Reward</dt><dd>' + esc(b.paid) + ' QOIN</dd>' +
+        '<dt>Reward</dt><dd>' + esc(b.paid) + ' QNR</dd>' +
         '<dt>Transactions</dt><dd>' + b.txs + '</dd>' +
         '<dt>Hash</dt><dd class="mono">' + esc(b.hash) + '</dd>'
       : '<dt>Blocks</dt><dd>None yet. Mining is open: play a tone in Frostoise to find block 1.</dd>';
@@ -768,11 +772,11 @@
     if (m.running && m.payout) $('m-payout').placeholder = 'paying ' + (w.open && w.raw === m.payout ? walletAddr(w) : m.payout);
     else $('m-payout').placeholder = w.open ? 'your wallet: ' + walletAddr(w) : 'name.frostchain to pay';
     $('f-wallet').innerHTML = w.open
-      ? esc(w.label) + ' · <b>' + esc(walletAddr(w)) + '</b><br>' + esc(w.balanceText) + ' QOIN' + (w.immature !== '0' ? ' + ' + esc(w.immatureText) + ' locked from mining' : '')
+      ? esc(w.label) + ' · <b>' + esc(walletAddr(w)) + '</b><br>' + esc(w.balanceText) + ' QNR' + (w.immature !== '0' ? ' + ' + esc(w.immatureText) + ' locked from mining' : '')
       : 'No wallet open. Open Graysons Wallet so Frostoise can pay you, or type a .frostchain name above.';
   }
 
-  // ---------------- MyFrost: send and receive by @name, buy QOIN with DOGE ----------------
+  // ---------------- MyFrost: send and receive by @name ----------------
   var MF = { page: 'home', review: null, lastKey: '', pendingPay: null };
   function mfMyAddr(w) { return w.name || (w.raw + '.frostchain'); }
   function mfHandle(w) { return w.name ? atName(w.name) : w.pendingName ? atName(w.pendingName) + ' (registering)' : atName(w.raw); }
@@ -799,7 +803,6 @@
     if (page === 'home') mfLoadActivity();
     if (page === 'send') { mfShowForm(); mfLoadRecent(); }
     if (page === 'receive') mfDrawReceive();
-    if (page === 'swap') mfRenderSwap(true);
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-mfgo]');
@@ -809,11 +812,9 @@
   function mfRefresh(s) {
     mfRender();
     var w = s.wallet, key = s.node.height + '/' + w.balance + '/' + w.pendingIn + '/' + w.pendingOut + '/' + w.name;
-    if (MF.page === 'swap') mfRenderSwap(false);
     if (key === MF.lastKey) return;
     MF.lastKey = key;
     if (MF.page === 'home') mfLoadActivity();
-    if (MF.page === 'swap' && s.swap && s.swap.isDesk) mfLoadDeskLog();
   }
 
   // unlock (wallets are created in Graysons Wallet)
@@ -862,7 +863,7 @@
     if (!S.wallet || !S.wallet.open) return;
     call('wallet.history').then(function (l) {
       $('mf-activity').innerHTML = l.length ? l.slice(0, 25).map(function (e) { return txItem(e, atName); }).join('')
-        : '<li class="empty">Nothing yet. Tap Receive for your QR code, or Swap to buy QOIN with DOGE.</li>';
+        : '<li class="empty">Nothing yet. Tap Receive for your QR code.</li>';
     }).catch(function () {});
   }
 
@@ -918,9 +919,9 @@
     busy(btn, true, 'Checking…');
     call('wallet.send', p).then(function (r) {
       MF.review = p;
-      $('mf-review-kv').innerHTML = kvHtml([['To', who(r.to)], ['Amount', r.amountText + ' QOIN'],
-        ['Network fee', r.feeText + ' QOIN' + (r.rekey ? ' (includes switching to a fresh key)' : '')],
-        ['Total', r.totalText + ' QOIN'], ['Left after', r.after + ' QOIN'], ['Note', r.memo || '—']]);
+      $('mf-review-kv').innerHTML = kvHtml([['To', who(r.to)], ['Amount', r.amountText + ' QNR'],
+        ['Network fee', r.feeText + ' QNR' + (r.rekey ? ' (includes switching to a fresh key)' : '')],
+        ['Total', r.totalText + ' QNR'], ['Left after', r.after + ' QNR'], ['Note', r.memo || '—']]);
       msg('mf-review-msg', '');
       msg('mf-send-msg', '');
       $('mf-send').classList.add('hidden');
@@ -936,7 +937,7 @@
       $('mf-to').value = $('mf-amount').value = $('mf-memo').value = '';
       msg('mf-to-hint', '');
       mfShowForm();
-      toast('Sent ' + r.amountText + ' QOIN to ' + who(r.to));
+      toast('Sent ' + r.amountText + ' QNR to ' + who(r.to));
       return refresh().then(function () { mfGo('home'); });
     }).catch(function (err) { msg('mf-review-msg', err.message, 'err'); }).then(function () { busy(btn, false); });
   });
@@ -962,68 +963,7 @@
   $('mf-rc-copy').addEventListener('click', function () { copy(mfReqLink()); });
   $('mf-rc-share').addEventListener('click', function () {
     var w = S.wallet, amt = cleanAmount($('mf-req').value);
-    share((amt ? 'Pay me ' + amt + ' QOIN' : 'Pay me QOIN') + ' at ' + (w.name ? atName(w.name) : mfMyAddr(w)) + ' in MyFrost: ' + mfReqLink());
-  });
-
-  // swap: the offer lives on finux.tech/getqoin; the PiDoge desk pays buyers from here
-  var GET_QOIN_URL = 'https://finux.tech/getqoin';
-  function mfRenderSwap(fresh) {
-    var s = S.status, w = S.wallet; if (!s || !s.swap || !w || !w.open) return;
-    var sw = s.swap;
-    $('mf-rate-tag').textContent = sw.rateText;
-    $('mf-your-name').textContent = mfMyAddr(w);
-    $('mf-get').classList.toggle('hidden', !!sw.isDesk);
-    $('mf-desk').classList.toggle('hidden', !sw.isDesk);
-    if (sw.isDesk && fresh) mfLoadDeskLog();
-  }
-  function mfQuote(inputId, outId, msgId) {
-    var v = $(inputId).value.trim();
-    if (!v) { $(outId).textContent = '–'; msg(msgId, ''); return; }
-    call('swap.quote', { doge: v }).then(function (r) {
-      if ($(inputId).value.trim() !== v) return;
-      $(outId).textContent = r.qoinText;
-      msg(msgId, '');
-    }).catch(function (e) {
-      if ($(inputId).value.trim() !== v) return;
-      $(outId).textContent = '–';
-      msg(msgId, e.message, 'err');
-    });
-  }
-  var mfQ2;
-  $('mf-desk-doge').addEventListener('input', function () { clearTimeout(mfQ2); mfQ2 = setTimeout(function () { mfQuote('mf-desk-doge', 'mf-desk-quote', 'mf-desk-msg'); }, 200); });
-  $('mf-your-name').addEventListener('click', function () { copy(this.textContent); });
-  $('mf-open-get').addEventListener('click', function () { copy(mfMyAddr(S.wallet)); openUrl(GET_QOIN_URL); });
-
-  // the desk (only the wallet holding the desk's name sees this)
-  function mfLoadDeskLog() {
-    call('swap.history').then(function (l) {
-      $('mf-desk-log').innerHTML = l.length ? l.slice(0, 15).map(function (e) { return txItem(e, atName); }).join('')
-        : '<li class="empty">No swaps paid yet.</li>';
-    }).catch(function () {});
-  }
-  $('mf-desk-review').addEventListener('click', function () {
-    var btn = this, p = { to: $('mf-desk-to').value.trim(), doge: $('mf-desk-doge').value.trim(), ref: $('mf-desk-ref').value.trim() };
-    busy(btn, true, 'Checking…');
-    call('swap.pay', { to: p.to, doge: p.doge, ref: p.ref, dry: true }).then(function (r) {
-      msg('mf-desk-msg', '');
-      modal('<h2>Pay this swap?</h2><dl class="kv">' + kvHtml([['Buyer', who(r.to)], ['DOGE received', r.doge + ' DOGE'],
-        ['Pays', r.amountText + ' QOIN'], ['Network fee', r.feeText + ' QOIN'], ['Note on the payment', r.memo], ['Left after', r.after + ' QOIN']]) + '</dl>' +
-        '<p class="small muted">Only pay once the DOGE has really arrived in MyDoge.</p><div class="msg" id="dk-msg"></div>' +
-        '<div class="actions"><button class="btn" id="dk-cancel">Cancel</button><button class="btn mf-primary" id="dk-pay">Pay now</button></div>');
-      $('dk-cancel').addEventListener('click', closeModal);
-      $('dk-pay').addEventListener('click', function () {
-        var b2 = this;
-        busy(b2, true, 'Signing…');
-        call('swap.pay', p).then(function (r2) {
-          closeModal();
-          $('mf-desk-to').value = $('mf-desk-doge').value = $('mf-desk-ref').value = '';
-          $('mf-desk-quote').textContent = '–';
-          toast('Paid ' + r2.amountText + ' QOIN to ' + who(r2.to));
-          mfLoadDeskLog();
-          refresh();
-        }).catch(function (e) { msg('dk-msg', e.message, 'err'); busy(b2, false); });
-      });
-    }).catch(function (e) { msg('mf-desk-msg', e.message, 'err'); }).then(function () { busy(btn, false); });
+    share((amt ? 'Pay me ' + amt + ' QNR' : 'Pay me QNR') + ' at ' + (w.name ? atName(w.name) : mfMyAddr(w)) + ' in MyFrost: ' + mfReqLink());
   });
 
   // frostchain: payment links (camera apps, other apps, or #myfrost?pay=… from Android)
@@ -1051,6 +991,244 @@
     mfCheckTo();
     toast('Payment link opened: check it, then tap Review');
   }
+
+  // ---------------- Temporal: seal capsules for the future, go back to any block; QNR is the gas ----------------
+  var TP = { page: 'seal', review: null, arrived: null, riding: false, lastKey: '', audio: null };
+  var TP_GENESIS = 1791481020, TP_BURN = 'fcn22knwovgbfytc6qyjczvb4kkxwjhqjmoaru';
+  function tpNow() { return Math.floor(Date.now() / 1000); }
+  function tpIsBurn(t) { return !!t && t.replace(/\.frostchain$/, '') === TP_BURN; }
+  function tpLocal(t) {
+    var d = new Date(t * 1000), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function tpParse(v) { var t = new Date(v).getTime(); return isNaN(t) ? NaN : Math.floor(t / 1000); }
+  function tpWhen(t) {
+    try { return new Date(t * 1000).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return new Date(t * 1000).toLocaleString(); }
+  }
+  function tpSpan(sec) {
+    sec = Math.max(0, sec);
+    var d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
+    if (d >= 365) { var y = Math.floor(d / 365), rd = d - y * 365; return y + (y === 1 ? ' year' : ' years') + (rd ? ', ' + rd + (rd === 1 ? ' day' : ' days') : ''); }
+    if (d > 0) return d + (d === 1 ? ' day' : ' days') + (h ? ', ' + h + ' h' : '');
+    if (h > 0) return h + ' h ' + m + ' min';
+    return m + ' min';
+  }
+
+  function tpShow() {
+    var w = S.wallet, canPay = !!(w && w.open && !w.watch);
+    $('tp-gate').classList.toggle('hidden', canPay);
+    $('tp-seal').classList.toggle('hidden', !canPay);
+    if (!canPay) {
+      tpLoadWallets();
+      msg('tp-gate-msg', w && w.open && w.watch ? 'This wallet is watch-only, so it can’t pay gas. Unlock one that can spend.' : '');
+    }
+    tpDial();
+    tpGo(TP.page);
+  }
+  function tpGo(page) {
+    TP.page = page;
+    qsa('[data-tp]').forEach(function (p) { p.classList.toggle('hidden', p.dataset.tp !== page); });
+    qsa('#tp-tabbar a').forEach(function (a) { a.classList.toggle('on', a.dataset.tpgo === page); });
+    window.scrollTo(0, 0);
+    if (page === 'capsules') tpLoadCapsules();
+    if (page === 'back') { tpInitTravel(); tpLoadGas(); }
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tpgo]');
+    if (t) { e.preventDefault(); tpGo(t.dataset.tpgo); }
+  });
+  /** Called by refresh() while Temporal shows. */
+  function tpRefresh(s) {
+    var key = s.node.height + '/' + (s.wallet && s.wallet.open ? s.wallet.file : '');
+    if (key === TP.lastKey) return;
+    TP.lastKey = key;
+    if (TP.page === 'capsules') tpLoadCapsules();
+    if (TP.page === 'back') tpLoadGas();
+  }
+
+  // unlock, for paying gas
+  function tpLoadWallets() {
+    call('wallets.list').then(function (list) {
+      var spendable = list.filter(function (w) { return !w.watch; });
+      $('tp-file').innerHTML = spendable.map(function (w) {
+        return '<option value="' + esc(w.file) + '">' + esc(w.label) + (w.name ? ' · ' + esc(atName(w.name)) : '') + '</option>';
+      }).join('');
+      $('tp-unlock').classList.toggle('hidden', !spendable.length);
+      if (!spendable.length) msg('tp-gate-msg', 'No wallets on this phone yet. Make one in Graysons Wallet, then come back.');
+    }).catch(function () {});
+  }
+  $('tp-unlock').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = $('tp-open');
+    busy(btn, true, 'Unlocking…');
+    call('wallet.open', { file: $('tp-file').value, password: $('tp-pass').value }).then(function (w) {
+      $('tp-pass').value = '';
+      msg('tp-gate-msg', '');
+      S.wallet = w;
+      tpShow();
+      refresh();
+    }).catch(function (err) { msg('tp-gate-msg', err.message, 'err'); }).then(function () { busy(btn, false); });
+  });
+
+  // seal
+  var tpOpens = $('tp-opens');
+  (function () { var t = tpNow() + 365 * 86400; tpOpens.value = tpLocal(t - t % 60); })();
+  function tpDial() {
+    var t = tpParse(tpOpens.value), now = tpNow();
+    tpOpens.min = tpLocal(now + 15 * 60);
+    $('tp-dial').textContent = isNaN(t) ? '' : t <= now ? 'That moment has passed.' : 'Opens in ' + tpSpan(t - now + 59) + '.';
+  }
+  tpOpens.addEventListener('input', tpDial);
+  $('tp-seal').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = $('tp-review'), text = $('tp-text').value, opens = tpParse(tpOpens.value);
+    if (!text.trim()) { msg('tp-seal-msg', 'Write a message first.', 'err'); return; }
+    if (isNaN(opens)) { msg('tp-seal-msg', 'Pick when it opens.', 'err'); return; }
+    busy(btn, true, 'Checking…');
+    call('temporal.seal', { text: text, opens: opens, dry: true }).then(function (r) {
+      msg('tp-seal-msg', '');
+      TP.review = { text: text, opens: opens, salt: r.salt };
+      modal('<h2>Seal it?</h2><dl class="kv">' + kvHtml([['Opens', tpWhen(opens)], ['Fingerprint', r.fingerprint.slice(0, 16) + '…'],
+        ['Gas, burned', r.amountText + ' QNR'], ['Network fee', r.feeText + ' QNR'], ['Left after', r.after + ' QNR']]) + '</dl>' +
+        '<p class="small muted">Only the fingerprint and the opening time go on the chain. Your words stay on this phone, shut until then. ' +
+        'Copy the capsule code from Capsules before you ever uninstall.</p><div class="msg" id="tp-m-msg"></div>' +
+        '<div class="actions"><button class="btn" id="tp-m-cancel">Cancel</button><button class="btn tp-primary" id="tp-m-seal">Seal, burn 1 QNR</button></div>');
+      $('tp-m-cancel').addEventListener('click', closeModal);
+      $('tp-m-seal').addEventListener('click', function () {
+        var b2 = this, p = TP.review; if (!p) return;
+        busy(b2, true, 'Signing…');
+        call('temporal.seal', { text: p.text, opens: p.opens, salt: p.salt }).then(function () {
+          closeModal();
+          TP.review = null;
+          $('tp-text').value = '';
+          toast('Sealed. The next block carries it.');
+          refresh();
+          tpGo('capsules');
+        }).catch(function (err) { msg('tp-m-msg', err.message, 'err'); busy(b2, false); });
+      });
+    }).catch(function (err) { msg('tp-seal-msg', err.message, 'err'); }).then(function () { busy(btn, false); });
+  });
+
+  // capsules
+  function tpLoadCapsules() {
+    call('temporal.capsules').then(function (l) {
+      $('tp-count').textContent = l.length ? l.length + (l.length === 1 ? ' capsule' : ' capsules') : '';
+      $('tp-list').innerHTML = l.length ? l.map(tpItem).join('') : '<li class="empty">None yet. Seal one, or add a capsule code below.</li>';
+    }).catch(function () {});
+  }
+  function tpItem(c) {
+    var seal = c.seal, proof;
+    if (seal) proof = seal.onTime ? 'Proven: sealed in block #' + seal.height + ', ' + tpWhen(seal.time) : 'Sealed in block #' + seal.height + ', after it opened';
+    else proof = c.txid ? 'Waiting for a block to carry the seal' : 'No seal for it on this chain';
+    var body = c.open
+      ? '<blockquote class="tp-text">' + esc(c.text).replace(/\n/g, '<br>') + '</blockquote>'
+      : '<p class="small muted">' + c.chars + (c.chars === 1 ? ' character' : ' characters') + ', shut for ' + esc(tpSpan(c.opens - tpNow() + 59)) + ' more.</p>';
+    return '<li class="tp-cap"><div class="row-between"><span class="tp-state' + (c.open ? ' open' : '') + '">' + (c.open ? 'Open' : 'Shut') + '</span>' +
+      '<span class="small muted mono">' + esc(c.fingerprint.slice(0, 12)) + '…</span></div>' +
+      '<div class="tp-opens">' + (c.open ? 'Opened ' : 'Opens ') + esc(tpWhen(c.opens)) + '</div>' + body +
+      '<div class="small ' + (seal && seal.onTime ? 'tp-ok' : 'muted') + '">' + esc(proof) + '</div>' +
+      '<div class="actions"><button class="btn small" data-tpcode="' + esc(c.fingerprint) + '">Copy capsule code</button>' +
+      '<button class="btn small danger" data-tpforget="' + esc(c.fingerprint) + '">Forget</button></div></li>';
+  }
+  $('tp-list').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tpcode]');
+    if (b) { call('temporal.code', { fingerprint: b.dataset.tpcode }).then(function (r) { copy(r.code); }).catch(function (err) { toast(err.message); }); return; }
+    b = e.target.closest('[data-tpforget]');
+    if (!b) return;
+    if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'Tap again to forget'; return; }
+    call('temporal.forget', { fingerprint: b.dataset.tpforget }).then(tpLoadCapsules).catch(function (err) { toast(err.message); });
+  });
+  $('tp-add').addEventListener('click', function () {
+    var btn = this;
+    busy(btn, true, 'Adding…');
+    call('temporal.add', { code: $('tp-code').value }).then(function (c) {
+      $('tp-code').value = '';
+      msg('tp-add-msg', 'Added. It opens ' + tpWhen(c.opens) + '.', 'ok');
+      tpLoadCapsules();
+    }).catch(function (err) { msg('tp-add-msg', err.message, 'err'); }).then(function () { busy(btn, false); });
+  });
+
+  // go back
+  function tpSlideFor(t) { var now = tpNow(); return Math.round(1000 * Math.max(0, Math.min(1, (t - TP_GENESIS) / Math.max(1, now - TP_GENESIS)))); }
+  function tpInitTravel() {
+    var now = tpNow();
+    $('tp-when').min = tpLocal(TP_GENESIS);
+    $('tp-when').max = tpLocal(now);
+    if (!$('tp-when').value) { $('tp-when').value = tpLocal(now - 3600); $('tp-slide').value = tpSlideFor(now - 3600); }
+  }
+  $('tp-slide').addEventListener('input', function () {
+    var now = tpNow();
+    $('tp-when').value = tpLocal(TP_GENESIS + Math.round((now - TP_GENESIS) * this.value / 1000));
+  });
+  $('tp-when').addEventListener('input', function () { var t = tpParse(this.value); if (!isNaN(t)) $('tp-slide').value = tpSlideFor(t); });
+  $('tp-travel').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var t = tpParse($('tp-when').value);
+    if (isNaN(t)) return;
+    call('temporal.at', { time: Math.max(TP_GENESIS, t) }).then(function (r) {
+      var b = r.block;
+      TP.arrived = b;
+      $('tp-a-when').textContent = tpWhen(b.time);
+      $('tp-a-title').textContent = b.height === 0 ? 'The start of the chain' : 'Block #' + b.height;
+      var rows = [['Mined by', b.height === 0 ? 'nobody: genesis is in the code' : atName(b.miner)],
+        ['Tone', b.hz ? b.hz.toFixed(2) + ' Hz, ' + b.band : 'none'],
+        ['QNR mined by then', short(r.minedText)], ['Capsules sealed by then', String(r.seals)]];
+      if (r.balanceText !== undefined) rows.push(['You had', short(r.balanceText) + ' QNR']);
+      $('tp-a-kv').innerHTML = kvHtml(rows);
+      $('tp-a-play').disabled = !b.hz;
+      $('tp-a-ride-now').textContent = '';
+      $('tp-arrival').classList.remove('hidden');
+    }).catch(function (err) { toast(err.message); });
+  });
+  function tpLoadGas() {
+    call('temporal.info').then(function (i) {
+      $('tp-gas').innerHTML = kvHtml([['Price', i.gasText + ' QNR a seal'], ['Burned so far', short(i.burnedText) + ' QNR'],
+        ['Seals on the chain', String(i.count)], ['Burn address', i.burnAddress]]);
+    }).catch(function () {});
+  }
+
+  // The pulse Frostoise listens for: an 880 Hz hum swelling and fading at the block's tone.
+  function tpPulse(hz, seconds) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return Promise.reject(new Error('no sound on this phone'));
+    if (!TP.audio) { var ac0 = new AC(), m0 = ac0.createGain(); m0.gain.value = 0; m0.connect(ac0.destination); TP.audio = { ac: ac0, master: m0, nodes: null }; }
+    var A = TP.audio, ac = A.ac;
+    return (ac.state === 'suspended' ? ac.resume() : Promise.resolve()).then(function () {
+      tpStopPulse();
+      var carrier = ac.createOscillator(); carrier.frequency.value = 880;
+      var amp = ac.createGain(); amp.gain.value = 0.5;
+      var lfo = ac.createOscillator(); lfo.frequency.value = hz;
+      var depth = ac.createGain(); depth.gain.value = 0.5;
+      lfo.connect(depth); depth.connect(amp.gain); carrier.connect(amp); amp.connect(A.master);
+      carrier.start(); lfo.start();
+      A.nodes = [carrier, lfo, amp, depth];
+      A.master.gain.setTargetAtTime(0.45, ac.currentTime, 0.05);
+      return new Promise(function (res) { setTimeout(function () { tpStopPulse(); res(); }, seconds * 1000); });
+    });
+  }
+  function tpStopPulse() {
+    var A = TP.audio; if (!A) return;
+    A.master.gain.setTargetAtTime(0, A.ac.currentTime, 0.03);
+    var n = A.nodes; A.nodes = null;
+    if (n) setTimeout(function () { n.forEach(function (x) { try { if (x.stop) x.stop(); } catch (e) { } try { x.disconnect(); } catch (e) { } }); }, 150);
+  }
+  $('tp-a-play').addEventListener('click', function () {
+    if (TP.arrived && TP.arrived.hz) tpPulse(TP.arrived.hz, 4).catch(function (e) { toast(e.message); });
+  });
+  $('tp-a-ride').addEventListener('click', function () {
+    if (!TP.arrived || TP.riding) return;
+    TP.riding = true;
+    call('temporal.after', { height: TP.arrived.height, count: 12 }).then(function (list) {
+      if (!list.length) { $('tp-a-ride-now').textContent = 'Nothing after this yet: this is the newest block.'; TP.riding = false; return; }
+      var i = 0;
+      (function next() {
+        if (i >= list.length) { var last = list[list.length - 1]; $('tp-a-ride-now').textContent = 'Arrived at #' + last.height + ', ' + tpWhen(last.time) + '.'; TP.riding = false; return; }
+        var b = list[i++];
+        $('tp-a-ride-now').textContent = '#' + b.height + ' · ' + tpWhen(b.time) + (b.hz ? ' · ' + b.hz.toFixed(2) + ' Hz' : '');
+        (b.hz ? tpPulse(b.hz, 1.5) : new Promise(function (r) { setTimeout(r, 600); })).then(next, function () { TP.riding = false; });
+      })();
+    }).catch(function (err) { TP.riding = false; toast(err.message); });
+  });
 
   // ---------------- start ----------------
   function start() {

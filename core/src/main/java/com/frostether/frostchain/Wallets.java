@@ -396,7 +396,7 @@ public final class Wallets {
         if (U64.cmp(add2, j) > 0) {
             ChainState.Account account = this.node.chain.account(requireSpendable.account);
             long j2 = account == null ? 0L : account.immature;
-            throw new IllegalArgumentException("not enough unlocked QOIN: you can send up to " + U64.format(j > add ? j - add : 0L) + (j2 != 0 ? " (" + U64.format(j2) + " more is still locked from mining)" : ""));
+            throw new IllegalArgumentException("not enough unlocked " + Consensus.COIN + ": you can send up to " + U64.format(j > add ? j - add : 0L) + (j2 != 0 ? " (" + U64.format(j2) + " more is still locked from mining)" : ""));
         }
         String nameOf = this.node.chain.nameOf(resolve);
         Object[] objArr = new Object[26];
@@ -521,7 +521,7 @@ public final class Wallets {
             Wallet requireSpendable = requireSpendable();
             ChainState.Account pendingAccount = this.node.pendingAccount(requireSpendable.account);
             if (U64.cmp(Consensus.MIN_FEE, pendingAccount == null ? 0L : pendingAccount.balance) > 0) {
-                throw new IllegalArgumentException("rotating the key costs a " + U64.format(Consensus.MIN_FEE) + " QOIN fee");
+                throw new IllegalArgumentException("rotating the key costs a " + U64.format(Consensus.MIN_FEE) + " " + Consensus.COIN + " fee");
             }
             int i = pendingAccount != null ? pendingAccount.keyIndex : 0;
             int nextLeaf = nextLeaf(requireSpendable, pendingAccount, i);

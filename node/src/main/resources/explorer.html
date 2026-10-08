@@ -137,7 +137,7 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
     <div class="stat"><dt>Height</dt><dd id="s-height">–</dd></div>
     <div class="stat"><dt>Last block</dt><dd id="s-age">–</dd></div>
     <div class="stat"><dt>Next block</dt><dd id="s-next">–</dd></div>
-    <div class="stat"><dt>QOIN mined</dt><dd id="s-supply">–</dd></div>
+    <div class="stat"><dt>QNR mined</dt><dd id="s-supply">–</dd></div>
     <div class="stat"><dt>Difficulty</dt><dd id="s-diff">–</dd></div>
     <div class="stat"><dt>Tones, last 24</dt><dd><span id="s-mixtext">–</span><div class="mix" id="s-mix" aria-hidden="true"></div></dd></div>
   </dl>
@@ -224,10 +224,10 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
   </div>
 
   <footer>
-    FrostExplorer reads this node's copy of Frostchain and only reads: it can't move anyone's QOIN.
+    FrostExplorer reads this node's copy of Frostchain and only reads: it can't move anyone's QNR.
     Blocks come about every 5 minutes, never sooner than 4½ minutes after the last.
     Mined coins unlock after 12 blocks. Blocks glow slower than once a second, so nothing here flashes.
-    <a href="https://get.finux.tech">Get Graysons Wallet</a> · <a href="https://github.com/FrosTether/Graysons-Wallet">Source</a>
+    <a href="https://get.finux.tech">Get Graysons Wallet</a> · <a href="https://get.finux.tech/temporal/" id="temporal-link">Temporal</a> · <a href="https://get.finux.tech/node/">Run a node</a> · <a href="https://github.com/FrosTether/Graysons-Wallet">Source</a>
   </footer>
 </div>
 
@@ -267,6 +267,13 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
   };
   const bandOf = (b) => (b && b.reso && BANDS[b.reso.band] ? b.reso.band : "");
   const colorOf = (b) => COLORS[bandOf(b)] || COLORS.dim;
+  // Temporal seals: payments to the burn address whose memo is "T1 <opens> <fingerprint>"
+  const isBurn = (addr) => !!(status && status.burnAddress && addr && (addr === status.burnAddress || addr === status.burnId));
+  const sealNote = (memo, burn) => {
+    const m = burn && /^T1 (\d{1,12}) ([0-9a-f]{40})$/.exec(memo || "");
+    if (!m) return memo;
+    return "Capsule " + m[2].slice(0, 10) + "…, opens " + new Date(+m[1] * 1000).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  };
 
   async function get(path) {
     const r = await fetch(API + path, { cache: "no-store" });
@@ -289,6 +296,7 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
       skew = s.now - nowSec();
       nextAt = nowSec() + s.nextIn;
       el("live").textContent = "Live · chain " + s.chain.slice(0, 8);
+      el("temporal-link").href = "https://get.finux.tech/temporal/?node=" + encodeURIComponent(API || location.origin);
       el("live").classList.add("on");
       banner("");
       if (changed) {
@@ -372,7 +380,7 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
     el("d-band").textContent = band ? `${band.hz === 4 ? "4.0" : band.hz} Hz ${k} · ${band.level}` : "–";
     el("d-time").textContent = `${new Date(b.time * 1000).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })} · ${ago(b.time)}`;
     el("d-miner").innerHTML = b.miner ? `<button type="button" class="linkish" data-addr="${esc(b.miner)}">${esc(b.minerName || b.miner)}</button>` : "–";
-    el("d-reward").textContent = qoin(b.paid) + " QOIN";
+    el("d-reward").textContent = qoin(b.paid) + " QNR";
     el("d-diff").textContent = Number(b.difficulty).toLocaleString("en-US");
     el("d-nonce").textContent = b.nonce;
     el("d-hash").textContent = b.hash;
@@ -388,11 +396,11 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
     }
     renderSpectrum(b);
     const txs = b.txList;
-    el("d-txs").innerHTML = !txs ? `<p class="empty">Loading…</p>` : txs.length ? `<table><thead><tr><th>Type</th><th>From</th><th>To</th><th class="amt">QOIN</th><th>Memo</th></tr></thead><tbody>${
-      txs.map((x) => `<tr><td>${x.type === "send" ? "Send" : x.type === "name" ? "Name" : "New key"}</td>
+    el("d-txs").innerHTML = !txs ? `<p class="empty">Loading…</p>` : txs.length ? `<table><thead><tr><th>Type</th><th>From</th><th>To</th><th class="amt">QNR</th><th>Memo</th></tr></thead><tbody>${
+      txs.map((x) => `<tr><td>${x.type === "send" ? (isBurn(x.to) ? "Temporal seal" : "Send") : x.type === "name" ? "Name" : "New key"}</td>
         <td><button type="button" class="linkish mono" data-addr="${esc(x.from)}">${esc(short(x.from, x.fromName))}</button></td>
         <td>${x.to ? `<button type="button" class="linkish mono" data-addr="${esc(x.to)}">${esc(short(x.to, x.toName))}</button>` : (x.type === "name" ? esc(x.name) + ".frostchain" : "–")}</td>
-        <td class="amt">${x.type === "send" ? qoin(x.amount, 4) : "–"}</td><td>${esc(x.memo)}</td></tr>`).join("")
+        <td class="amt">${x.type === "send" ? qoin(x.amount, 4) : "–"}</td><td>${esc(sealNote(x.memo, isBurn(x.to)))}</td></tr>`).join("")
     }</tbody></table>` : `<p class="empty">Only the mining reward in this block.</p>`;
     retune();
   }
@@ -453,15 +461,15 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
   function showAccount(a) {
     el("detail").hidden = true;
     el("account").hidden = false;
-    el("a-name").textContent = a.name || "Account";
+    el("a-name").textContent = isBurn(a.address) ? "Temporal burn address" : a.name || "Account";
     el("a-addr").textContent = a.address;
-    el("a-balance").textContent = qoin(a.balance) + " QOIN";
-    el("a-immature").textContent = qoin(a.immature) + " QOIN";
+    el("a-balance").textContent = qoin(a.balance) + " QNR" + (isBurn(a.address) ? ", burned for good" : "");
+    el("a-immature").textContent = qoin(a.immature) + " QNR";
     const rows = a.history || [];
-    el("a-history").innerHTML = rows.length ? `<table><thead><tr><th>Block</th><th>What</th><th class="amt">QOIN</th><th>Memo</th></tr></thead><tbody>${
+    el("a-history").innerHTML = rows.length ? `<table><thead><tr><th>Block</th><th>What</th><th class="amt">QNR</th><th>Memo</th></tr></thead><tbody>${
       rows.map((r) => `<tr><td class="mono"><button type="button" class="linkish" data-block="${r.height}">#${r.height}</button></td>
         <td>${esc(r.kind === "mined" ? "Mined a block" : r.kind === "received" ? "Received" : r.kind === "sent" ? "Sent" : r.kind === "name" ? "Claimed " + r.name + ".frostchain" : r.kind === "rekey" ? "Moved to a fresh key" : r.kind)}</td>
-        <td class="amt">${r.kind === "name" || r.kind === "rekey" ? "–" : (r.kind === "sent" ? "−" : "") + fmtMinor(r.amount)}</td><td>${esc(r.memo)}</td></tr>`).join("")
+        <td class="amt">${r.kind === "name" || r.kind === "rekey" ? "–" : (r.kind === "sent" ? "−" : "") + fmtMinor(r.amount)}</td><td>${esc(sealNote(r.memo, isBurn(a.address) || (r.kind === "sent" && isBurn(r.other || ""))))}</td></tr>`).join("")
     }</tbody></table>` : `<p class="empty">Nothing on the chain for this account yet.</p>`;
   }
   document.addEventListener("click", (e) => {

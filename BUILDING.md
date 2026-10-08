@@ -9,7 +9,7 @@ It was rebuilt from the released 0.3.0 APK (see [Where this source came from](#w
 |---|---|
 | `core/` | Frostchain itself in plain Java: consensus rules, LMS keys, wallets, the node and its peer-to-peer HTTP. No Android code. |
 | `node/` | `frostnode`, the headless server node. See [node/README.md](node/README.md). |
-| `app/` | The Android app: Graysons Wallet, Frostoise and MyFrost. Its screens are web pages in `app/src/main/assets/ui`. |
+| `app/` | The Android app: Graysons Wallet, Frostoise, MyFrost and Temporal. Its screens are web pages in `app/src/main/assets/ui`. |
 
 ## The Android app
 
@@ -28,7 +28,7 @@ The APK lands in `app/build/outputs/apk/`.
 
 Every push to `main` that changes the app or the chain runs the chain tests, builds the app and `frostnode`, and replaces the release for the current version.
 A push that only changes `node/` rebuilds `frostnode.zip`, checks that FrostExplorer answers, and swaps the zip into that release. The app stays as it was, so phones don't reinstall for a server change.
-This link always serves the newest build:
+This link always serves the newest build, and each build also replaces `releases/GraysonsWallet-0.3.0-poc.apk`, so old links to the 0.3.0 file get the current app:
 
 https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk
 
@@ -96,6 +96,7 @@ The suite takes a few minutes, because several tests mine real blocks:
 | `ReorgTest` | Two forks meeting, with the lighter one switching over |
 | `WalletFlowTest` | Mine into a wallet, send by address and by name, claim a name |
 | `MinerTest` | The real Frostoise miner: waits for launch and the tone, finds a block, backs off when the phone is hot |
+| `TemporalTest` | Temporal: the burn address and fingerprint the web page shares, seals on the chain, capsules kept shut, travel |
 
 ## The server node
 
@@ -120,7 +121,7 @@ The app shows it under **Graysons Wallet → Node**, and `frostnode` prints it w
 
 ## Where this source came from
 
-The original source wasn't available, so this code was rebuilt from the 0.3.0 APK (SHA-256 `5594c078…0694f`):
+The original source wasn't available, so this code was rebuilt from the 0.3.0 APK (SHA-256 `5594c078…0694f`, kept in [`releases/0.3.0/`](releases/0.3.0/)):
 
 - The screens in `app/src/main/assets/ui` are the original files, unchanged.
 - The manifest and resources were decoded from the APK.

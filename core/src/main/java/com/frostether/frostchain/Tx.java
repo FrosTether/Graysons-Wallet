@@ -4,6 +4,7 @@ import com.frostether.frostchain.Bytes;
 import java.util.Map;
 
 public final class Tx {
+    /** Part of every transaction's signed bytes, so it keeps the coin's first ticker: changing it would make a new chain. */
     private static final byte[] DOMAIN = Bytes.utf8("QOIN-FROSTCHAIN-TX1");
     public static final int NAME = 2;
     public static final int REKEY = 3;

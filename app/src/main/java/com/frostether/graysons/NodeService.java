@@ -106,7 +106,7 @@ public final class NodeService extends Service {
         NotificationManager notificationManager = (NotificationManager) getSystemService("notification");
         if (notificationManager != null && notificationManager.getNotificationChannel(CHANNEL) == null) {
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL, "Frostoise mining", 2);
-            notificationChannel.setDescription("Shown while Frostoise is mining Qoin (QOIN)");
+            notificationChannel.setDescription("Shown while Frostoise is mining Qoin (QNR)");
             notificationChannel.setShowBadge(false);
             notificationManager.createNotificationChannel(notificationChannel);
         }
