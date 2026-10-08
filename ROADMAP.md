@@ -37,6 +37,11 @@ Monero is trusted because its code is open, it launched with no premine and no s
 - [ ] Outside security review of consensus, LMS key handling and the wallet.
 - [ ] Bug reporting process and a security contact.
 
+## 5. Ecosystem
+
+- [ ] **Oofcoins**: reward points for finux games like FrostGames and FrostMines. They're earned and spent inside games only. They're never sold and never swap for QOIN, which keeps them safe for kids. Start them off-chain, then move them onto Frostchain as a balance that can't be transferred.
+- [ ] **One wrapped QOIN on one outside chain**, once Frostchain has outside users. GCII on Ethereum Classic is already designed as a 1:1 wrapper, and Solana is the alternative. Pick one. A wrapper is a vault: every wrapped coin must be backed by QOIN locked at a public Frostchain address, and the key that mints wrapped coins is the most valuable key in the project.
+
 ## How to help
 
 Try the app, run a node, and post your setup in [Discussions](https://github.com/FrosTether/Graysons-Wallet/discussions). Issues and pull requests are welcome.
