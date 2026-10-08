@@ -1,18 +1,21 @@
-**Graysons Vault 0.4.2** is Graysons Wallet's new name. This build renames the coin's ticker to QNR, adds Temporal, and takes out the Doge swap.
+**Graysons Vault 0.4.3** is the first build signed with the permanent release key. Nothing else changes from 0.4.2.
 
-- **Graysons Vault:** the app that creates and restores wallets, claims names and runs your node is now called Graysons Vault. Frostoise and MyFrost keep their names.
-- **QNR:** Qoin's ticker is QNR now, for its CryptoNote roots. Same chain, same coins: only the name on the screen changed.
-- **Temporal, the fourth app:** a time machine. Seal a message for the future: its fingerprint goes on the chain with 1 QNR burned as gas, which proves you wrote it by then, and Temporal keeps the words shut until the date you pick. Or go back to any moment since genesis and hear the tone that block was mined on. The same machine runs at [get.finux.tech/temporal](https://get.finux.tech/temporal/).
-- **No more Doge swap:** MyFrost's Swap tab and the swap desk are gone. A Doge tunnel may come back later as a governance option.
+From this build on, updates install over the app like any other: no more uninstalling, no more typing your 25 words.
 
-The chain is the same v0.4 chain: Graysons Vault → Node still shows `chain aa18513e5ee8db9f`.
+- **Graysons Vault** (Graysons Wallet before 0.4.2): create or restore a wallet, claim a name, run your node.
+- **Temporal:** seal a message for the future, or go back to any block. Each seal burns 1 QNR as gas.
+- **QNR** is the ticker, and the Doge swap is gone.
+
+The chain is the same v0.4 chain: Graysons Vault → Node shows `chain aa18513e5ee8db9f`.
 
 ### Install
 
-1. Uninstall Graysons Wallet (0.4.0 or 0.4.1) first. Those builds were signed with test keys, so Android won't install over them.
+1. Uninstall Graysons Vault 0.4.2 (or Graysons Wallet) one last time. Those builds were signed with test keys, so Android won't install over them.
 2. Download `GraysonsVault.apk` below, open it, and allow installs from your browser when asked.
-3. Open Graysons Vault, tap **Restore** and enter your 25 words. New here? Tap **Create wallet** and write down your new 25 words. Wallets from 0.3 belong to the old chain, so make a new one.
+3. Open Graysons Vault, tap **Restore** and enter your 25 words. New here? Tap **Create wallet** and write down your new 25 words.
 
-Check the file against `SHA256SUMS`. `GraysonsWallet.apk` is the same file under the old name, for old links. `frostnode.zip` is the server node, with FrostExplorer and Temporal's API; see `node/README.md` or [get.finux.tech/node](https://get.finux.tech/node/).
+If you sealed Temporal capsules on 0.4.2, copy their capsule codes first (Temporal → Capsules → Copy capsule code), then add them back after the reinstall. The seals themselves are on the chain either way.
+
+Check the file against `SHA256SUMS`. `GraysonsWallet.apk` is the same file under the old name, for old links. `frostnode.zip` is the server node; see [get.finux.tech/node](https://get.finux.tech/node/).
 
 QNR has no guaranteed value. This is a proof of concept: expect bugs.

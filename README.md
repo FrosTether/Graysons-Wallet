@@ -8,7 +8,7 @@ The ticker is QNR, for Qoin's CryptoNote roots. One install gives you four apps:
 - **MyFrost**: send and receive QNR by `@name`
 - **Temporal**: a time machine. Seal a message for the future, or go back to any block. Each seal burns 1 QNR as gas
 
-> **Proof of concept (v0.4.2).** QNR has no guaranteed value. Expect bugs and breaking changes.
+> **Proof of concept (v0.4.3).** QNR has no guaranteed value. Expect bugs and breaking changes.
 
 ## Download
 
@@ -24,9 +24,9 @@ Your phone will ask you to allow installs from your browser, since the app isn't
 
 Nothing from 0.3.x carries over: not coins, names or blocks. If you restore your 0.3.x words anyway, you get a new, empty account, because 0.4 derives fresh signing keys from them. That keeps the old chain's one-time keys from ever signing again.
 
-**Updating from 0.4.0 or 0.4.1?** Those were signed with throwaway test keys, so uninstall first, install the new one,
-and tap **Restore** with your 25 words. Once builds are signed with the permanent release key, updates install over the
-app like any other. The release page says which key signed each build.
+**Updating from 0.4.0, 0.4.1 or 0.4.2?** Those were signed with throwaway test keys, so uninstall once more, install
+the newest build, and tap **Restore** with your 25 words. 0.4.3 is the first build signed with the permanent release key:
+from it on, updates install over the app like any other.
 
 Old links to `releases/GraysonsWallet-0.3.0-poc.apk` now download the newest app. The original 0.3.0 APK, which runs the
 old chain, is kept in [`releases/0.3.0/`](releases/0.3.0/) for the record.
