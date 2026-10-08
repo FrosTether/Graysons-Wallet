@@ -93,5 +93,5 @@ echo
 echo "frostnode is running and starts on boot."
 echo "- Cloud servers also block ports outside the machine. On Oracle Cloud, add an ingress rule for TCP 7830"
 echo "  in your VCN's security list. Then check http://<this server's IP>:7830/p2p/info from your phone."
-echo "- On each phone: Graysons Wallet > Node > Add > this server's IP."
+echo "- On each phone: Graysons Vault > Node > Add > this server's IP."
 echo "- FrostExplorer is on port 7831 of this server. Logs: journalctl -u frostnode -f"
