@@ -24,9 +24,9 @@ Your phone will ask you to allow installs from your browser, since the app isn't
 
 Nothing from 0.3.x carries over: not coins, names or blocks. If you restore your 0.3.x words anyway, you get a new, empty account, because 0.4 derives fresh signing keys from them. That keeps the old chain's one-time keys from ever signing again.
 
-**Updating from 0.4.0 or 0.4.1?** Those were signed with throwaway test keys. 0.4.2 is the first build signed with the
-permanent release key, so uninstall once more, install it, and tap **Restore** with your 25 words. After this, updates
-install over the app like any other.
+**Updating from 0.4.0 or 0.4.1?** Those were signed with throwaway test keys, so uninstall first, install the new one,
+and tap **Restore** with your 25 words. Once builds are signed with the permanent release key, updates install over the
+app like any other. The release page says which key signed each build.
 
 Old links to `releases/GraysonsWallet-0.3.0-poc.apk` now download the newest app. The original 0.3.0 APK, which runs the
 old chain, is kept in [`releases/0.3.0/`](releases/0.3.0/) for the record.
