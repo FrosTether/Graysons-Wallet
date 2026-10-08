@@ -4,24 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Get Qoin | finux</title>
-<meta name="description" content="Install Graysons Wallet and mine Qoin on your Android phone, only while it hears a tone. Mining is open.">
+<meta name="description" content="Install Graysons Wallet and mine Qoin (QNR) on your Android phone, only while it hears a tone. Mining is open.">
+<link rel="canonical" href="https://get.finux.tech/">
 <meta name="theme-color" content="#f5f0fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#150e1a" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Get Qoin">
-<meta property="og:description" content="Install Graysons Wallet and mine Qoin on your Android phone, only while it hears a tone. Mining is open.">
+<meta property="og:description" content="Install Graysons Wallet and mine Qoin (QNR) on your Android phone, only while it hears a tone. Mining is open.">
 <meta property="og:url" content="https://get.finux.tech/">
-<meta property="og:image" content="https://get.finux.tech/og.png">
+<meta property="og:image" content="https://get.finux.tech/og/home.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Get Qoin. Three mining tones: 4.0, 7.83 and 11.11 Hz.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E">
-<link rel="preload" href="fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
 <style>
-@font-face { font-family: "Archivo"; src: url("fonts/archivo.woff") format("woff");
+@font-face { font-family: "Archivo"; src: url("/fonts/archivo.woff") format("woff");
   font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
-@font-face { font-family: "Martian Mono"; src: url("fonts/martian-mono.woff") format("woff");
+@font-face { font-family: "Martian Mono"; src: url("/fonts/martian-mono.woff") format("woff");
   font-weight: 100 800; font-stretch: 75% 112.5%; font-display: swap; }
 :root {
   --ground: #f5f0fa;
@@ -39,6 +40,11 @@
   --wave-fill: rgba(94, 44, 140, 0.12);
   --note: #fbf1e3;
   --note-ink: #5b3a06;
+  --code: #1d1326;
+  --code-ink: #efe6f7;
+  --code-dim: #a897ba;
+  --good: #23784a;
+  --bad: #a3302b;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -58,6 +64,11 @@
     --wave-fill: rgba(203, 166, 247, 0.14);
     --note: #2a1f1a;
     --note-ink: #f3e3c8;
+    --code: #0f0914;
+    --code-ink: #efe6f7;
+    --code-dim: #9a89ad;
+    --good: #6fd39b;
+    --bad: #ff8a80;
     color-scheme: dark;
   }
 }
@@ -77,6 +88,11 @@
   --wave-fill: rgba(203, 166, 247, 0.14);
   --note: #2a1f1a;
   --note-ink: #f3e3c8;
+  --code: #0f0914;
+  --code-ink: #efe6f7;
+  --code-dim: #9a89ad;
+  --good: #6fd39b;
+  --bad: #ff8a80;
   color-scheme: dark;
 }
 
@@ -90,24 +106,28 @@ body {
   font-size: 1.0625rem;
   line-height: 1.55;
   font-variation-settings: "wdth" 100;
+  overflow-wrap: break-word;
 }
 a { color: var(--plum); text-underline-offset: 0.18em; }
 a:hover { text-decoration-thickness: 2px; }
 :focus-visible { outline: 3px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
 .mono { font-family: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
 
 .wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
 
-/* Header */
-.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 18px; }
-.brand { color: var(--ink); text-decoration: none; font-weight: 800; font-size: 1.25rem; font-variation-settings: "wdth" 125; letter-spacing: -0.01em; }
-.top nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 18px; }
-.top nav a { color: var(--muted); text-decoration: none; font-size: 0.95rem; white-space: nowrap; }
+/* Header: the brand, then the four pages */
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 18px; padding-block: 18px 6px; }
+.brand { display: inline-flex; align-items: baseline; gap: 8px; color: var(--ink); text-decoration: none; font-weight: 800; font-size: 1.3rem; font-variation-settings: "wdth" 125; letter-spacing: -0.01em; }
+.brand .tick { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; color: var(--lamp); border: 1.5px solid currentColor; border-radius: 6px; padding: 1px 5px; }
+.top nav { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.top nav a { color: var(--muted); text-decoration: none; font-size: 0.97rem; white-space: nowrap; padding-block: 4px; border-bottom: 2px solid transparent; }
 .top nav a:hover { color: var(--ink); }
+.top nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--lamp); }
 
-/* Hero */
-.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 28px 8px; }
+/* Page opener */
+.opener { padding-block: 28px 8px; }
 h1 {
   margin: 0;
   font-size: clamp(3.1rem, 15.5vw, 7rem);
@@ -117,6 +137,7 @@ h1 {
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
+h1.long { font-size: clamp(2.6rem, 11.5vw, 5.6rem); }
 .lede { margin: 18px 0 0; font-size: 1.2rem; line-height: 1.5; max-width: 34em; color: var(--ink); }
 .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 26px; }
 .btn {
@@ -127,21 +148,9 @@ h1 {
 }
 .btn:hover { filter: brightness(1.06); }
 .btn.quiet { background: transparent; color: var(--plum); }
+.btn.small { min-height: 40px; padding: 0 14px; font-size: 0.95rem; border-radius: 10px; }
+.btn[disabled] { opacity: 0.5; cursor: default; filter: none; }
 .fine { margin: 14px 0 0; color: var(--muted); font-size: 0.95rem; max-width: 36em; }
-.qr { display: none; }
-
-/* Launch strip */
-.launch {
-  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 24px;
-  margin-top: 30px; padding-block: 16px; border-block: 1px solid var(--line);
-}
-.launch p { margin: 0; }
-.launch .when { font-weight: 600; }
-.launch .local { color: var(--muted); font-size: 0.95rem; }
-.countdown { font-size: clamp(1.35rem, 5.6vw, 1.9rem); font-weight: 500; color: var(--lamp); white-space: nowrap; }
-.after { display: none; }
-.is-open .before { display: none; }
-.is-open .after { display: inline; }
 
 /* Sections */
 section { padding-block: 44px 8px; }
@@ -154,7 +163,86 @@ h2 {
   letter-spacing: -0.01em;
   text-wrap: balance;
 }
+h3 { margin: 0 0 6px; font-size: 1.15rem; line-height: 1.3; font-weight: 700; }
 .intro { margin: 0; max-width: 38em; color: var(--muted); }
+p.body { max-width: 40em; }
+
+/* Steps: a real sequence, so numbered */
+.steps { list-style: none; counter-reset: step; margin: 24px 0 0; padding: 0; display: grid; gap: 22px; max-width: 44em; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0 14px; }
+.steps li::before {
+  content: counter(step); grid-row: span 3;
+  font-family: "Martian Mono", ui-monospace, monospace; font-weight: 600; font-size: 1.3rem; line-height: 1.6rem;
+  color: var(--lamp);
+}
+.steps b { font-size: 1.12rem; }
+.steps span { color: var(--muted); }
+.steps .mono { font-size: 0.86em; color: var(--ink); }
+
+/* Facts: term on the left, detail on the right */
+.facts { margin: 22px 0 0; display: grid; grid-template-columns: minmax(0, 1fr); max-width: 52em; }
+.facts div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding-block: 14px; border-top: 1px solid var(--line); }
+.facts dt { color: var(--muted); font-size: 0.95rem; }
+.facts dd { margin: 0; }
+.facts .mono { font-size: 0.92em; }
+.facts .nowrap { white-space: nowrap; }
+
+/* Link cards to the other pages */
+.cards { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.cards a { display: block; height: 100%; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; }
+.cards a:hover { border-color: var(--plum); }
+.cards b { display: block; font-size: 1.15rem; margin-bottom: 4px; }
+.cards span { color: var(--muted); font-size: 0.97rem; }
+.cards b::after { content: " →"; color: var(--lamp); }
+
+/* Commands to copy: the button sits beside the code, so long lines scroll without running under it */
+.cmd { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; margin: 14px 0 0; border-radius: 14px; background: var(--code); color: var(--code-ink); max-width: 52em; }
+.cmd pre { margin: 0; padding: 16px 4px 16px 18px; overflow-x: auto; font-family: "Martian Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; line-height: 1.7; }
+.cmd .c { color: var(--code-dim); }
+.cmd button { margin: 10px 10px 0 6px; min-height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); color: var(--code-ink); font: inherit; font-size: 0.8rem; cursor: pointer; }
+.cmd button:hover { background: rgba(255,255,255,0.16); }
+p .mono, li > span .mono { font-size: 0.88em; }
+code { font-family: "Martian Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.86em; background: var(--sunk); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+
+/* Tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+.tabs button { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
+.tabs button[aria-selected="true"] { border-color: var(--lamp); background: var(--lamp-soft); }
+.panel { padding-top: 6px; }
+
+/* Tables */
+.table { margin: 22px 0 0; overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.97rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-top: 1px solid var(--line); }
+thead th { border-top: 0; font-size: 0.9rem; color: var(--muted); font-weight: 600; background: var(--sunk); }
+tbody th { font-weight: 600; color: var(--muted); width: 20%; }
+td .mono { font-size: 0.9em; }
+
+.note { margin: 14px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--note); color: var(--note-ink); max-width: 44em; }
+.print { color: var(--muted); max-width: 46em; }
+footer { margin-top: 48px; padding-block: 22px 40px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.95rem; }
+footer a { color: var(--muted); }
+
+@media (min-width: 760px) {
+  .facts div { grid-template-columns: 14em minmax(0, 1fr); gap: 24px; }
+  .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Get Qoin: the hero with its QR code, the launch strip and the tone station */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 28px 8px; }
+.qr { display: none; }
+
+.launch {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 24px;
+  margin-top: 30px; padding-block: 16px; border-block: 1px solid var(--line);
+}
+.launch p { margin: 0; }
+.launch .when { font-weight: 600; }
+.launch .local { color: var(--muted); font-size: 0.95rem; }
+.countdown { font-size: clamp(1.35rem, 5.6vw, 1.9rem); font-weight: 500; color: var(--lamp); white-space: nowrap; }
+.after { display: none; }
+.is-open .before { display: none; }
+.is-open .after { display: inline; }
 
 /* Tone station: the one loud thing on the page */
 .station {
@@ -198,49 +286,12 @@ h2 {
 .howto { margin: 14px 0 0; color: var(--muted); font-size: 0.95rem; max-width: 46em; }
 .msg { margin: 10px 0 0; color: var(--lamp); font-weight: 600; min-height: 1.4em; }
 
-/* Steps: a real sequence, so numbered */
-.steps { list-style: none; counter-reset: step; margin: 24px 0 0; padding: 0; display: grid; gap: 22px; max-width: 44em; }
-.steps li { counter-increment: step; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0 14px; }
-.steps li::before {
-  content: counter(step); grid-row: span 2;
-  font-family: "Martian Mono", ui-monospace, monospace; font-weight: 600; font-size: 1.3rem; line-height: 1.6rem;
-  color: var(--lamp);
-}
-.steps b { font-size: 1.12rem; }
-.steps span { color: var(--muted); }
-.steps .mono, .pay .mono, .then .mono { font-size: 0.86em; color: var(--ink); }
-
-/* Starter bundle */
-.deal { margin-top: 24px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px 40px; align-items: start; }
-.price { margin: 0; font-weight: 800; font-variation-settings: "wdth" 125; font-size: clamp(2.6rem, 11vw, 4rem); line-height: 1; }
-.price span { display: block; margin-top: 6px; font-weight: 500; font-variation-settings: "wdth" 100; font-size: 1.15rem; color: var(--muted); }
-.opens { margin: 14px 0 0; }
-.pay { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
-.pay li { padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
-.pay h3 { margin: 0 0 4px; font-size: 1.1rem; }
-.pay p { margin: 0; color: var(--muted); }
-.then { margin: 22px 0 0; max-width: 44em; }
-.note { margin: 14px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--note); color: var(--note-ink); max-width: 44em; }
-
-/* Chain facts */
-.facts { margin: 22px 0 0; display: grid; grid-template-columns: minmax(0, 1fr); max-width: 52em; }
-.facts div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding-block: 14px; border-top: 1px solid var(--line); }
-.facts dt { color: var(--muted); font-size: 0.95rem; }
-.facts dd { margin: 0; }
-.facts .mono { font-size: 0.95em; white-space: nowrap; }
-
-.print { color: var(--muted); max-width: 46em; }
-footer { margin-top: 48px; padding-block: 22px 40px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.95rem; }
-footer a { color: var(--muted); }
-
 @media (min-width: 760px) {
   .lamps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lamp { grid-template-columns: minmax(0, 1fr); padding: 18px; gap: 6px; }
   .bulb { grid-row: auto; margin-bottom: 6px; }
   .hz { font-size: 2.3rem; }
   .station { padding: 26px; }
-  .deal { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
-  .facts div { grid-template-columns: 14em minmax(0, 1fr); gap: 24px; }
 }
 @media (min-width: 900px) {
   .hero { grid-template-columns: minmax(0, 1fr) 250px; align-items: end; }
@@ -257,20 +308,19 @@ footer a { color: var(--muted); }
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="https://finux.tech/">finux</a>
-    <nav aria-label="finux">
-      <a href="https://finux.tech/projects">Projects</a>
-      <a href="https://finux.tech/opensource">Open source</a>
-      <a href="https://finux.tech/contact">Contact</a>
-      <a href="https://github.com/FrosTether">GitHub</a>
+    <a class="brand" href="/">Qoin <span class="tick mono">QNR</span></a>
+    <nav aria-label="Qoin">
+      <a href="/" aria-current="page">Get Qoin</a>
+      <a href="/node/">Nodes</a>
+      <a href="/qnr/">QNR vs XMR</a>
+      <a href="/temporal/">Temporal</a>
     </nav>
   </header>
-
   <main>
     <div class="hero">
       <div>
         <h1>Get Qoin</h1>
-        <p class="lede">Qoin is mined on phones, and only while the phone hears a tone. Install Graysons Wallet, play a tone nearby, and your phone starts mining.</p>
+        <p class="lede">Qoin (QNR) is mined on phones, and only while the phone hears a tone. Install Graysons Wallet, play a tone nearby, and your phone starts mining.</p>
         <div class="cta">
           <a class="btn" href="https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk">Download Graysons Wallet</a>
           <a href="https://github.com/FrosTether/Graysons-Wallet/releases/latest">Release notes and checksums</a>
@@ -341,56 +391,110 @@ footer a { color: var(--muted); }
     <section id="start" aria-labelledby="start-h">
       <h2 id="start-h">How to start</h2>
       <ol class="steps">
-        <li><b>Install Graysons Wallet.</b><span>One install adds three apps: Graysons Wallet, Frostoise and MyFrost.</span></li>
-        <li><b>Create a wallet.</b><span>Tap Create wallet and write down your 25 words. They're the only way back into your coins, so keep them offline and never share them. Coming from 0.3? Uninstall it first. 0.4 is a new chain, so everyone starts with a new wallet.</span></li>
-        <li><b>Mine.</b><span>Open Frostoise, play a tone and tap Start mining. Phones on the same Wi-Fi find each other. To reach everyone else, add a public node from the <a href="https://github.com/FrosTether/Graysons-Wallet/discussions">project discussions</a>. Mined coins unlock after 12 blocks, about an hour.</span></li>
+        <li><b>Install Graysons Wallet.</b><span>One install adds the apps that come with it: Graysons Wallet, Frostoise and MyFrost.</span></li>
+        <li><b>Create a wallet.</b><span>Tap Create wallet and write down your 25 words. They're the only way back into your coins, so keep them offline and never share them. Updating from an earlier build? Uninstall it first, then tap Restore and enter your 25 words. Wallets from 0.3 belong to the old chain, so make a new one.</span></li>
+        <li><b>Mine.</b><span>Open Frostoise, play a tone and tap Start mining. Phones on the same Wi-Fi find each other. To reach everyone else, add an <a href="/node/">always-on node</a>. Mined coins unlock after 12 blocks, about an hour.</span></li>
         <li><b>Claim your name.</b><span>Pick a <span class="mono">.frostchain</span> name, so people can pay you as @you instead of a long address.</span></li>
       </ol>
     </section>
 
-    <section id="buy" aria-labelledby="buy-h">
-      <h2 id="buy-h">Or buy a starter bundle</h2>
-      <div class="deal">
-        <div>
-          <p class="price">10 QOIN<span>for $5</span></p>
-          <p class="opens"><span class="before">Orders open at launch, Thursday 8 October at 13:37 Eastern.</span><span class="after">Orders are open.</span> Coins go out once my first mined blocks unlock, about an hour after launch.</p>
-          <div class="cta"><a class="btn quiet" href="https://finux.tech/contact">Message me</a></div>
-        </div>
-        <ul class="pay">
-          <li><h3>Chime</h3><p>Message me and I'll send my Chime details.</p></li>
-          <li><h3>Dogecoin</h3><p>$5 of DOGE at the day's rate, sent to <b>@frostcoin</b> on MyDoge. Message me for the exact amount before you send.</p></li>
-        </ul>
-      </div>
-      <p class="then">With your payment, send me your <span class="mono">.frostchain</span> name or Receive address, and I'll send the 10 QOIN there.</p>
-      <p class="note">Pay here, not in the app. MyFrost doesn't do swaps, so don't send DOGE through it.</p>
+    <section id="more" aria-labelledby="more-h">
+      <h2 id="more-h">Keep going</h2>
+      <ul class="cards">
+        <li><a href="/node/"><b>Run a node</b><span>Keep the chain online while phones sleep, and show it live in FrostExplorer.</span></a></li>
+        <li><a href="/qnr/"><b>QNR vs XMR</b><span>How Qoin compares with Monero, and what it takes next from Monero, Zcash and Dash.</span></a></li>
+        <li><a href="/temporal/"><b>Temporal</b><span>A time machine for the chain. Seal a message for the future, paid for in QNR.</span></a></li>
+      </ul>
     </section>
 
     <section id="chain" aria-labelledby="chain-h">
       <h2 id="chain-h">The chain</h2>
       <dl class="facts">
         <div><dt>Blocks</dt><dd>About one every 5 minutes, and never sooner than 4½ minutes after the last, so two Frost blocks for every Bitcoin Cash block.</dd></div>
-        <div><dt>Reward</dt><dd>About <span class="mono">263.88</span> QOIN a block at launch, shrinking slowly as coins are mined.</dd></div>
+        <div><dt>Reward</dt><dd>About <span class="mono nowrap">263.88</span> QNR a block at launch, shrinking slowly as coins are mined.</dd></div>
+        <div><dt>Supply</dt><dd>Never more than <span class="mono nowrap">184,467,440.737</span> QNR. Half of it takes about 4.6 years to mine.</dd></div>
         <div><dt>Unlock</dt><dd>Mined coins can be spent after 12 more blocks.</dd></div>
-        <div><dt>Mining tones</dt><dd><span class="mono">3.75–4.25</span>, <span class="mono">7.50–8.20</span> or <span class="mono">10.80–11.40</span> Hz. Every block carries a record of the reading.</dd></div>
+        <div><dt>Mining tones</dt><dd><span class="mono nowrap">3.75–4.25</span>, <span class="mono nowrap">7.50–8.20</span> or <span class="mono nowrap">10.80–11.40</span> Hz. Every block carries a record of the reading.</dd></div>
         <div><dt>Signatures</dt><dd>Hash-based LMS keys (RFC 8554), built to hold up against quantum computers.</dd></div>
-        <div><dt>Units</dt><dd>QOIN, divisible to 11 decimal places.</dd></div>
+        <div><dt>Units</dt><dd>QNR, divisible to 11 decimal places.</dd></div>
         <div><dt>Source</dt><dd>Open source under GPL-3.0, on <a href="https://github.com/FrosTether/Graysons-Wallet">GitHub</a>.</dd></div>
       </dl>
     </section>
 
     <section id="fine-print" aria-labelledby="print-h">
       <h2 id="print-h">Fine print</h2>
-      <p class="print">Qoin is an early proof of concept I'm building myself. QOIN has no guaranteed value and isn't an investment. Only buy some if you'd enjoy trying a homemade blockchain, and only spend what you're fine losing. The tones are for mining. They aren't health or wellness advice.</p>
+      <p class="print">Qoin is an early proof of concept I'm building myself. QNR has no guaranteed value and isn't an investment, and nothing on this site sells it. The tones are for mining. They aren't health or wellness advice.</p>
     </section>
   </main>
-
   <footer>
     <a href="https://finux.tech/">finux.tech</a>
+    <a href="https://finux.tech/projects">Projects</a>
     <a href="https://finux.tech/contact">Contact</a>
     <a href="https://github.com/FrosTether/Graysons-Wallet">Source and issues</a>
     <a href="https://github.com/FrosTether">GitHub @FrosTether</a>
   </footer>
 </div>
+<script>
+(function () {
+  'use strict';
+  // Copy buttons next to commands and addresses: copy the text of the <pre> or [data-copy-text] they sit beside.
+  function copyText(text, btn) {
+    var done = function () {
+      var was = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = was; }, 1400);
+    };
+    var fallback = function () {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* the text stays selectable */ }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('[data-copy]') : null;
+    if (!btn) return;
+    var src = btn.getAttribute('data-copy');
+    var text;
+    if (src) {
+      var el = document.getElementById(src);
+      text = el ? (el.value !== undefined && el.tagName !== 'DIV' ? el.value : el.textContent) : '';
+    } else {
+      var pre = btn.parentNode.querySelector('pre');
+      text = pre ? pre.textContent : '';
+    }
+    copyText(text.trim(), btn);
+  });
+  window.copyText = copyText;
+
+  // Tabs: arrow keys move between them, the selected one shows its panel.
+  Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), function (list) {
+    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) tab.focus();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(t, false); });
+      t.addEventListener('keydown', function (e) {
+        var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+        if (j === -1) return;
+        e.preventDefault();
+        select(tabs[(j + tabs.length) % tabs.length], true);
+      });
+    });
+  });
+})();
+</script>
 <script>
 (function () {
   'use strict';

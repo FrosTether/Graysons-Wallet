@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Run a node | Qoin</title>
+<meta name="description" content="Keep Frostchain online while phones sleep: run frostnode on a server, a laptop or a spare phone, and show the chain live in FrostExplorer.">
+<link rel="canonical" href="https://get.finux.tech/node/">
+<meta name="theme-color" content="#f5f0fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#150e1a" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Run a node">
+<meta property="og:description" content="Keep Frostchain online while phones sleep: run frostnode on a server, a laptop or a spare phone, and show the chain live in FrostExplorer.">
+<meta property="og:url" content="https://get.finux.tech/node/">
+<meta property="og:image" content="https://get.finux.tech/og/node.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Run a node: keep the chain online while phones sleep.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E">
+<link rel="preload" href="/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+<style>
+@font-face { font-family: "Archivo"; src: url("/fonts/archivo.woff") format("woff");
+  font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+@font-face { font-family: "Martian Mono"; src: url("/fonts/martian-mono.woff") format("woff");
+  font-weight: 100 800; font-stretch: 75% 112.5%; font-display: swap; }
+:root {
+  --ground: #f5f0fa;
+  --surface: #ffffff;
+  --sunk: #ece3f4;
+  --ink: #24142f;
+  --muted: #65537a;
+  --line: #dccfe8;
+  --plum: #5e2c8c;
+  --plum-ink: #ffffff;
+  --lamp: #c9700a;
+  --lamp-soft: rgba(232, 144, 28, 0.22);
+  --lamp-glow: rgba(232, 144, 28, 0.45);
+  --wave: #5e2c8c;
+  --wave-fill: rgba(94, 44, 140, 0.12);
+  --note: #fbf1e3;
+  --note-ink: #5b3a06;
+  --code: #1d1326;
+  --code-ink: #efe6f7;
+  --code-dim: #a897ba;
+  --good: #23784a;
+  --bad: #a3302b;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #150e1a;
+    --surface: #20152a;
+    --sunk: #1a1122;
+    --ink: #f1eaf7;
+    --muted: #b4a5c3;
+    --line: #3a2a48;
+    --plum: #cba6f7;
+    --plum-ink: #1a0f22;
+    --lamp: #ffb547;
+    --lamp-soft: rgba(255, 181, 71, 0.18);
+    --lamp-glow: rgba(255, 181, 71, 0.5);
+    --wave: #cba6f7;
+    --wave-fill: rgba(203, 166, 247, 0.14);
+    --note: #2a1f1a;
+    --note-ink: #f3e3c8;
+    --code: #0f0914;
+    --code-ink: #efe6f7;
+    --code-dim: #9a89ad;
+    --good: #6fd39b;
+    --bad: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #150e1a;
+  --surface: #20152a;
+  --sunk: #1a1122;
+  --ink: #f1eaf7;
+  --muted: #b4a5c3;
+  --line: #3a2a48;
+  --plum: #cba6f7;
+  --plum-ink: #1a0f22;
+  --lamp: #ffb547;
+  --lamp-soft: rgba(255, 181, 71, 0.18);
+  --lamp-glow: rgba(255, 181, 71, 0.5);
+  --wave: #cba6f7;
+  --wave-fill: rgba(203, 166, 247, 0.14);
+  --note: #2a1f1a;
+  --note-ink: #f3e3c8;
+  --code: #0f0914;
+  --code-ink: #efe6f7;
+  --code-dim: #9a89ad;
+  --good: #6fd39b;
+  --bad: #ff8a80;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  font-variation-settings: "wdth" 100;
+  overflow-wrap: break-word;
+}
+a { color: var(--plum); text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
+.mono { font-family: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
+
+/* Header: the brand, then the four pages */
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 18px; padding-block: 18px 6px; }
+.brand { display: inline-flex; align-items: baseline; gap: 8px; color: var(--ink); text-decoration: none; font-weight: 800; font-size: 1.3rem; font-variation-settings: "wdth" 125; letter-spacing: -0.01em; }
+.brand .tick { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; color: var(--lamp); border: 1.5px solid currentColor; border-radius: 6px; padding: 1px 5px; }
+.top nav { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.top nav a { color: var(--muted); text-decoration: none; font-size: 0.97rem; white-space: nowrap; padding-block: 4px; border-bottom: 2px solid transparent; }
+.top nav a:hover { color: var(--ink); }
+.top nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--lamp); }
+
+/* Page opener */
+.opener { padding-block: 28px 8px; }
+h1 {
+  margin: 0;
+  font-size: clamp(3.1rem, 15.5vw, 7rem);
+  line-height: 0.92;
+  font-weight: 800;
+  font-variation-settings: "wdth" 125;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+h1.long { font-size: clamp(2.6rem, 11.5vw, 5.6rem); }
+.lede { margin: 18px 0 0; font-size: 1.2rem; line-height: 1.5; max-width: 34em; color: var(--ink); }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 26px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 24px; border-radius: 12px;
+  font: inherit; font-weight: 700; font-size: 1.05rem; text-decoration: none; cursor: pointer;
+  border: 2px solid var(--plum); background: var(--plum); color: var(--plum-ink);
+}
+.btn:hover { filter: brightness(1.06); }
+.btn.quiet { background: transparent; color: var(--plum); }
+.btn.small { min-height: 40px; padding: 0 14px; font-size: 0.95rem; border-radius: 10px; }
+.btn[disabled] { opacity: 0.5; cursor: default; filter: none; }
+.fine { margin: 14px 0 0; color: var(--muted); font-size: 0.95rem; max-width: 36em; }
+
+/* Sections */
+section { padding-block: 44px 8px; }
+h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 5.4vw, 2.4rem);
+  line-height: 1.08;
+  font-weight: 750;
+  font-variation-settings: "wdth" 112;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+h3 { margin: 0 0 6px; font-size: 1.15rem; line-height: 1.3; font-weight: 700; }
+.intro { margin: 0; max-width: 38em; color: var(--muted); }
+p.body { max-width: 40em; }
+
+/* Steps: a real sequence, so numbered */
+.steps { list-style: none; counter-reset: step; margin: 24px 0 0; padding: 0; display: grid; gap: 22px; max-width: 44em; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0 14px; }
+.steps li::before {
+  content: counter(step); grid-row: span 3;
+  font-family: "Martian Mono", ui-monospace, monospace; font-weight: 600; font-size: 1.3rem; line-height: 1.6rem;
+  color: var(--lamp);
+}
+.steps b { font-size: 1.12rem; }
+.steps span { color: var(--muted); }
+.steps .mono { font-size: 0.86em; color: var(--ink); }
+
+/* Facts: term on the left, detail on the right */
+.facts { margin: 22px 0 0; display: grid; grid-template-columns: minmax(0, 1fr); max-width: 52em; }
+.facts div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding-block: 14px; border-top: 1px solid var(--line); }
+.facts dt { color: var(--muted); font-size: 0.95rem; }
+.facts dd { margin: 0; }
+.facts .mono { font-size: 0.92em; }
+.facts .nowrap { white-space: nowrap; }
+
+/* Link cards to the other pages */
+.cards { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.cards a { display: block; height: 100%; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; }
+.cards a:hover { border-color: var(--plum); }
+.cards b { display: block; font-size: 1.15rem; margin-bottom: 4px; }
+.cards span { color: var(--muted); font-size: 0.97rem; }
+.cards b::after { content: " →"; color: var(--lamp); }
+
+/* Commands to copy: the button sits beside the code, so long lines scroll without running under it */
+.cmd { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; margin: 14px 0 0; border-radius: 14px; background: var(--code); color: var(--code-ink); max-width: 52em; }
+.cmd pre { margin: 0; padding: 16px 4px 16px 18px; overflow-x: auto; font-family: "Martian Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; line-height: 1.7; }
+.cmd .c { color: var(--code-dim); }
+.cmd button { margin: 10px 10px 0 6px; min-height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); color: var(--code-ink); font: inherit; font-size: 0.8rem; cursor: pointer; }
+.cmd button:hover { background: rgba(255,255,255,0.16); }
+p .mono, li > span .mono { font-size: 0.88em; }
+code { font-family: "Martian Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.86em; background: var(--sunk); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+
+/* Tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+.tabs button { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
+.tabs button[aria-selected="true"] { border-color: var(--lamp); background: var(--lamp-soft); }
+.panel { padding-top: 6px; }
+
+/* Tables */
+.table { margin: 22px 0 0; overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.97rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-top: 1px solid var(--line); }
+thead th { border-top: 0; font-size: 0.9rem; color: var(--muted); font-weight: 600; background: var(--sunk); }
+tbody th { font-weight: 600; color: var(--muted); width: 20%; }
+td .mono { font-size: 0.9em; }
+
+.note { margin: 14px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--note); color: var(--note-ink); max-width: 44em; }
+.print { color: var(--muted); max-width: 46em; }
+footer { margin-top: 48px; padding-block: 22px 40px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.95rem; }
+footer a { color: var(--muted); }
+
+@media (min-width: 760px) {
+  .facts div { grid-template-columns: 14em minmax(0, 1fr); gap: 24px; }
+  .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">Qoin <span class="tick mono">QNR</span></a>
+    <nav aria-label="Qoin">
+      <a href="/">Get Qoin</a>
+      <a href="/node/" aria-current="page">Nodes</a>
+      <a href="/qnr/">QNR vs XMR</a>
+      <a href="/temporal/">Temporal</a>
+    </nav>
+  </header>
+  <main>
+    <div class="opener">
+      <h1>Run a node</h1>
+      <p class="lede">Phones mine Qoin, but phones sleep. An always-on node keeps the chain online: it stores every block, passes new blocks and payments between phones, and shows the chain live in FrostExplorer.</p>
+      <div class="cta">
+        <a class="btn" href="https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip">Download frostnode</a>
+        <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md">The full guide</a>
+      </div>
+      <p class="fine">Needs Java 17. It starts in about 100 MB of memory, and the chain grows by about 130 MB a year. It never holds anyone's 25 words.</p>
+    </div>
+
+    <section id="does" aria-labelledby="does-h">
+      <h2 id="does-h">What a node does</h2>
+      <dl class="facts">
+        <div><dt>Keeps the chain</dt><dd>Stores every block and checks every rule, the same checks the phones run.</dd></div>
+        <div><dt>Relays</dt><dd>Passes new blocks and payments between phones that can't reach each other, on TCP port <span class="mono">7830</span>.</dd></div>
+        <div><dt>Shows it</dt><dd>Serves FrostExplorer on port <span class="mono">7831</span>: every block, its tone, names and balances, updating live.</dd></div>
+        <div><dt>No wallet</dt><dd>A node can't spend, mine or see anyone's 25 words. Mining still happens on phones that hear a tone.</dd></div>
+        <div><dt>Rewards</dt><dd>None yet. Paying always-on nodes, the way Dash pays its masternodes, is one of the governance options I'm working out. For now, running one is how you keep the network up.</dd></div>
+      </dl>
+    </section>
+
+    <section id="run" aria-labelledby="run-h">
+      <h2 id="run-h">Pick where it runs</h2>
+      <p class="intro">Anything that stays on and online works. A free cloud server is best, since it never sleeps and has a fixed address.</p>
+
+      <div class="tabs" role="tablist" aria-label="Where the node runs">
+        <button type="button" role="tab" id="tab-server" aria-controls="panel-server" aria-selected="true">Server</button>
+        <button type="button" role="tab" id="tab-laptop" aria-controls="panel-laptop" aria-selected="false" tabindex="-1">Laptop</button>
+        <button type="button" role="tab" id="tab-phone" aria-controls="panel-phone" aria-selected="false" tabindex="-1">Android phone</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-server" aria-labelledby="tab-server">
+        <ol class="steps">
+          <li><b>Get a server.</b><span>Oracle Cloud's Always Free tier gives you a small Ubuntu machine at no cost. Any Ubuntu or Debian server works.</span></li>
+          <li><b>Run the installer.</b><span>It installs Java and the latest frostnode, checks the download against the release checksums, and sets it up as a service that starts on boot. Run it again any time to update.</span>
+            <div class="cmd"><pre>curl -fsSL https://get.finux.tech/node/install.sh | sudo sh</pre><button type="button" data-copy>Copy</button></div>
+          </li>
+          <li><b>Open port 7830.</b><span>The installer opens it on the server itself. Cloud providers block it a second time outside the machine: on Oracle Cloud, go to Networking, your VCN, Security lists, Default, and add an ingress rule for source <span class="mono">0.0.0.0/0</span>, TCP, port <span class="mono">7830</span>.</span></li>
+          <li><b>Check it.</b><span>From your phone's browser, open <span class="mono">http://&lt;server&nbsp;IP&gt;:7830/p2p/info</span>. It should show the chain <span class="mono">aa18513e5ee8db9f</span> and the height.</span></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-laptop" aria-labelledby="tab-laptop" hidden>
+        <ol class="steps">
+          <li><b>Install Java 17.</b><span>On Windows or a Mac, use the Temurin 17 installer from <a href="https://adoptium.net/temurin/releases/?version=17">adoptium.net</a>. On Linux, <span class="mono">sudo apt install openjdk-17-jre-headless</span>.</span></li>
+          <li><b>Download and unzip frostnode.</b><span>Unzip <a href="https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip">frostnode.zip</a> anywhere you like.</span></li>
+          <li><b>Start it.</b><span>Open a terminal in that folder and run:</span>
+            <div class="cmd"><pre><span class="c"># Mac or Linux</span>
+frostnode/bin/frostnode --data frostnode-data
+<span class="c"># Windows</span>
+frostnode\bin\frostnode.bat --data frostnode-data</pre><button type="button" data-copy>Copy</button></div>
+          </li>
+          <li><b>Keep it awake.</b><span>Set the laptop to never sleep while it's plugged in. Phones on the same Wi-Fi can add it by the laptop's local IP. For phones elsewhere, your router has to forward TCP 7830 to the laptop.</span></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-phone" aria-labelledby="tab-phone" hidden>
+        <ol class="steps">
+          <li><b>Install Termux.</b><span>Get it from <a href="https://f-droid.org/packages/com.termux/">F-Droid</a>. A spare phone on a charger makes a decent node.</span></li>
+          <li><b>Run frostnode next to the app.</b><span>Graysons Wallet already uses port 7830 on the phone, so frostnode takes 7832 and 7833 and copies the chain from the app:</span>
+            <div class="cmd"><pre>pkg install openjdk-17 unzip
+curl -LO https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip
+unzip -o frostnode.zip
+termux-wake-lock
+frostnode/bin/frostnode --data ~/frostnode-data --port 7832 --explorer-port 7833 --peer 127.0.0.1:7830</pre><button type="button" data-copy>Copy</button></div>
+          </li>
+          <li><b>Open the explorer.</b><span>Visit <span class="mono">http://localhost:7833</span> in the phone's browser. It runs while the phone stays awake.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="connect" aria-labelledby="connect-h">
+      <h2 id="connect-h">Connect the phones</h2>
+      <ol class="steps">
+        <li><b>Open Graysons Wallet.</b><span>Go to Node, then Add.</span></li>
+        <li><b>Enter the node's address.</b><span>The server's IP or a name like <span class="mono">node.finux.tech</span> pointing at it. Port 7830 is the default, so the host alone works.</span></li>
+        <li><b>Watch it sync.</b><span>The Node screen shows the node's height. Phones now pass blocks through it, even when they're on different networks.</span></li>
+      </ol>
+    </section>
+
+    <section id="explorer" aria-labelledby="explorer-h">
+      <h2 id="explorer-h">Put FrostExplorer on the web</h2>
+      <p class="intro">A Cloudflare Tunnel gives the explorer an https address on your own domain, with no port to open. It runs on the same machine as the node.</p>
+      <div class="cmd"><pre><span class="c"># try it: prints a temporary https://….trycloudflare.com address</span>
+cloudflared tunnel --url http://localhost:7831
+
+<span class="c"># keep it, on your own name</span>
+cloudflared tunnel login
+cloudflared tunnel create frostexplorer
+cloudflared tunnel route dns frostexplorer explorer.finux.tech
+cloudflared tunnel run --url http://localhost:7831 frostexplorer</pre><button type="button" data-copy>Copy</button></div>
+      <p class="fine">Get <span class="mono">cloudflared</span> from Cloudflare's downloads page, or <span class="mono">pkg install cloudflared</span> in Termux. Keeping it running after a reboot is in the <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md#put-it-on-explorerfinuxtech">full guide</a>.</p>
+    </section>
+
+    <section id="public" aria-labelledby="public-h">
+      <h2 id="public-h">Public nodes</h2>
+      <p class="body">None are listed yet. Running one that's always on? Send me its address on the <a href="https://finux.tech/contact">contact page</a> and I'll list it here, so new phones can find it.</p>
+    </section>
+  </main>
+  <footer>
+    <a href="https://finux.tech/">finux.tech</a>
+    <a href="https://finux.tech/projects">Projects</a>
+    <a href="https://finux.tech/contact">Contact</a>
+    <a href="https://github.com/FrosTether/Graysons-Wallet">Source and issues</a>
+    <a href="https://github.com/FrosTether">GitHub @FrosTether</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+  // Copy buttons next to commands and addresses: copy the text of the <pre> or [data-copy-text] they sit beside.
+  function copyText(text, btn) {
+    var done = function () {
+      var was = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = was; }, 1400);
+    };
+    var fallback = function () {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* the text stays selectable */ }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('[data-copy]') : null;
+    if (!btn) return;
+    var src = btn.getAttribute('data-copy');
+    var text;
+    if (src) {
+      var el = document.getElementById(src);
+      text = el ? (el.value !== undefined && el.tagName !== 'DIV' ? el.value : el.textContent) : '';
+    } else {
+      var pre = btn.parentNode.querySelector('pre');
+      text = pre ? pre.textContent : '';
+    }
+    copyText(text.trim(), btn);
+  });
+  window.copyText = copyText;
+
+  // Tabs: arrow keys move between them, the selected one shows its panel.
+  Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), function (list) {
+    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) tab.focus();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(t, false); });
+      t.addEventListener('keydown', function (e) {
+        var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+        if (j === -1) return;
+        e.preventDefault();
+        select(tabs[(j + tabs.length) % tabs.length], true);
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

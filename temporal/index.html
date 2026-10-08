@@ -1,0 +1,951 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Temporal | Qoin</title>
+<meta name="description" content="A time machine for Frostchain: seal a message for the future, or go back to any block. Each seal burns 1 QNR as gas.">
+<link rel="canonical" href="https://get.finux.tech/temporal/">
+<meta name="theme-color" content="#f5f0fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#150e1a" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Temporal">
+<meta property="og:description" content="A time machine for Frostchain: seal a message for the future, or go back to any block. Each seal burns 1 QNR as gas.">
+<meta property="og:url" content="https://get.finux.tech/temporal/">
+<meta property="og:image" content="https://get.finux.tech/og/temporal.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Temporal: a time machine for Frostchain.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E">
+<link rel="preload" href="/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+<style>
+@font-face { font-family: "Archivo"; src: url("/fonts/archivo.woff") format("woff");
+  font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+@font-face { font-family: "Martian Mono"; src: url("/fonts/martian-mono.woff") format("woff");
+  font-weight: 100 800; font-stretch: 75% 112.5%; font-display: swap; }
+:root {
+  --ground: #f5f0fa;
+  --surface: #ffffff;
+  --sunk: #ece3f4;
+  --ink: #24142f;
+  --muted: #65537a;
+  --line: #dccfe8;
+  --plum: #5e2c8c;
+  --plum-ink: #ffffff;
+  --lamp: #c9700a;
+  --lamp-soft: rgba(232, 144, 28, 0.22);
+  --lamp-glow: rgba(232, 144, 28, 0.45);
+  --wave: #5e2c8c;
+  --wave-fill: rgba(94, 44, 140, 0.12);
+  --note: #fbf1e3;
+  --note-ink: #5b3a06;
+  --code: #1d1326;
+  --code-ink: #efe6f7;
+  --code-dim: #a897ba;
+  --good: #23784a;
+  --bad: #a3302b;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #150e1a;
+    --surface: #20152a;
+    --sunk: #1a1122;
+    --ink: #f1eaf7;
+    --muted: #b4a5c3;
+    --line: #3a2a48;
+    --plum: #cba6f7;
+    --plum-ink: #1a0f22;
+    --lamp: #ffb547;
+    --lamp-soft: rgba(255, 181, 71, 0.18);
+    --lamp-glow: rgba(255, 181, 71, 0.5);
+    --wave: #cba6f7;
+    --wave-fill: rgba(203, 166, 247, 0.14);
+    --note: #2a1f1a;
+    --note-ink: #f3e3c8;
+    --code: #0f0914;
+    --code-ink: #efe6f7;
+    --code-dim: #9a89ad;
+    --good: #6fd39b;
+    --bad: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #150e1a;
+  --surface: #20152a;
+  --sunk: #1a1122;
+  --ink: #f1eaf7;
+  --muted: #b4a5c3;
+  --line: #3a2a48;
+  --plum: #cba6f7;
+  --plum-ink: #1a0f22;
+  --lamp: #ffb547;
+  --lamp-soft: rgba(255, 181, 71, 0.18);
+  --lamp-glow: rgba(255, 181, 71, 0.5);
+  --wave: #cba6f7;
+  --wave-fill: rgba(203, 166, 247, 0.14);
+  --note: #2a1f1a;
+  --note-ink: #f3e3c8;
+  --code: #0f0914;
+  --code-ink: #efe6f7;
+  --code-dim: #9a89ad;
+  --good: #6fd39b;
+  --bad: #ff8a80;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  font-variation-settings: "wdth" 100;
+  overflow-wrap: break-word;
+}
+a { color: var(--plum); text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
+.mono { font-family: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+[hidden] { display: none !important; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
+
+/* Header: the brand, then the four pages */
+.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 18px; padding-block: 18px 6px; }
+.brand { display: inline-flex; align-items: baseline; gap: 8px; color: var(--ink); text-decoration: none; font-weight: 800; font-size: 1.3rem; font-variation-settings: "wdth" 125; letter-spacing: -0.01em; }
+.brand .tick { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; color: var(--lamp); border: 1.5px solid currentColor; border-radius: 6px; padding: 1px 5px; }
+.top nav { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.top nav a { color: var(--muted); text-decoration: none; font-size: 0.97rem; white-space: nowrap; padding-block: 4px; border-bottom: 2px solid transparent; }
+.top nav a:hover { color: var(--ink); }
+.top nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--lamp); }
+
+/* Page opener */
+.opener { padding-block: 28px 8px; }
+h1 {
+  margin: 0;
+  font-size: clamp(3.1rem, 15.5vw, 7rem);
+  line-height: 0.92;
+  font-weight: 800;
+  font-variation-settings: "wdth" 125;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+h1.long { font-size: clamp(2.6rem, 11.5vw, 5.6rem); }
+.lede { margin: 18px 0 0; font-size: 1.2rem; line-height: 1.5; max-width: 34em; color: var(--ink); }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 26px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 24px; border-radius: 12px;
+  font: inherit; font-weight: 700; font-size: 1.05rem; text-decoration: none; cursor: pointer;
+  border: 2px solid var(--plum); background: var(--plum); color: var(--plum-ink);
+}
+.btn:hover { filter: brightness(1.06); }
+.btn.quiet { background: transparent; color: var(--plum); }
+.btn.small { min-height: 40px; padding: 0 14px; font-size: 0.95rem; border-radius: 10px; }
+.btn[disabled] { opacity: 0.5; cursor: default; filter: none; }
+.fine { margin: 14px 0 0; color: var(--muted); font-size: 0.95rem; max-width: 36em; }
+
+/* Sections */
+section { padding-block: 44px 8px; }
+h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 5.4vw, 2.4rem);
+  line-height: 1.08;
+  font-weight: 750;
+  font-variation-settings: "wdth" 112;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+h3 { margin: 0 0 6px; font-size: 1.15rem; line-height: 1.3; font-weight: 700; }
+.intro { margin: 0; max-width: 38em; color: var(--muted); }
+p.body { max-width: 40em; }
+
+/* Steps: a real sequence, so numbered */
+.steps { list-style: none; counter-reset: step; margin: 24px 0 0; padding: 0; display: grid; gap: 22px; max-width: 44em; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0 14px; }
+.steps li::before {
+  content: counter(step); grid-row: span 3;
+  font-family: "Martian Mono", ui-monospace, monospace; font-weight: 600; font-size: 1.3rem; line-height: 1.6rem;
+  color: var(--lamp);
+}
+.steps b { font-size: 1.12rem; }
+.steps span { color: var(--muted); }
+.steps .mono { font-size: 0.86em; color: var(--ink); }
+
+/* Facts: term on the left, detail on the right */
+.facts { margin: 22px 0 0; display: grid; grid-template-columns: minmax(0, 1fr); max-width: 52em; }
+.facts div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding-block: 14px; border-top: 1px solid var(--line); }
+.facts dt { color: var(--muted); font-size: 0.95rem; }
+.facts dd { margin: 0; }
+.facts .mono { font-size: 0.92em; }
+.facts .nowrap { white-space: nowrap; }
+
+/* Link cards to the other pages */
+.cards { list-style: none; margin: 22px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.cards a { display: block; height: 100%; padding: 18px 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; }
+.cards a:hover { border-color: var(--plum); }
+.cards b { display: block; font-size: 1.15rem; margin-bottom: 4px; }
+.cards span { color: var(--muted); font-size: 0.97rem; }
+.cards b::after { content: " →"; color: var(--lamp); }
+
+/* Commands to copy: the button sits beside the code, so long lines scroll without running under it */
+.cmd { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; margin: 14px 0 0; border-radius: 14px; background: var(--code); color: var(--code-ink); max-width: 52em; }
+.cmd pre { margin: 0; padding: 16px 4px 16px 18px; overflow-x: auto; font-family: "Martian Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.82rem; line-height: 1.7; }
+.cmd .c { color: var(--code-dim); }
+.cmd button { margin: 10px 10px 0 6px; min-height: 32px; padding: 0 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); color: var(--code-ink); font: inherit; font-size: 0.8rem; cursor: pointer; }
+.cmd button:hover { background: rgba(255,255,255,0.16); }
+p .mono, li > span .mono { font-size: 0.88em; }
+code { font-family: "Martian Mono", ui-monospace, Menlo, Consolas, monospace; font-size: 0.86em; background: var(--sunk); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+
+/* Tabs */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+.tabs button { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 2px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; }
+.tabs button[aria-selected="true"] { border-color: var(--lamp); background: var(--lamp-soft); }
+.panel { padding-top: 6px; }
+
+/* Tables */
+.table { margin: 22px 0 0; overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.97rem; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-top: 1px solid var(--line); }
+thead th { border-top: 0; font-size: 0.9rem; color: var(--muted); font-weight: 600; background: var(--sunk); }
+tbody th { font-weight: 600; color: var(--muted); width: 20%; }
+td .mono { font-size: 0.9em; }
+
+.note { margin: 14px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--note); color: var(--note-ink); max-width: 44em; }
+.print { color: var(--muted); max-width: 46em; }
+footer { margin-top: 48px; padding-block: 22px 40px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.95rem; }
+footer a { color: var(--muted); }
+
+@media (min-width: 760px) {
+  .facts div { grid-template-columns: 14em minmax(0, 1fr); gap: 24px; }
+  .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Temporal: the sealing machine, the capsule shelf and the arrival card */
+.machine { margin-top: 22px; padding: 18px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); max-width: 46em; display: grid; gap: 14px; }
+.field { display: grid; gap: 6px; }
+.field span { font-weight: 600; font-size: 0.97rem; }
+.field textarea, .field input {
+  width: 100%; font: inherit; color: var(--ink); background: var(--sunk);
+  border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px;
+}
+.field textarea { resize: vertical; min-height: 8em; line-height: 1.5; }
+.field input { min-height: 50px; font-family: "Martian Mono", ui-monospace, monospace; font-size: 0.95rem; }
+.field textarea:focus, .field input:focus { outline: none; border-color: var(--lamp); }
+.machine .row { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 18px; }
+.machine .row .field { flex: 1 1 15em; }
+.machine .cta { margin-top: 0; }
+.dial { margin: 0 0 14px; color: var(--lamp); font-size: 0.95rem; }
+.msg { margin: 6px 0 0; min-height: 1.4em; font-weight: 600; color: var(--muted); }
+.msg.bad { color: var(--bad); }
+
+.sealed { margin-top: 22px; padding: 18px; border-radius: 22px; border: 2px solid var(--lamp); background: var(--lamp-soft); max-width: 52em; }
+.sealed h3 { font-size: 1.35rem; }
+.pay { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; margin-top: 12px; }
+.payqr { margin: 0; width: 200px; max-width: 100%; }
+.payqr svg { display: block; width: 100%; height: auto; border-radius: 12px; }
+.payqr:empty { display: none; }
+.break { overflow-wrap: anywhere; }
+.copy { margin-left: 6px; min-height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 0.8rem; cursor: pointer; }
+.sealed .facts dd .mono { font-size: 0.86em; }
+
+.capsules { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 12px; max-width: 46em; }
+.capsules .empty { color: var(--muted); }
+.capsule { padding: 14px 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
+.cap-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.cap-head .mono { color: var(--muted); font-size: 0.85rem; }
+.cap-state { font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 10px; border-radius: 999px; background: var(--sunk); color: var(--muted); }
+.cap-state.is-open { background: var(--lamp-soft); color: var(--ink); }
+.cap-when { margin: 6px 0 0; }
+.cap-text { margin: 12px 0 0; padding: 12px 16px; border-left: 3px solid var(--lamp); background: var(--sunk); border-radius: 0 12px 12px 0; overflow-wrap: anywhere; }
+.cap-proof { margin: 8px 0 0; color: var(--muted); font-size: 0.95rem; }
+.capsule .cta { margin-top: 12px; gap: 8px 10px; }
+.paste { margin-top: 14px; max-width: 46em; }
+
+.arrival { margin-top: 22px; padding: 18px 20px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); max-width: 46em; }
+.arrival .when { margin: 0; color: var(--lamp); font-size: 0.95rem; }
+.arrival h3 { margin-top: 4px; font-size: clamp(1.6rem, 6vw, 2.2rem); font-weight: 800; font-variation-settings: "wdth" 115; }
+.arrival .facts { margin-top: 10px; }
+.ride { margin: 12px 0 0; min-height: 1.4em; color: var(--muted); font-size: 0.9rem; white-space: pre-wrap; }
+
+@media (min-width: 760px) {
+  .machine, .sealed { padding: 24px; }
+  .pay { grid-template-columns: minmax(0, 1fr) 200px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/">Qoin <span class="tick mono">QNR</span></a>
+    <nav aria-label="Qoin">
+      <a href="/">Get Qoin</a>
+      <a href="/node/">Nodes</a>
+      <a href="/qnr/">QNR vs XMR</a>
+      <a href="/temporal/" aria-current="page">Temporal</a>
+    </nav>
+  </header>
+  <main>
+    <div class="opener">
+      <h1>Temporal</h1>
+      <p class="lede">A time machine for Frostchain. Seal a message for the future, or go back to any block since the chain began. Temporal runs on QNR: every seal burns 1&nbsp;QNR as gas.</p>
+    </div>
+
+    <section id="seal" aria-labelledby="seal-h">
+      <h2 id="seal-h">Seal a capsule</h2>
+      <p class="intro">Write something for later. Temporal puts its fingerprint on the chain, which proves you wrote it before that block. Your words stay with you, and Temporal keeps them shut until the day you pick.</p>
+
+      <form class="machine" id="seal-form" novalidate>
+        <label class="field"><span>Your message</span>
+          <textarea id="seal-text" rows="6" maxlength="4000" placeholder="What do you want to tell the future?"></textarea>
+        </label>
+        <div class="row">
+          <label class="field"><span>Opens on</span><input type="datetime-local" id="seal-open"></label>
+          <p class="dial mono" id="seal-dial" aria-live="polite"></p>
+        </div>
+        <div class="cta"><button class="btn" type="submit">Seal it</button></div>
+        <p class="msg" id="seal-msg" role="status"></p>
+      </form>
+
+      <div class="sealed" id="sealed" hidden>
+        <h3>Sealed. Now burn the gas.</h3>
+        <p class="body">Send 1 QNR to the Temporal burn address with this memo. The block that carries it is your proof of when you wrote it.</p>
+        <div class="pay">
+          <div>
+            <a class="btn" id="pay-link" href="#">Pay 1 QNR in MyFrost</a>
+            <p class="fine">On an Android phone with Graysons Wallet, this opens MyFrost with everything filled in. On a computer, scan the code with that phone.</p>
+          </div>
+          <figure class="payqr" id="pay-qr" aria-label="QR code of the payment link"></figure>
+        </div>
+        <dl class="facts">
+          <div><dt>To</dt><dd><span class="mono break" id="burn-to"></span> <button type="button" class="copy" data-copy="burn-to">Copy</button></dd></div>
+          <div><dt>Amount</dt><dd>1 QNR, plus the usual network fee</dd></div>
+          <div><dt>Memo</dt><dd><span class="mono break" id="memo-out"></span> <button type="button" class="copy" data-copy="memo-out">Copy</button></dd></div>
+        </dl>
+        <div class="cta">
+          <button class="btn quiet" type="button" id="save-file">Save the capsule file</button>
+          <button class="btn quiet" type="button" id="copy-code">Copy the capsule code</button>
+        </div>
+        <p class="note">Keep the capsule file. The chain holds only the fingerprint, so the file is the only copy of your words. This browser keeps one too.</p>
+      </div>
+    </section>
+
+    <section id="mine" aria-labelledby="mine-h">
+      <h2 id="mine-h">Your capsules</h2>
+      <p class="intro">The ones kept in this browser. Each stays shut until its day.</p>
+      <ul class="capsules" id="capsules"></ul>
+      <div class="cta">
+        <label class="btn quiet small" for="load-file">Open a capsule file</label>
+        <input type="file" id="load-file" class="sr-only" accept=".json,.temporal,application/json">
+        <button class="btn quiet small" type="button" id="paste-open">Paste a capsule code</button>
+      </div>
+      <div class="paste" id="paste-box" hidden>
+        <label class="field"><span>Capsule code</span><textarea id="paste-text" rows="3" placeholder="temporal1:…"></textarea></label>
+        <div class="cta"><button class="btn small" type="button" id="paste-go">Add it</button></div>
+      </div>
+      <p class="msg" id="mine-msg" role="status"></p>
+    </section>
+
+    <section id="back" aria-labelledby="back-h">
+      <h2 id="back-h">Go back</h2>
+      <p class="intro">Pick any moment since the chain started, 13:37 Eastern on 8 October 2026. Temporal finds the block mined then and plays the tone it was mined on.</p>
+      <form class="machine" id="back-form" novalidate>
+        <div class="row">
+          <label class="field"><span>Take me to</span><input type="datetime-local" id="back-time"></label>
+          <div class="cta"><button class="btn" type="submit" id="back-go">Go</button></div>
+        </div>
+      </form>
+      <div class="arrival" id="arrival" hidden>
+        <p class="when mono" id="arr-when"></p>
+        <h3 id="arr-title"></h3>
+        <dl class="facts">
+          <div><dt>Mined by</dt><dd id="arr-miner"></dd></div>
+          <div><dt>Tone</dt><dd id="arr-tone"></dd></div>
+          <div><dt>QNR mined by then</dt><dd class="mono" id="arr-mined"></dd></div>
+          <div><dt>Capsules sealed by then</dt><dd class="mono" id="arr-seals"></dd></div>
+        </dl>
+        <div class="cta">
+          <button class="btn" type="button" id="arr-play">Play its tone</button>
+          <button class="btn quiet" type="button" id="arr-ride">Ride forward an hour</button>
+        </div>
+        <p class="ride mono" id="arr-ride-now" aria-live="polite"></p>
+      </div>
+      <p class="msg" id="back-msg" role="status"></p>
+    </section>
+
+    <section id="gas" aria-labelledby="gas-h">
+      <h2 id="gas-h">The gas</h2>
+      <dl class="facts">
+        <div><dt>Price</dt><dd>1 QNR a seal, burned for good. Every seal leaves fewer QNR in circulation.</dd></div>
+        <div><dt>Burn address</dt><dd><span class="mono break">fcn22knwovgbfytc6qyjczvb4kkxwjhqjmoaru</span>. It's the SHA-256 of the words <code>frostchain/burn</code> and <code>temporal/v1</code>, not of any key, so nobody can ever spend from it.</dd></div>
+        <div><dt>Burned so far</dt><dd id="burned">Shows here when a live node is in reach.</dd></div>
+        <div><dt>Memo</dt><dd><code>T1 &lt;opens&gt; &lt;fingerprint&gt;</code>: the opening time in Unix seconds, then the first 20 bytes of the capsule's SHA-256 in hex.</dd></div>
+        <div><dt>Fine print</dt><dd>A seal is an ordinary payment, so it works on today's chain. Temporal counts a seal only if it burned at least 1 QNR and landed in a block before its opening time.</dd></div>
+      </dl>
+    </section>
+  </main>
+  <footer>
+    <a href="https://finux.tech/">finux.tech</a>
+    <a href="https://finux.tech/projects">Projects</a>
+    <a href="https://finux.tech/contact">Contact</a>
+    <a href="https://github.com/FrosTether/Graysons-Wallet">Source and issues</a>
+    <a href="https://github.com/FrosTether">GitHub @FrosTether</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+  // Copy buttons next to commands and addresses: copy the text of the <pre> or [data-copy-text] they sit beside.
+  function copyText(text, btn) {
+    var done = function () {
+      var was = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = was; }, 1400);
+    };
+    var fallback = function () {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* the text stays selectable */ }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('[data-copy]') : null;
+    if (!btn) return;
+    var src = btn.getAttribute('data-copy');
+    var text;
+    if (src) {
+      var el = document.getElementById(src);
+      text = el ? (el.value !== undefined && el.tagName !== 'DIV' ? el.value : el.textContent) : '';
+    } else {
+      var pre = btn.parentNode.querySelector('pre');
+      text = pre ? pre.textContent : '';
+    }
+    copyText(text.trim(), btn);
+  });
+  window.copyText = copyText;
+
+  // Tabs: arrow keys move between them, the selected one shows its panel.
+  Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), function (list) {
+    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+    function select(tab, focus) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) tab.focus();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(t, false); });
+      t.addEventListener('keydown', function (e) {
+        var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+        if (j === -1) return;
+        e.preventDefault();
+        select(tabs[(j + tabs.length) % tabs.length], true);
+      });
+    });
+  });
+})();
+</script>
+<script>
+/* Minimal QR code encoder: byte mode, error correction level M, versions 1-10.
+   Follows ISO/IEC 18004 (structure after Project Nayuki's reference implementation). */
+(function () {
+  'use strict';
+  var ECC = [-1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26];   // EC codewords per block (level M)
+  var BLOCKS = [-1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5];         // number of blocks (level M)
+
+  function rawModules(v) {
+    var r = (16 * v + 128) * v + 64;
+    if (v >= 2) { var n = Math.floor(v / 7) + 2; r -= (25 * n - 10) * n - 55; if (v >= 7) r -= 36; }
+    return r;
+  }
+  function dataCodewords(v) { return Math.floor(rawModules(v) / 8) - ECC[v] * BLOCKS[v]; }
+
+  function gfMul(x, y) {
+    var z = 0;
+    for (var i = 7; i >= 0; i--) { z = (z << 1) ^ ((z >>> 7) * 0x11D); z ^= ((y >>> i) & 1) * x; }
+    return z & 0xFF;
+  }
+  function rsDivisor(deg) {
+    var r = []; for (var i = 0; i < deg; i++) r.push(0); r[deg - 1] = 1;
+    var root = 1;
+    for (i = 0; i < deg; i++) {
+      for (var j = 0; j < r.length; j++) { r[j] = gfMul(r[j], root); if (j + 1 < r.length) r[j] ^= r[j + 1]; }
+      root = gfMul(root, 2);
+    }
+    return r;
+  }
+  function rsRemainder(data, div) {
+    var r = div.map(function () { return 0; });
+    data.forEach(function (b) {
+      var f = b ^ r.shift(); r.push(0);
+      for (var i = 0; i < r.length; i++) r[i] ^= gfMul(div[i], f);
+    });
+    return r;
+  }
+  function utf8(s) {
+    var out = [];
+    var e = unescape(encodeURIComponent(s));
+    for (var i = 0; i < e.length; i++) out.push(e.charCodeAt(i));
+    return out;
+  }
+
+  function encode(text) {
+    var bytes = utf8(text), v, dx, dy;
+    for (v = 1; v <= 10; v++) {
+      var cap = dataCodewords(v) * 8, need = 4 + (v < 10 ? 8 : 16) + bytes.length * 8;
+      if (need <= cap) break;
+    }
+    if (v > 10) throw new Error('text too long for QR');
+    var bits = [];
+    function put(val, len) { for (var i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); }
+    put(4, 4); put(bytes.length, v < 10 ? 8 : 16);
+    bytes.forEach(function (b) { put(b, 8); });
+    var capBits = dataCodewords(v) * 8;
+    put(0, Math.min(4, capBits - bits.length));
+    while (bits.length % 8) bits.push(0);
+    var data = [];
+    for (var i = 0; i < bits.length; i += 8) { var b = 0; for (var j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; data.push(b); }
+    for (var pad = 0xEC; data.length < dataCodewords(v); pad ^= 0xEC ^ 0x11) data.push(pad);
+
+    // split into blocks, add RS, interleave
+    var nb = BLOCKS[v], ecl = ECC[v], raw = Math.floor(rawModules(v) / 8);
+    var nShort = nb - raw % nb, shortLen = Math.floor(raw / nb), div = rsDivisor(ecl), blocks = [], k = 0;
+    for (i = 0; i < nb; i++) {
+      var dat = data.slice(k, k + shortLen - ecl + (i < nShort ? 0 : 1)); k += dat.length;
+      var blk = dat.slice(); if (i < nShort) blk.push(0);
+      blocks.push(blk.concat(rsRemainder(dat, div)));
+    }
+    var seq = [];
+    for (i = 0; i < blocks[0].length; i++)
+      for (j = 0; j < nb; j++)
+        if (i !== shortLen - ecl || j >= nShort) seq.push(blocks[j][i]);
+
+    var size = 17 + 4 * v, m = [], fn = [];
+    for (i = 0; i < size; i++) { m.push(new Array(size).fill(false)); fn.push(new Array(size).fill(false)); }
+    function set(x, y, dark) { m[y][x] = dark; fn[y][x] = true; }
+    for (i = 0; i < size; i++) { set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+    [[3, 3], [size - 4, 3], [3, size - 4]].forEach(function (c) {
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++) {
+        var d = Math.max(Math.abs(dx), Math.abs(dy)), xx = c[0] + dx, yy = c[1] + dy;
+        if (xx >= 0 && xx < size && yy >= 0 && yy < size) set(xx, yy, d !== 2 && d !== 4);
+      }
+    });
+    if (v >= 2) {
+      var na = Math.floor(v / 7) + 2, step = Math.floor((v * 4 + na * 2 + 1) / (na * 2 - 2)) * 2, pos = [6];
+      for (var p = size - 7, t = []; t.length < na - 1; p -= step) t.unshift(p);
+      pos = pos.concat(t);
+      for (i = 0; i < na; i++) for (j = 0; j < na; j++) {
+        if ((i === 0 && j === 0) || (i === 0 && j === na - 1) || (i === na - 1 && j === 0)) continue;
+        for (dy = -2; dy <= 2; dy++) for (dx = -2; dx <= 2; dx++) set(pos[i] + dx, pos[j] + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      }
+    }
+    function format(mask) {
+      var d = (0 << 3) | mask, rem = d;                  // level M = 00
+      for (var i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+      var b = ((d << 10) | rem) ^ 0x5412;
+      function bit(i) { return ((b >>> i) & 1) !== 0; }
+      for (i = 0; i <= 5; i++) set(8, i, bit(i));
+      set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+      for (i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+      for (i = 0; i < 8; i++) set(size - 1 - i, 8, bit(i));
+      for (i = 8; i < 15; i++) set(8, size - 15 + i, bit(i));
+      set(8, size - 8, true);
+    }
+    format(0);
+    if (v >= 7) {
+      var rem = v;
+      for (i = 0; i < 12; i++) rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
+      var vb = v * 4096 + rem;
+      for (i = 0; i < 18; i++) {
+        var bt = Math.floor(vb / Math.pow(2, i)) % 2 === 1, a = size - 11 + i % 3, c = Math.floor(i / 3);
+        set(a, c, bt); set(c, a, bt);
+      }
+    }
+    // place data
+    var bi = 0, total = seq.length * 8;
+    for (var right = size - 1; right >= 1; right -= 2) {
+      if (right === 6) right = 5;
+      for (var vert = 0; vert < size; vert++) for (j = 0; j < 2; j++) {
+        var x = right - j, up = ((right + 1) & 2) === 0, y = up ? size - 1 - vert : vert;
+        if (!fn[y][x] && bi < total) { m[y][x] = ((seq[bi >>> 3] >>> (7 - (bi & 7))) & 1) === 1; bi++; }
+      }
+    }
+    var masks = [
+      function (x, y) { return (x + y) % 2 === 0; }, function (x, y) { return y % 2 === 0; },
+      function (x) { return x % 3 === 0; }, function (x, y) { return (x + y) % 3 === 0; },
+      function (x, y) { return (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0; },
+      function (x, y) { return x * y % 2 + x * y % 3 === 0; },
+      function (x, y) { return (x * y % 2 + x * y % 3) % 2 === 0; },
+      function (x, y) { return ((x + y) % 2 + x * y % 3) % 2 === 0; }];
+    function applyMask(k) { for (var y = 0; y < size; y++) for (var x = 0; x < size; x++) if (!fn[y][x] && masks[k](x, y)) m[y][x] = !m[y][x]; }
+    function penalty() {
+      var s = 0, x, y, run, dark = 0;
+      for (var pass = 0; pass < 2; pass++) for (y = 0; y < size; y++) {
+        run = 1;
+        for (x = 1; x <= size; x++) {
+          var a = pass ? m[x - 1] && m[x - 1][y] : m[y][x - 1], b = x < size ? (pass ? m[x][y] : m[y][x]) : null;
+          if (b === a) run++; else { if (run >= 5) s += 3 + run - 5; run = 1; }
+        }
+        for (x = 0; x + 10 < size; x++) {
+          var str = '';
+          for (var q = 0; q < 11; q++) str += (pass ? m[x + q][y] : m[y][x + q]) ? '1' : '0';
+          if (str === '10111010000' || str === '00001011101') s += 40;
+        }
+      }
+      for (y = 0; y + 1 < size; y++) for (x = 0; x + 1 < size; x++) {
+        var c = m[y][x];
+        if (c === m[y][x + 1] && c === m[y + 1][x] && c === m[y + 1][x + 1]) s += 3;
+      }
+      for (y = 0; y < size; y++) for (x = 0; x < size; x++) if (m[y][x]) dark++;
+      s += Math.floor(Math.abs(dark * 20 - size * size * 10) / (size * size)) * 10;
+      return s;
+    }
+    var best = 0, bestScore = Infinity;
+    for (k = 0; k < 8; k++) {
+      applyMask(k); format(k);
+      var sc = penalty();
+      if (sc < bestScore) { bestScore = sc; best = k; }
+      applyMask(k);
+    }
+    applyMask(best); format(best);
+    return m;
+  }
+
+  function draw(canvas, text, dark, light) {
+    var m = encode(text), n = m.length, quiet = 4, scale = Math.floor(canvas.width / (n + 2 * quiet));
+    var ctx = canvas.getContext('2d'), off = Math.floor((canvas.width - scale * n) / 2);
+    ctx.fillStyle = light || '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = dark || '#000';
+    for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) if (m[y][x]) ctx.fillRect(off + x * scale, off + y * scale, scale, scale);
+  }
+
+  window.QR = { encode: encode, draw: draw };
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  // Temporal v1, the same rules as core/src/main/java/com/frostether/frostchain/Temporal.java:
+  //   fingerprint = first 20 bytes of SHA-256("temporal/v1\n" + opens + "\n" + salt + "\n" + text), in hex
+  //   memo        = "T1 " + opens + " " + fingerprint, on a payment of at least 1 QNR to the burn address
+  var BURN = 'fcn22knwovgbfytc6qyjczvb4kkxwjhqjmoaru';
+  var GENESIS = 1791481020;          // 13:37 Eastern, Thursday 8 October 2026
+  var MIN_LEAD = 15 * 60;            // a seal needs a few blocks to land before it opens
+  var MAX_TEXT = 4000;
+  var STORE = 'temporal.capsules';
+  var $ = function (id) { return document.getElementById(id); };
+  var now = function () { return Math.floor(Date.now() / 1000); };
+
+  // ---------- small helpers ----------
+  function hex(bytes) { return Array.prototype.map.call(bytes, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join(''); }
+  function utf8(s) { return new TextEncoder().encode(s); }
+  function fingerprint(opens, salt, text) {
+    return crypto.subtle.digest('SHA-256', utf8('temporal/v1\n' + opens + '\n' + salt + '\n' + text))
+      .then(function (h) { return hex(new Uint8Array(h).slice(0, 20)); });
+  }
+  function newSalt() { var b = new Uint8Array(16); crypto.getRandomValues(b); return hex(b); }
+  function memoFor(c) { return 'T1 ' + c.opens + ' ' + c.fp; }
+  function payLink(c) { return 'frostchain:' + BURN + '?amount=1&memo=' + encodeURIComponent(memoFor(c)); }
+  function b64url(s) {
+    var bin = ''; utf8(s).forEach(function (b) { bin += String.fromCharCode(b); });
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function unb64url(s) {
+    var bin = atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function when(t) {
+    try { return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(t * 1000)); }
+    catch (e) { return new Date(t * 1000).toLocaleString(); }
+  }
+  function span(sec) {
+    sec = Math.max(0, sec);
+    var d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
+    if (d >= 365) { var y = Math.floor(d / 365), rd = d - y * 365; return y + (y === 1 ? ' year' : ' years') + (rd ? ', ' + rd + (rd === 1 ? ' day' : ' days') : ''); }
+    if (d > 0) return d + (d === 1 ? ' day' : ' days') + (h ? ', ' + h + ' h' : '');
+    if (h > 0) return h + ' h ' + m + ' min';
+    return m + ' min';
+  }
+  function localInput(t) {
+    var d = new Date(t * 1000), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+  function fromInput(v) { var t = new Date(v).getTime(); return isNaN(t) ? NaN : Math.floor(t / 1000); }
+  function say(id, text, bad) { var el = $(id); el.textContent = text || ''; el.classList.toggle('bad', !!bad); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // ---------- capsules kept in this browser ----------
+  function load() {
+    try { var l = JSON.parse(localStorage.getItem(STORE) || '[]'); return Array.isArray(l) ? l : []; } catch (e) { return []; }
+  }
+  var capsules = load();
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(capsules)); } catch (e) { /* private window: the file is the copy */ } }
+  function add(c) {
+    if (!capsules.some(function (x) { return x.fp === c.fp; })) capsules.unshift(c);
+    save(); render();
+  }
+
+  // ---------- a node, if one is in reach: ?node=… or the public explorer ----------
+  var params = new URLSearchParams(location.search);
+  var API = (params.get('node') || 'https://explorer.finux.tech').replace(/\/+$/, '');
+  var live = false;
+  function api(path) {
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 6000);
+    return fetch(API + path, { cache: 'no-store', signal: ctl ? ctl.signal : undefined }).then(function (r) {
+      clearTimeout(timer);
+      return r.json().then(function (body) {
+        if (!r.ok) throw new Error(body && body.error ? body.error : 'the node said ' + r.status);
+        return body;
+      });
+    }, function (e) { clearTimeout(timer); throw e; });
+  }
+  function probe() {
+    api('/api/explorer/temporal').then(function (t) {
+      live = true;
+      $('burned').textContent = t.burnedText + ' QNR in ' + t.count + (t.count === 1 ? ' seal' : ' seals') + '.';
+      render();
+    }, function () {
+      live = false;
+      $('burned').innerHTML = 'Shows here when a live node is in reach. <a href="/node/">Run one</a>.';
+    });
+  }
+
+  // ---------- seal ----------
+  var sealOpen = $('seal-open');
+  function defaultOpen() { var t = now() + 365 * 86400; return t - t % 60; }
+  sealOpen.value = localInput(defaultOpen());
+  sealOpen.min = localInput(now() + MIN_LEAD);
+  function dial() {
+    var t = fromInput(sealOpen.value);
+    $('seal-dial').textContent = isNaN(t) ? '' : t <= now() ? 'That moment has passed.' : 'Opens in ' + span(t - now() + 59) + '.';
+  }
+  sealOpen.addEventListener('input', dial);
+  dial();
+  setInterval(dial, 30000);
+
+  var current = null;
+  $('seal-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var text = $('seal-text').value, opens = fromInput(sealOpen.value);
+    if (!text.trim()) { say('seal-msg', 'Write a message first.', true); return; }
+    if (text.length > MAX_TEXT) { say('seal-msg', 'Keep it under ' + MAX_TEXT + ' characters.', true); return; }
+    if (isNaN(opens)) { say('seal-msg', 'Pick when it opens.', true); return; }
+    if (opens < now() + MIN_LEAD) { say('seal-msg', 'Pick a time at least 15 minutes from now, so the seal lands in a block before it opens.', true); return; }
+    if (!window.crypto || !crypto.subtle) { say('seal-msg', 'This browser can’t make fingerprints here. Try Chrome or Firefox.', true); return; }
+    var c = { v: 1, opens: opens, salt: newSalt(), text: text, made: now() };
+    fingerprint(c.opens, c.salt, c.text).then(function (fp) {
+      c.fp = fp;
+      add(c);
+      showSealed(c);
+      $('seal-text').value = '';
+      say('seal-msg', '');
+    });
+  });
+
+  function qrSvg(text) {
+    if (!window.QR) return '';
+    var m = window.QR.encode(text), n = m.length, q = 4, size = n + 2 * q, d = '';
+    for (var y = 0; y < n; y++) {
+      for (var x = 0; x < n; x++) {
+        if (!m[y][x]) continue;
+        var run = 1; while (x + run < n && m[y][x + run]) run++;
+        d += 'M' + (x + q) + ' ' + (y + q) + 'h' + run + 'v1h-' + run + 'z'; x += run - 1;
+      }
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + ' ' + size + '" shape-rendering="crispEdges"><rect width="' + size + '" height="' + size + '" fill="#fff"/><path fill="#1a0f22" d="' + d + '"/></svg>';
+  }
+
+  function showSealed(c) {
+    current = c;
+    $('pay-link').href = payLink(c);
+    $('pay-qr').innerHTML = qrSvg(payLink(c));
+    $('burn-to').textContent = BURN;
+    $('memo-out').textContent = memoFor(c);
+    $('sealed').hidden = false;
+    $('sealed').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function capsuleFile(c) {
+    return JSON.stringify({ temporal: 1, opens: c.opens, salt: c.salt, text: c.text, fingerprint: c.fp, memo: memoFor(c), burnAddress: BURN }, null, 2) + '\n';
+  }
+  function download(c) {
+    var blob = new Blob([capsuleFile(c)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'capsule-' + c.fp.slice(0, 8) + '.temporal.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+  function code(c) { return 'temporal1:' + b64url(JSON.stringify({ v: 1, opens: c.opens, salt: c.salt, text: c.text })); }
+  $('save-file').addEventListener('click', function () { if (current) download(current); });
+  $('copy-code').addEventListener('click', function () { if (current) window.copyText(code(current), this); });
+
+  // ---------- your capsules ----------
+  function render() {
+    var ul = $('capsules');
+    if (!capsules.length) { ul.innerHTML = '<li class="empty">None yet. Seal one above, or open a capsule file.</li>'; return; }
+    ul.innerHTML = capsules.map(function (c, i) {
+      var open = now() >= c.opens;
+      var head = '<div class="cap-head"><span class="cap-state ' + (open ? 'is-open' : '') + '">' + (open ? 'Open' : 'Shut') + '</span>' +
+        '<span class="mono">' + c.fp.slice(0, 12) + '…</span></div>' +
+        '<p class="cap-when">' + (open ? 'Opened ' + esc(when(c.opens)) : 'Opens ' + esc(when(c.opens)) + ', in ' + span(c.opens - now())) + '</p>';
+      var body = c.shown ? '<blockquote class="cap-text">' + esc(c.text).replace(/\n/g, '<br>') + '</blockquote><p class="cap-proof" id="proof-' + i + '"></p>' : '';
+      var buttons = open
+        ? '<button type="button" class="btn small" data-act="show" data-i="' + i + '">' + (c.shown ? 'Close it' : 'Read it') + '</button>' +
+          (live ? '<button type="button" class="btn quiet small" data-act="check" data-i="' + i + '">Check the seal</button>' : '')
+        : '<button type="button" class="btn quiet small" data-act="pay" data-i="' + i + '">Pay the gas</button>';
+      buttons += '<button type="button" class="btn quiet small" data-act="file" data-i="' + i + '">Save file</button>' +
+        '<button type="button" class="btn quiet small" data-act="forget" data-i="' + i + '">Forget</button>';
+      return '<li class="capsule">' + head + body + '<div class="cta">' + buttons + '</div></li>';
+    }).join('');
+  }
+  $('capsules').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]'); if (!b) return;
+    var i = Number(b.getAttribute('data-i')), c = capsules[i], act = b.getAttribute('data-act');
+    if (!c) return;
+    if (act === 'show') { c.shown = !c.shown; render(); }
+    else if (act === 'pay') showSealed(c);
+    else if (act === 'file') download(c);
+    else if (act === 'forget') {
+      if (b.getAttribute('data-sure')) { capsules.splice(i, 1); save(); render(); }
+      else { b.setAttribute('data-sure', '1'); b.textContent = 'Tap again to forget it'; }
+    } else if (act === 'check') {
+      c.shown = true; render();
+      var out = $('proof-' + i);
+      out.textContent = 'Looking for the seal…';
+      api('/api/explorer/temporal?fp=' + c.fp).then(function (s) {
+        if (!s.seal) { out.textContent = 'No seal with this fingerprint on the chain yet.'; return; }
+        var late = s.seal.time > c.opens;
+        out.textContent = (late ? 'Sealed after it opened: ' : 'Proven: sealed in block #') + (late ? 'block #' : '') + s.seal.height + ', ' + when(s.seal.time) + '.';
+      }, function (err) { out.textContent = 'Couldn’t reach the node: ' + err.message; });
+    }
+  });
+
+  function importCapsule(obj) {
+    if (!obj || typeof obj.text !== 'string' || !/^[0-9a-f]{32}$/.test(String(obj.salt)) || !isFinite(obj.opens)) {
+      throw new Error('That isn’t a Temporal capsule.');
+    }
+    var c = { v: 1, opens: Math.floor(obj.opens), salt: obj.salt, text: obj.text, made: now() };
+    return fingerprint(c.opens, c.salt, c.text).then(function (fp) {
+      if (obj.fingerprint && obj.fingerprint !== fp) throw new Error('This capsule was changed after it was sealed: its fingerprint doesn’t match.');
+      c.fp = fp; add(c); say('mine-msg', 'Added. It opens ' + when(c.opens) + '.');
+    });
+  }
+  $('load-file').addEventListener('change', function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    f.text().then(function (t) { return importCapsule(JSON.parse(t)); })
+      .catch(function (e) { say('mine-msg', e.message || 'That file isn’t a capsule.', true); });
+    this.value = '';
+  });
+  $('paste-open').addEventListener('click', function () { $('paste-box').hidden = false; $('paste-text').focus(); });
+  $('paste-go').addEventListener('click', function () {
+    var v = $('paste-text').value.trim();
+    try {
+      if (v.indexOf('temporal1:') !== 0) throw new Error('A capsule code starts with temporal1:');
+      importCapsule(JSON.parse(unb64url(v.slice(10)))).then(function () { $('paste-text').value = ''; $('paste-box').hidden = true; },
+        function (e) { say('mine-msg', e.message, true); });
+    } catch (e) { say('mine-msg', e.message || 'That code didn’t read as a capsule.', true); }
+  });
+
+  // ---------- go back ----------
+  var backTime = $('back-time');
+  backTime.min = localInput(GENESIS);
+  backTime.max = localInput(now());
+  backTime.value = localInput(now() - 3600);
+  var arrived = null;
+  $('back-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var t = fromInput(backTime.value);
+    if (isNaN(t)) { say('back-msg', 'Pick a moment.', true); return; }
+    if (!live) {
+      $('back-msg').innerHTML = 'Going back needs a live node, and none is in reach yet. <a href="/node/">Run one</a>, or open Temporal in Graysons Wallet.';
+      return;
+    }
+    say('back-msg', 'Travelling…');
+    api('/api/explorer/at?t=' + Math.max(GENESIS, t)).then(function (r) {
+      arrived = r.block;
+      var b = r.block;
+      $('arr-when').textContent = when(b.time);
+      $('arr-title').textContent = b.height === 0 ? 'The start of the chain' : 'Block #' + b.height;
+      $('arr-miner').textContent = b.height === 0 ? 'Nobody: genesis is fixed in the code' : (b.minerName ? '@' + b.minerName.replace(/\.frostchain$/, '') : b.miner);
+      $('arr-tone').textContent = b.reso ? (b.reso.hzMilli / 1000).toFixed(2) + ' Hz, ' + b.reso.band : 'None';
+      $('arr-mined').textContent = r.minedText + ' QNR';
+      $('arr-seals').textContent = String(r.seals);
+      $('arr-play').disabled = !b.reso;
+      $('arrival').hidden = false;
+      say('back-msg', t < GENESIS ? 'That’s before the chain started, so here’s where it began.' : '');
+    }, function (err) { say('back-msg', 'The node didn’t answer: ' + err.message, true); });
+  });
+
+  // The same pulse Frostoise listens for: an 880 Hz hum swelling and fading at the block's tone.
+  var audio = { ac: null, master: null, nodes: null };
+  function pulse(hz, seconds) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return Promise.reject(new Error('this browser can’t play sound'));
+    if (!audio.ac) { audio.ac = new AC(); audio.master = audio.ac.createGain(); audio.master.gain.value = 0; audio.master.connect(audio.ac.destination); }
+    var ac = audio.ac;
+    return (ac.state === 'suspended' ? ac.resume() : Promise.resolve()).then(function () {
+      stopPulse();
+      var carrier = ac.createOscillator(); carrier.frequency.value = 880;
+      var amp = ac.createGain(); amp.gain.value = 0.5;
+      var lfo = ac.createOscillator(); lfo.frequency.value = hz;
+      var depth = ac.createGain(); depth.gain.value = 0.5;
+      lfo.connect(depth); depth.connect(amp.gain); carrier.connect(amp); amp.connect(audio.master);
+      carrier.start(); lfo.start();
+      audio.nodes = [carrier, lfo, amp, depth];
+      audio.master.gain.setTargetAtTime(0.5, ac.currentTime, 0.05);
+      return new Promise(function (res) { setTimeout(function () { stopPulse(); res(); }, seconds * 1000); });
+    });
+  }
+  function stopPulse() {
+    if (audio.master) audio.master.gain.setTargetAtTime(0, audio.ac.currentTime, 0.03);
+    var n = audio.nodes; audio.nodes = null;
+    if (n) setTimeout(function () { n.forEach(function (x) { try { if (x.stop) x.stop(); } catch (e) { } try { x.disconnect(); } catch (e) { } }); }, 150);
+  }
+  $('arr-play').addEventListener('click', function () {
+    if (!arrived || !arrived.reso) return;
+    pulse(arrived.reso.hzMilli / 1000, 4).catch(function (e) { say('back-msg', 'No sound: ' + e.message, true); });
+  });
+  var riding = false;
+  $('arr-ride').addEventListener('click', function () {
+    if (!arrived || riding) return;
+    riding = true;
+    var from = arrived.height;
+    api('/api/explorer/blocks?before=' + (from + 13) + '&count=12').then(function (list) {
+      var blocks = list.slice().reverse().filter(function (b) { return b.height > from; });
+      if (!blocks.length) { $('arr-ride-now').textContent = 'Nothing after this yet: you’re at the newest block.'; riding = false; return; }
+      var i = 0;
+      (function next() {
+        if (i >= blocks.length) { $('arr-ride-now').textContent = 'Back to #' + blocks[blocks.length - 1].height + ', ' + when(blocks[blocks.length - 1].time) + '.'; riding = false; return; }
+        var b = blocks[i++];
+        $('arr-ride-now').textContent = '#' + b.height + '  ' + when(b.time) + '  ' + (b.reso ? (b.reso.hzMilli / 1000).toFixed(2) + ' Hz' : '');
+        (b.reso ? pulse(b.reso.hzMilli / 1000, 1.5) : new Promise(function (r) { setTimeout(r, 600); })).then(next, function () { riding = false; });
+      })();
+    }, function (err) { riding = false; say('back-msg', 'The node didn’t answer: ' + err.message, true); });
+  });
+
+  render();
+  probe();
+  setInterval(render, 60000);
+})();
+</script>
+</body>
+</html>
