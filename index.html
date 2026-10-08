@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Get Qoin | finux</title>
+<meta name="description" content="Install Graysons Wallet and mine Qoin on your Android phone, only while it hears a tone. Mining opens Friday 9 October at 13:37 Eastern.">
+<meta name="theme-color" content="#f5f0fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#150e1a" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Get Qoin">
+<meta property="og:description" content="Install Graysons Wallet and mine Qoin on your Android phone, only while it hears a tone. Mining opens Friday 9 October at 13:37 Eastern.">
+<meta property="og:url" content="https://frostether.github.io/Graysons-Wallet/">
+<meta property="og:image" content="https://frostether.github.io/Graysons-Wallet/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Get Qoin. Three mining tones: 4.0, 7.83 and 11.11 Hz.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/archivo.woff" as="font" type="font/woff" crossorigin>
+<style>
+@font-face { font-family: "Archivo"; src: url("fonts/archivo.woff") format("woff");
+  font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+@font-face { font-family: "Martian Mono"; src: url("fonts/martian-mono.woff") format("woff");
+  font-weight: 100 800; font-stretch: 75% 112.5%; font-display: swap; }
+:root {
+  --ground: #f5f0fa;
+  --surface: #ffffff;
+  --sunk: #ece3f4;
+  --ink: #24142f;
+  --muted: #65537a;
+  --line: #dccfe8;
+  --plum: #5e2c8c;
+  --plum-ink: #ffffff;
+  --lamp: #c9700a;
+  --lamp-soft: rgba(232, 144, 28, 0.22);
+  --lamp-glow: rgba(232, 144, 28, 0.45);
+  --wave: #5e2c8c;
+  --wave-fill: rgba(94, 44, 140, 0.12);
+  --note: #fbf1e3;
+  --note-ink: #5b3a06;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #150e1a;
+    --surface: #20152a;
+    --sunk: #1a1122;
+    --ink: #f1eaf7;
+    --muted: #b4a5c3;
+    --line: #3a2a48;
+    --plum: #cba6f7;
+    --plum-ink: #1a0f22;
+    --lamp: #ffb547;
+    --lamp-soft: rgba(255, 181, 71, 0.18);
+    --lamp-glow: rgba(255, 181, 71, 0.5);
+    --wave: #cba6f7;
+    --wave-fill: rgba(203, 166, 247, 0.14);
+    --note: #2a1f1a;
+    --note-ink: #f3e3c8;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #150e1a;
+  --surface: #20152a;
+  --sunk: #1a1122;
+  --ink: #f1eaf7;
+  --muted: #b4a5c3;
+  --line: #3a2a48;
+  --plum: #cba6f7;
+  --plum-ink: #1a0f22;
+  --lamp: #ffb547;
+  --lamp-soft: rgba(255, 181, 71, 0.18);
+  --lamp-glow: rgba(255, 181, 71, 0.5);
+  --wave: #cba6f7;
+  --wave-fill: rgba(203, 166, 247, 0.14);
+  --note: #2a1f1a;
+  --note-ink: #f3e3c8;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  font-variation-settings: "wdth" 100;
+}
+a { color: var(--plum); text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--lamp); outline-offset: 3px; border-radius: 4px; }
+.mono { font-family: "Martian Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; }
+
+/* Header */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 18px; }
+.brand { color: var(--ink); text-decoration: none; font-weight: 800; font-size: 1.25rem; font-variation-settings: "wdth" 125; letter-spacing: -0.01em; }
+.top nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 18px; }
+.top nav a { color: var(--muted); text-decoration: none; font-size: 0.95rem; white-space: nowrap; }
+.top nav a:hover { color: var(--ink); }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 28px 8px; }
+h1 {
+  margin: 0;
+  font-size: clamp(3.1rem, 15.5vw, 7rem);
+  line-height: 0.92;
+  font-weight: 800;
+  font-variation-settings: "wdth" 125;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.lede { margin: 18px 0 0; font-size: 1.2rem; line-height: 1.5; max-width: 34em; color: var(--ink); }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin-top: 26px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 52px; padding: 0 24px; border-radius: 12px;
+  font: inherit; font-weight: 700; font-size: 1.05rem; text-decoration: none; cursor: pointer;
+  border: 2px solid var(--plum); background: var(--plum); color: var(--plum-ink);
+}
+.btn:hover { filter: brightness(1.06); }
+.btn.quiet { background: transparent; color: var(--plum); }
+.fine { margin: 14px 0 0; color: var(--muted); font-size: 0.95rem; max-width: 36em; }
+.qr { display: none; }
+
+/* Launch strip */
+.launch {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 24px;
+  margin-top: 30px; padding-block: 16px; border-block: 1px solid var(--line);
+}
+.launch p { margin: 0; }
+.launch .when { font-weight: 600; }
+.launch .local { color: var(--muted); font-size: 0.95rem; }
+.countdown { font-size: clamp(1.35rem, 5.6vw, 1.9rem); font-weight: 500; color: var(--lamp); white-space: nowrap; }
+.after { display: none; }
+.is-open .before { display: none; }
+.is-open .after { display: inline; }
+
+/* Sections */
+section { padding-block: 44px 8px; }
+h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 5.4vw, 2.4rem);
+  line-height: 1.08;
+  font-weight: 750;
+  font-variation-settings: "wdth" 112;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.intro { margin: 0; max-width: 38em; color: var(--muted); }
+
+/* Tone station: the one loud thing on the page */
+.station {
+  margin-top: 24px; padding: 18px; border-radius: 22px;
+  background: var(--surface); border: 1px solid var(--line);
+}
+.lamps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin: 0; padding: 0; border: 0; }
+.lamp {
+  position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 16px;
+  padding: 14px 16px; border-radius: 16px; border: 2px solid var(--line); background: var(--sunk); cursor: pointer;
+}
+.lamp input { position: absolute; opacity: 0; pointer-events: none; }
+.bulb {
+  grid-row: span 2; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--line); box-shadow: inset 0 0 0 3px var(--sunk);
+}
+.hz { font-size: 1.75rem; font-weight: 600; line-height: 1.05; }
+.hz small { font-size: 0.55em; font-weight: 400; margin-left: 0.25em; color: var(--muted); }
+.what { color: var(--muted); font-size: 0.95rem; line-height: 1.35; }
+.what b { color: var(--ink); font-weight: 650; }
+.lamp:has(input:checked) { border-color: var(--lamp); background: var(--lamp-soft); }
+.lamp:has(input:checked) .bulb { background: var(--lamp); box-shadow: 0 0 0 5px var(--lamp-soft), 0 0 22px 4px var(--lamp-glow); }
+.lamp:has(input:focus-visible) { outline: 3px solid var(--lamp); outline-offset: 3px; }
+.playing .lamp:has(input:checked) .bulb { box-shadow: 0 0 0 6px var(--lamp-soft), 0 0 34px 10px var(--lamp-glow); }
+
+.scope { margin: 16px 0 0; }
+.scope svg { display: block; width: 100%; height: auto; max-width: 100%; }
+.scope figcaption { margin-top: 8px; color: var(--muted); font-size: 0.92rem; }
+.env { fill: var(--wave-fill); stroke: var(--wave); stroke-width: 2.5; stroke-linejoin: round; }
+.axis { stroke: var(--line); stroke-width: 2; }
+.ticks { display: flex; justify-content: space-between; margin-top: 4px; color: var(--muted); font-size: 0.8rem; }
+.head { stroke: var(--lamp); stroke-width: 4; opacity: 0; }
+.playing .head { opacity: 1; animation: sweep 1s linear infinite; }
+@keyframes sweep { from { transform: translateX(0); } to { transform: translateX(1000px); } }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 16px; }
+.play { min-width: 12.5em; }
+.playing .play { background: transparent; color: var(--plum); }
+.vol { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 0.95rem; }
+.vol input { width: 160px; accent-color: var(--plum); }
+.howto { margin: 14px 0 0; color: var(--muted); font-size: 0.95rem; max-width: 46em; }
+.msg { margin: 10px 0 0; color: var(--lamp); font-weight: 600; min-height: 1.4em; }
+
+/* Steps: a real sequence, so numbered */
+.steps { list-style: none; counter-reset: step; margin: 24px 0 0; padding: 0; display: grid; gap: 22px; max-width: 44em; }
+.steps li { counter-increment: step; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0 14px; }
+.steps li::before {
+  content: counter(step); grid-row: span 2;
+  font-family: "Martian Mono", ui-monospace, monospace; font-weight: 600; font-size: 1.3rem; line-height: 1.6rem;
+  color: var(--lamp);
+}
+.steps b { font-size: 1.12rem; }
+.steps span { color: var(--muted); }
+.steps .mono, .pay .mono, .then .mono { font-size: 0.86em; color: var(--ink); }
+
+/* Starter bundle */
+.deal { margin-top: 24px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px 40px; align-items: start; }
+.price { margin: 0; font-weight: 800; font-variation-settings: "wdth" 125; font-size: clamp(2.6rem, 11vw, 4rem); line-height: 1; }
+.price span { display: block; margin-top: 6px; font-weight: 500; font-variation-settings: "wdth" 100; font-size: 1.15rem; color: var(--muted); }
+.opens { margin: 14px 0 0; }
+.pay { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.pay li { padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.pay h3 { margin: 0 0 4px; font-size: 1.1rem; }
+.pay p { margin: 0; color: var(--muted); }
+.then { margin: 22px 0 0; max-width: 44em; }
+.note { margin: 14px 0 0; padding: 12px 16px; border-radius: 12px; background: var(--note); color: var(--note-ink); max-width: 44em; }
+
+/* Chain facts */
+.facts { margin: 22px 0 0; display: grid; grid-template-columns: minmax(0, 1fr); max-width: 52em; }
+.facts div { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding-block: 14px; border-top: 1px solid var(--line); }
+.facts dt { color: var(--muted); font-size: 0.95rem; }
+.facts dd { margin: 0; }
+.facts .mono { font-size: 0.95em; white-space: nowrap; }
+
+.print { color: var(--muted); max-width: 46em; }
+footer { margin-top: 48px; padding-block: 22px 40px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.95rem; }
+footer a { color: var(--muted); }
+
+@media (min-width: 760px) {
+  .lamps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lamp { grid-template-columns: minmax(0, 1fr); padding: 18px; gap: 6px; }
+  .bulb { grid-row: auto; margin-bottom: 6px; }
+  .hz { font-size: 2.3rem; }
+  .station { padding: 26px; }
+  .deal { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
+  .facts div { grid-template-columns: 14em minmax(0, 1fr); gap: 24px; }
+}
+@media (min-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr) 250px; align-items: end; }
+  .qr { display: block; margin: 0; }
+  .qr .tile { display: block; padding: 10px; border-radius: 16px; background: #fff; border: 1px solid var(--line); }
+  .qr svg { display: block; width: 100%; height: auto; }
+  .qr figcaption { margin-top: 10px; color: var(--muted); font-size: 0.92rem; line-height: 1.4; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .playing .head { animation: none; opacity: 0; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="https://finux.tech/">finux</a>
+    <nav aria-label="finux">
+      <a href="https://finux.tech/projects">Projects</a>
+      <a href="https://finux.tech/opensource">Open source</a>
+      <a href="https://finux.tech/contact">Contact</a>
+      <a href="https://github.com/FrosTether">GitHub</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>Get Qoin</h1>
+        <p class="lede">Qoin is mined on phones, and only while the phone hears a tone. Install Graysons Wallet, play a tone nearby, and your phone starts mining.</p>
+        <div class="cta">
+          <a class="btn" href="https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk">Download Graysons Wallet</a>
+          <a href="https://github.com/FrosTether/Graysons-Wallet/releases/latest">Release notes and checksums</a>
+        </div>
+        <p class="fine">For Android 8.0 or newer. Your phone will ask you to allow the install, since the app isn't on the Play Store.</p>
+      </div>
+      <figure class="qr">
+        <span class="tile"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 49 49" shape-rendering="crispEdges" role="img" aria-label="QR code for the Graysons Wallet download"><rect width="49" height="49" fill="#fff"/><path fill="#1a0f22" d="M4 4h7v1h-7zM13 4h6v1h-6zM20 4h8v1h-8zM29 4h1v1h-1zM32 4h5v1h-5zM38 4h7v1h-7zM4 5h1v1h-1zM10 5h1v1h-1zM13 5h2v1h-2zM16 5h1v1h-1zM18 5h2v1h-2zM21 5h1v1h-1zM24 5h2v1h-2zM29 5h3v1h-3zM33 5h2v1h-2zM36 5h1v1h-1zM38 5h1v1h-1zM44 5h1v1h-1zM4 6h1v1h-1zM6 6h3v1h-3zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM19 6h1v1h-1zM21 6h7v1h-7zM29 6h1v1h-1zM31 6h2v1h-2zM35 6h2v1h-2zM38 6h1v1h-1zM40 6h3v1h-3zM44 6h1v1h-1zM4 7h1v1h-1zM6 7h3v1h-3zM10 7h1v1h-1zM12 7h1v1h-1zM15 7h1v1h-1zM17 7h4v1h-4zM23 7h1v1h-1zM25 7h1v1h-1zM28 7h1v1h-1zM30 7h1v1h-1zM34 7h2v1h-2zM38 7h1v1h-1zM40 7h3v1h-3zM44 7h1v1h-1zM4 8h1v1h-1zM6 8h3v1h-3zM10 8h1v1h-1zM12 8h1v1h-1zM16 8h1v1h-1zM18 8h3v1h-3zM22 8h3v1h-3zM26 8h3v1h-3zM32 8h1v1h-1zM34 8h3v1h-3zM38 8h1v1h-1zM40 8h3v1h-3zM44 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM12 9h2v1h-2zM15 9h4v1h-4zM20 9h1v1h-1zM24 9h1v1h-1zM26 9h1v1h-1zM28 9h2v1h-2zM31 9h3v1h-3zM36 9h1v1h-1zM38 9h1v1h-1zM44 9h1v1h-1zM4 10h7v1h-7zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM30 10h1v1h-1zM32 10h1v1h-1zM34 10h1v1h-1zM36 10h1v1h-1zM38 10h7v1h-7zM12 11h1v1h-1zM16 11h5v1h-5zM22 11h1v1h-1zM24 11h3v1h-3zM32 11h1v1h-1zM35 11h1v1h-1zM4 12h1v1h-1zM6 12h5v1h-5zM13 12h1v1h-1zM15 12h4v1h-4zM21 12h1v1h-1zM24 12h3v1h-3zM28 12h2v1h-2zM31 12h1v1h-1zM33 12h1v1h-1zM38 12h5v1h-5zM6 13h1v1h-1zM11 13h2v1h-2zM17 13h1v1h-1zM19 13h2v1h-2zM22 13h1v1h-1zM24 13h1v1h-1zM27 13h2v1h-2zM32 13h9v1h-9zM42 13h3v1h-3zM4 14h2v1h-2zM7 14h4v1h-4zM12 14h1v1h-1zM14 14h1v1h-1zM16 14h3v1h-3zM22 14h1v1h-1zM24 14h1v1h-1zM26 14h1v1h-1zM31 14h3v1h-3zM36 14h1v1h-1zM40 14h1v1h-1zM4 15h4v1h-4zM14 15h4v1h-4zM20 15h1v1h-1zM23 15h1v1h-1zM25 15h2v1h-2zM30 15h3v1h-3zM35 15h3v1h-3zM39 15h3v1h-3zM4 16h1v1h-1zM7 16h1v1h-1zM10 16h5v1h-5zM19 16h3v1h-3zM24 16h1v1h-1zM26 16h8v1h-8zM35 16h1v1h-1zM37 16h1v1h-1zM39 16h1v1h-1zM41 16h3v1h-3zM5 17h1v1h-1zM7 17h3v1h-3zM11 17h3v1h-3zM16 17h1v1h-1zM20 17h2v1h-2zM25 17h2v1h-2zM29 17h1v1h-1zM31 17h1v1h-1zM34 17h8v1h-8zM43 17h2v1h-2zM4 18h1v1h-1zM6 18h1v1h-1zM10 18h1v1h-1zM13 18h1v1h-1zM15 18h4v1h-4zM21 18h1v1h-1zM24 18h1v1h-1zM27 18h6v1h-6zM37 18h1v1h-1zM39 18h1v1h-1zM41 18h1v1h-1zM43 18h1v1h-1zM4 19h1v1h-1zM7 19h1v1h-1zM11 19h1v1h-1zM13 19h6v1h-6zM22 19h1v1h-1zM25 19h1v1h-1zM27 19h1v1h-1zM30 19h2v1h-2zM34 19h1v1h-1zM38 19h4v1h-4zM44 19h1v1h-1zM5 20h1v1h-1zM9 20h2v1h-2zM12 20h1v1h-1zM14 20h3v1h-3zM21 20h1v1h-1zM26 20h6v1h-6zM33 20h1v1h-1zM37 20h1v1h-1zM39 20h1v1h-1zM41 20h3v1h-3zM6 21h1v1h-1zM16 21h2v1h-2zM19 21h1v1h-1zM23 21h2v1h-2zM32 21h4v1h-4zM38 21h7v1h-7zM5 22h1v1h-1zM7 22h4v1h-4zM12 22h3v1h-3zM16 22h1v1h-1zM18 22h3v1h-3zM22 22h1v1h-1zM24 22h1v1h-1zM26 22h1v1h-1zM31 22h1v1h-1zM33 22h1v1h-1zM37 22h1v1h-1zM40 22h3v1h-3zM4 23h1v1h-1zM6 23h1v1h-1zM11 23h1v1h-1zM14 23h1v1h-1zM16 23h1v1h-1zM19 23h1v1h-1zM23 23h1v1h-1zM27 23h1v1h-1zM30 23h1v1h-1zM32 23h3v1h-3zM36 23h3v1h-3zM40 23h2v1h-2zM43 23h1v1h-1zM4 24h5v1h-5zM10 24h1v1h-1zM12 24h1v1h-1zM15 24h4v1h-4zM22 24h1v1h-1zM25 24h3v1h-3zM32 24h1v1h-1zM36 24h1v1h-1zM39 24h1v1h-1zM42 24h3v1h-3zM5 25h1v1h-1zM9 25h1v1h-1zM13 25h4v1h-4zM23 25h3v1h-3zM27 25h1v1h-1zM29 25h16v1h-16zM4 26h1v1h-1zM6 26h5v1h-5zM14 26h1v1h-1zM16 26h1v1h-1zM26 26h1v1h-1zM29 26h4v1h-4zM34 26h1v1h-1zM36 26h1v1h-1zM39 26h2v1h-2zM4 27h5v1h-5zM11 27h2v1h-2zM14 27h1v1h-1zM19 27h2v1h-2zM24 27h2v1h-2zM31 27h2v1h-2zM39 27h3v1h-3zM4 28h1v1h-1zM7 28h4v1h-4zM12 28h1v1h-1zM14 28h1v1h-1zM16 28h3v1h-3zM20 28h2v1h-2zM23 28h2v1h-2zM26 28h1v1h-1zM28 28h3v1h-3zM32 28h2v1h-2zM35 28h1v1h-1zM39 28h1v1h-1zM42 28h3v1h-3zM4 29h1v1h-1zM6 29h3v1h-3zM12 29h1v1h-1zM14 29h1v1h-1zM16 29h3v1h-3zM20 29h1v1h-1zM23 29h5v1h-5zM29 29h1v1h-1zM32 29h2v1h-2zM35 29h1v1h-1zM38 29h4v1h-4zM43 29h2v1h-2zM4 30h5v1h-5zM10 30h1v1h-1zM12 30h2v1h-2zM15 30h1v1h-1zM19 30h1v1h-1zM21 30h2v1h-2zM24 30h1v1h-1zM30 30h2v1h-2zM33 30h1v1h-1zM36 30h1v1h-1zM38 30h3v1h-3zM4 31h2v1h-2zM12 31h1v1h-1zM15 31h1v1h-1zM18 31h1v1h-1zM20 31h1v1h-1zM23 31h3v1h-3zM27 31h1v1h-1zM31 31h1v1h-1zM34 31h5v1h-5zM40 31h2v1h-2zM44 31h1v1h-1zM4 32h3v1h-3zM8 32h3v1h-3zM12 32h2v1h-2zM16 32h2v1h-2zM20 32h2v1h-2zM23 32h1v1h-1zM26 32h2v1h-2zM29 32h2v1h-2zM33 32h1v1h-1zM35 32h2v1h-2zM40 32h3v1h-3zM4 33h1v1h-1zM7 33h2v1h-2zM13 33h1v1h-1zM15 33h1v1h-1zM20 33h1v1h-1zM22 33h1v1h-1zM24 33h2v1h-2zM28 33h1v1h-1zM31 33h3v1h-3zM35 33h6v1h-6zM44 33h1v1h-1zM4 34h1v1h-1zM6 34h2v1h-2zM9 34h2v1h-2zM16 34h1v1h-1zM18 34h1v1h-1zM21 34h3v1h-3zM25 34h1v1h-1zM33 34h1v1h-1zM36 34h4v1h-4zM42 34h1v1h-1zM4 35h1v1h-1zM6 35h4v1h-4zM12 35h2v1h-2zM18 35h1v1h-1zM20 35h1v1h-1zM23 35h4v1h-4zM28 35h1v1h-1zM30 35h1v1h-1zM32 35h1v1h-1zM37 35h3v1h-3zM4 36h1v1h-1zM6 36h3v1h-3zM10 36h4v1h-4zM15 36h1v1h-1zM17 36h2v1h-2zM20 36h1v1h-1zM23 36h2v1h-2zM26 36h1v1h-1zM28 36h3v1h-3zM33 36h1v1h-1zM36 36h5v1h-5zM42 36h1v1h-1zM12 37h1v1h-1zM15 37h1v1h-1zM17 37h3v1h-3zM21 37h1v1h-1zM23 37h7v1h-7zM32 37h1v1h-1zM35 37h2v1h-2zM40 37h5v1h-5zM4 38h7v1h-7zM15 38h1v1h-1zM18 38h2v1h-2zM21 38h1v1h-1zM24 38h2v1h-2zM28 38h5v1h-5zM34 38h3v1h-3zM38 38h1v1h-1zM40 38h1v1h-1zM4 39h1v1h-1zM10 39h1v1h-1zM12 39h1v1h-1zM14 39h1v1h-1zM20 39h3v1h-3zM25 39h2v1h-2zM29 39h1v1h-1zM32 39h1v1h-1zM35 39h2v1h-2zM40 39h2v1h-2zM43 39h1v1h-1zM4 40h1v1h-1zM6 40h3v1h-3zM10 40h1v1h-1zM12 40h1v1h-1zM15 40h1v1h-1zM18 40h3v1h-3zM23 40h1v1h-1zM25 40h1v1h-1zM28 40h1v1h-1zM30 40h2v1h-2zM34 40h1v1h-1zM36 40h5v1h-5zM42 40h1v1h-1zM4 41h1v1h-1zM6 41h3v1h-3zM10 41h1v1h-1zM12 41h1v1h-1zM14 41h3v1h-3zM18 41h1v1h-1zM21 41h7v1h-7zM35 41h3v1h-3zM39 41h1v1h-1zM41 41h2v1h-2zM4 42h1v1h-1zM6 42h3v1h-3zM10 42h1v1h-1zM12 42h1v1h-1zM17 42h1v1h-1zM19 42h1v1h-1zM24 42h1v1h-1zM28 42h2v1h-2zM31 42h2v1h-2zM37 42h4v1h-4zM4 43h1v1h-1zM10 43h1v1h-1zM15 43h3v1h-3zM24 43h2v1h-2zM30 43h1v1h-1zM34 43h4v1h-4zM40 43h2v1h-2zM43 43h1v1h-1zM4 44h7v1h-7zM12 44h1v1h-1zM15 44h1v1h-1zM20 44h1v1h-1zM26 44h6v1h-6zM33 44h1v1h-1zM35 44h1v1h-1zM39 44h2v1h-2zM42 44h1v1h-1z"/></svg></span>
+        <figcaption>On a computer? Scan this with your Android phone to download the app there.</figcaption>
+      </figure>
+    </div>
+
+    <div class="launch" id="launch">
+      <p>
+        <span class="when before">Mining opens Friday 9 October at 13:37 Eastern.</span>
+        <span class="when after">Mining is open. The chain started Friday 9 October at 13:37 Eastern.</span>
+        <span class="local" id="local-time"></span>
+      </p>
+      <p class="countdown mono before" id="countdown" aria-live="off"></p>
+    </div>
+
+    <section id="tones" aria-labelledby="tones-h">
+      <h2 id="tones-h">Mine with a tone</h2>
+      <p class="intro">Frostoise, the miner that comes with Graysons Wallet, only works while your phone hears one of these tones. The tone sets how hard the phone works. Every block pays the same.</p>
+
+      <div class="station" id="station">
+        <fieldset class="lamps">
+          <legend class="sr-only">Pick a tone</legend>
+          <label class="lamp">
+            <input type="radio" name="tone" value="4">
+            <span class="bulb" aria-hidden="true"></span>
+            <span class="hz mono">4.0<small>Hz</small></span>
+            <span class="what"><b>Delta</b>. Low: up to 2 threads.</span>
+          </label>
+          <label class="lamp">
+            <input type="radio" name="tone" value="7.83" checked>
+            <span class="bulb" aria-hidden="true"></span>
+            <span class="hz mono">7.83<small>Hz</small></span>
+            <span class="what"><b>Theta</b>, the Schumann resonance. Medium: half your threads.</span>
+          </label>
+          <label class="lamp">
+            <input type="radio" name="tone" value="11.11">
+            <span class="bulb" aria-hidden="true"></span>
+            <span class="hz mono">11.11<small>Hz</small></span>
+            <span class="what"><b>Alpha</b>. High: all your threads.</span>
+          </label>
+        </fieldset>
+
+        <figure class="scope">
+          <svg viewBox="0 0 1000 240" aria-hidden="true" focusable="false">
+            <path class="env" id="env" d=""></path>
+            <line class="axis" x1="0" y1="226" x2="1000" y2="226"></line>
+            <line class="head" x1="2" y1="6" x2="2" y2="214"></line>
+          </svg>
+          <div class="ticks mono" aria-hidden="true"><span>0 s</span><span>1 s</span></div>
+          <figcaption id="scope-cap">One second of the 7.83 Hz pulse: the sound swells and fades 7.83 times.</figcaption>
+        </figure>
+
+        <div class="controls">
+          <button class="btn play" id="play" type="button" aria-pressed="false">Play 7.83 Hz</button>
+          <label class="vol" for="vol">Volume <input id="vol" type="range" min="0" max="100" value="60"></label>
+        </div>
+        <p class="howto">Play it out loud from a laptop, a speaker or another phone, with the mining phone close by. Open Frostoise, allow the microphone and wait for LOCKED. Headphones won't work, because the phone has to hear it.</p>
+        <p class="msg" id="tone-msg" role="status"></p>
+      </div>
+    </section>
+
+    <section id="start" aria-labelledby="start-h">
+      <h2 id="start-h">How to start</h2>
+      <ol class="steps">
+        <li><b>Install Graysons Wallet.</b><span>One install adds three apps: Graysons Wallet, Frostoise and MyFrost.</span></li>
+        <li><b>Create a wallet.</b><span>Tap Create wallet and write down your 25 words. They're the only way back into your coins, so keep them offline and never share them. Coming from 0.3? Uninstall it first. 0.4 is a new chain, so everyone starts with a new wallet.</span></li>
+        <li><b>Mine.</b><span>Open Frostoise, play a tone and tap Start mining. Phones on the same Wi-Fi find each other. To reach everyone else, add a public node from the <a href="https://github.com/FrosTether/Graysons-Wallet/discussions">project discussions</a>. Mined coins unlock after 12 blocks, about an hour.</span></li>
+        <li><b>Claim your name.</b><span>Pick a <span class="mono">.frostchain</span> name, so people can pay you as @you instead of a long address.</span></li>
+      </ol>
+    </section>
+
+    <section id="buy" aria-labelledby="buy-h">
+      <h2 id="buy-h">Or buy a starter bundle</h2>
+      <div class="deal">
+        <div>
+          <p class="price">10 QOIN<span>for $5</span></p>
+          <p class="opens"><span class="before">Orders open at launch, Friday 9 October at 13:37 Eastern.</span><span class="after">Orders are open.</span> Coins go out once my first mined blocks unlock, about an hour after launch.</p>
+          <div class="cta"><a class="btn quiet" href="https://finux.tech/contact">Message me</a></div>
+        </div>
+        <ul class="pay">
+          <li><h3>Chime</h3><p>Message me and I'll send my Chime details.</p></li>
+          <li><h3>Dogecoin</h3><p>$5 of DOGE at the day's rate, sent to <b>@frostcoin</b> on MyDoge. Message me for the exact amount before you send.</p></li>
+        </ul>
+      </div>
+      <p class="then">With your payment, send me your <span class="mono">.frostchain</span> name or Receive address, and I'll send the 10 QOIN there.</p>
+      <p class="note">Pay here, not in the app. MyFrost doesn't do swaps, so don't send DOGE through it.</p>
+    </section>
+
+    <section id="chain" aria-labelledby="chain-h">
+      <h2 id="chain-h">The chain</h2>
+      <dl class="facts">
+        <div><dt>Blocks</dt><dd>One every 5 minutes, so two Frost blocks for every Bitcoin Cash block.</dd></div>
+        <div><dt>Reward</dt><dd>About <span class="mono">263.88</span> QOIN a block at launch, shrinking slowly as coins are mined.</dd></div>
+        <div><dt>Unlock</dt><dd>Mined coins can be spent after 12 more blocks.</dd></div>
+        <div><dt>Mining tones</dt><dd><span class="mono">3.75–4.25</span>, <span class="mono">7.50–8.20</span> or <span class="mono">10.80–11.40</span> Hz. Every block carries a record of the reading.</dd></div>
+        <div><dt>Signatures</dt><dd>Hash-based LMS keys (RFC 8554), built to hold up against quantum computers.</dd></div>
+        <div><dt>Units</dt><dd>QOIN, divisible to 11 decimal places.</dd></div>
+        <div><dt>Source</dt><dd>Open source under GPL-3.0, on <a href="https://github.com/FrosTether/Graysons-Wallet">GitHub</a>.</dd></div>
+      </dl>
+    </section>
+
+    <section id="fine-print" aria-labelledby="print-h">
+      <h2 id="print-h">Fine print</h2>
+      <p class="print">Qoin is an early proof of concept I'm building myself. QOIN has no guaranteed value and isn't an investment. Only buy some if you'd enjoy trying a homemade blockchain, and only spend what you're fine losing. The tones are for mining. They aren't health or wellness advice.</p>
+    </section>
+  </main>
+
+  <footer>
+    <a href="https://finux.tech/">finux.tech</a>
+    <a href="https://finux.tech/contact">Contact</a>
+    <a href="https://github.com/FrosTether/Graysons-Wallet">Source and issues</a>
+    <a href="https://github.com/FrosTether">GitHub @FrosTether</a>
+  </footer>
+</div>
+<script>
+(function () {
+  'use strict';
+  var LAUNCH = 1791567420 * 1000; // Friday 9 October 2026, 13:37 Eastern: the v0.4 genesis
+  var $ = function (id) { return document.getElementById(id); };
+  var root = document.documentElement;
+
+  // ---------- launch countdown ----------
+  function two(n) { return (n < 10 ? '0' : '') + n; }
+  function tick() {
+    var left = LAUNCH - Date.now();
+    var open = left <= 0;
+    root.classList.toggle('is-open', open);
+    if (open) { return false; }
+    var s = Math.floor(left / 1000);
+    var d = Math.floor(s / 86400); s -= d * 86400;
+    var h = Math.floor(s / 3600); s -= h * 3600;
+    var m = Math.floor(s / 60); s -= m * 60;
+    $('countdown').textContent = (d > 0 ? d + (d === 1 ? ' day ' : ' days ') : '') + two(h) + ':' + two(m) + ':' + two(s);
+    return true;
+  }
+  if (tick()) {
+    var timer = setInterval(function () { if (!tick()) clearInterval(timer); }, 1000);
+  }
+  try {
+    var opts = { weekday: 'long', hour: 'numeric', minute: '2-digit' };
+    var here = new Intl.DateTimeFormat(undefined, opts).format(new Date(LAUNCH));
+    var eastern = new Intl.DateTimeFormat(undefined, Object.assign({ timeZone: 'America/New_York' }, opts)).format(new Date(LAUNCH));
+    if (here !== eastern && !root.classList.contains('is-open')) {
+      $('local-time').textContent = 'That’s ' + here + ' where you are.';
+    }
+  } catch (e) { /* no Intl time zones: the Eastern time stands alone */ }
+
+  // ---------- tone station ----------
+  // The same pulse as Frostoise's own tone player: a 220 Hz hum whose loudness swells and fades
+  // at the mining tone, which is what the phone's microphone listens for.
+  var tone = { hz: 7.83, ac: null, master: null, nodes: null, on: false };
+  var station = $('station'), play = $('play'), vol = $('vol'), msg = $('tone-msg');
+
+  function label(hz) { return (hz === 4 ? '4.0' : String(hz)) + ' Hz'; }
+
+  function drawScope(hz) {
+    // One second of the envelope, mirrored like an audio waveform. Static: nothing flashes at the tone rate.
+    var top = [], bottom = [], steps = 400, mid = 104, amp = 96;
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var e = 0.06 + 0.94 * (0.5 - 0.5 * Math.cos(2 * Math.PI * hz * t));
+      var x = (t * 1000).toFixed(1);
+      top.push(x + ' ' + (mid - amp * e).toFixed(1));
+      bottom.unshift(x + ' ' + (mid + amp * e).toFixed(1));
+    }
+    $('env').setAttribute('d', 'M' + top.join(' L') + ' L' + bottom.join(' L') + ' Z');
+    $('scope-cap').textContent = 'One second of the ' + label(hz) + ' pulse: the sound swells and fades ' + (hz === 4 ? '4' : hz) + ' times.';
+  }
+
+  function stopNodes(nodes) {
+    if (!nodes) return;
+    nodes.forEach(function (n) {
+      try { if (n.stop) n.stop(); } catch (e) { }
+      try { n.disconnect(); } catch (e) { }
+    });
+  }
+
+  function build() {
+    var ac = tone.ac;
+    var carrier = ac.createOscillator(); carrier.frequency.value = 220;
+    var amp = ac.createGain(); amp.gain.value = 0.5;
+    var lfo = ac.createOscillator(); lfo.frequency.value = tone.hz;
+    var depth = ac.createGain(); depth.gain.value = 0.5;
+    lfo.connect(depth); depth.connect(amp.gain); carrier.connect(amp); amp.connect(tone.master);
+    carrier.start(); lfo.start();
+    tone.nodes = [carrier, lfo, amp, depth];
+    tone.lfo = lfo;
+  }
+
+  function setPlaying(on) {
+    tone.on = on;
+    station.classList.toggle('playing', on);
+    play.setAttribute('aria-pressed', on ? 'true' : 'false');
+    play.textContent = on ? 'Stop the tone' : 'Play ' + label(tone.hz);
+  }
+
+  function start() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) { msg.textContent = 'This browser can’t play the tone. Try Chrome, Firefox or Safari.'; return; }
+    try {
+      if (!tone.ac) {
+        tone.ac = new AC();
+        tone.master = tone.ac.createGain();
+        tone.master.gain.value = 0;
+        tone.master.connect(tone.ac.destination);
+      }
+      var go = function () {
+        build();
+        tone.master.gain.setTargetAtTime(Number(vol.value) / 100, tone.ac.currentTime, 0.08);
+        setPlaying(true);
+        msg.textContent = '';
+      };
+      if (tone.ac.state === 'suspended') tone.ac.resume().then(go); else go();
+    } catch (e) {
+      msg.textContent = 'The tone didn’t start: ' + e.message;
+    }
+  }
+
+  function stop() {
+    var nodes = tone.nodes;
+    tone.nodes = null; tone.lfo = null;
+    if (tone.master) tone.master.gain.setTargetAtTime(0, tone.ac.currentTime, 0.05);
+    setTimeout(function () { stopNodes(nodes); }, 300);
+    setPlaying(false);
+  }
+
+  play.addEventListener('click', function () { if (tone.on) stop(); else start(); });
+  vol.addEventListener('input', function () {
+    if (tone.master && tone.on) tone.master.gain.setTargetAtTime(Number(vol.value) / 100, tone.ac.currentTime, 0.05);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="tone"]'), function (r) {
+    r.addEventListener('change', function () {
+      if (!r.checked) return;
+      tone.hz = Number(r.value);
+      drawScope(tone.hz);
+      if (tone.on && tone.lfo) tone.lfo.frequency.setTargetAtTime(tone.hz, tone.ac.currentTime, 0.05);
+      setPlaying(tone.on);
+    });
+  });
+  drawScope(tone.hz);
+  setPlaying(false);
+})();
+</script>
+</body>
+</html>
