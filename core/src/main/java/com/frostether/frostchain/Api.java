@@ -22,6 +22,11 @@ public final class Api {
         void startSensor(String str) throws Exception;
 
         void stopSensor();
+
+        /** How hot the device is, 0 (fine) to 3 (too hot to mine). See Miner.ThermalSource. */
+        default int thermalLevel() {
+            return 0;
+        }
     }
 
     public Api(Node node, Platform platform) {
@@ -31,6 +36,12 @@ public final class Api {
             @Override // com.frostether.frostchain.Miner.ResonanceSource
             public Resonance.Reading latest() {
                 return Api.this.platform.latestReading();
+            }
+        });
+        node.miner.setThermal(new Miner.ThermalSource() {
+            @Override // com.frostether.frostchain.Miner.ThermalSource
+            public int level() {
+                return Api.this.platform.thermalLevel();
             }
         });
     }

@@ -21,6 +21,9 @@ public final class Miner {
     private Thread refresher;
     private volatile boolean running;
     private volatile ResonanceSource source;
+    private volatile ThermalSource thermal;
+    /** The last heat level read: 0 fine to 3 too hot. */
+    private volatile int heat;
     private volatile int threads = 1;
     /** How many of the threads hash right now: set by the band the phone is locked on (v0.4). */
     private volatile int active = 1;
@@ -39,6 +42,14 @@ public final class Miner {
 
     public interface ResonanceSource {
         Resonance.Reading latest();
+    }
+
+    /**
+     * How hot the phone is, so mining on high doesn't cook it: 0 fine, 1 warm (halve the threads),
+     * 2 hot (one thread), 3 too hot (pause until it cools).
+     */
+    public interface ThermalSource {
+        int level();
     }
 
     static final class Template {
@@ -70,6 +81,34 @@ public final class Miner {
 
     public void setSource(ResonanceSource resonanceSource) {
         this.source = resonanceSource;
+    }
+
+    public void setThermal(ThermalSource thermalSource) {
+        this.thermal = thermalSource;
+    }
+
+    private int readHeat() {
+        ThermalSource t = this.thermal;
+        if (t == null) {
+            return 0;
+        }
+        try {
+            return Math.max(0, Math.min(3, t.level()));
+        } catch (RuntimeException e) {
+            return 0;
+        }
+    }
+
+    /** Fewer threads as the phone heats up: warm halves them, hot leaves one. Level 3 pauses mining. */
+    public static int coolCap(int heat, int active) {
+        switch (heat) {
+            case 0:
+                return active;
+            case 1:
+                return Math.max(1, (active + 1) / 2);
+            default:
+                return Math.min(1, active);
+        }
     }
 
     public void setListener(Listener listener) {
@@ -179,6 +218,7 @@ public final class Miner {
         objArr[15] = this.lastBlock;
         Map<String, Object> o = Json.o(objArr);
         o.put("active", Long.valueOf(this.active));
+        o.put("heat", Long.valueOf(this.heat));
         o.put("band", this.band >= 0 ? Resonance.BAND_NAMES[this.band] : "");
         o.put("level", this.band == 0 ? "low" : this.band == 1 ? "medium" : this.band == 2 ? "high" : "");
         if (this.payout != null) {
@@ -243,6 +283,12 @@ public final class Miner {
             this.gateWhy = "resonance reading is stale";
             return null;
         }
+        int heatNow = readHeat();
+        this.heat = heatNow;
+        if (heatNow >= 3) {
+            this.gateWhy = "cooling down: the phone is too hot to mine";
+            return null;
+        }
         Block tip = this.node.chain.tip();
         Block block = new Block();
         block.height = tip.height + 1;
@@ -261,8 +307,9 @@ public final class Miner {
         block.resoHash = block.reso.hash();
         int locked = latest.band >= 0 ? latest.band : Resonance.lockBand(latest.peakHz);
         this.band = locked;
-        this.active = threadsForBand(locked, this.threads);
-        this.gateWhy = "mining: locked on " + String.format(Locale.ROOT, "%.2f", Double.valueOf(latest.peakHz)) + " Hz";
+        this.active = coolCap(heatNow, threadsForBand(locked, this.threads));
+        this.gateWhy = "mining: locked on " + String.format(Locale.ROOT, "%.2f", Double.valueOf(latest.peakHz)) + " Hz"
+                + (heatNow > 0 ? ", fewer threads while the phone cools" : "");
         return new Template(block);
     }
 

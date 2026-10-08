@@ -756,7 +756,7 @@
     var m = s.miner;
     if (S.lastAccepted != null && m.accepted > S.lastAccepted) toast('❄ Found block ' + s.node.height + '!');
     S.lastAccepted = m.accepted;
-    $('mine-tag').textContent = m.running ? (m.mining ? 'mining' + (m.level ? ' · ' + m.level + ' (' + m.active + ' of ' + m.threads + ')' : '') : 'waiting for a tone') : 'stopped';
+    $('mine-tag').textContent = m.running ? (m.mining ? 'mining' + (m.level ? ' · ' + m.level + ' (' + m.active + ' of ' + m.threads + ')' : '') + (m.heat > 0 ? ' · cooling' : '') : (m.heat >= 3 ? 'cooling down' : 'waiting for a tone')) : 'stopped';
     $('mine-tag').className = 'tag' + (m.mining ? ' frost' : '');
     $('mine-btn').textContent = m.running ? 'Stop mining' : 'Start mining';
     $('m-rate').textContent = rate(m.mining ? m.hashrate : 0);

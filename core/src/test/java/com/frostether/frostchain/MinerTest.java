@@ -105,6 +105,36 @@ public class MinerTest {
     }
 
     @Test
+    public void heatBacksOffTheThreads() {
+        assertEquals(8, Miner.coolCap(0, 8)); // fine: as the tone says
+        assertEquals(4, Miner.coolCap(1, 8)); // warm: half
+        assertEquals(1, Miner.coolCap(1, 1));
+        assertEquals(1, Miner.coolCap(2, 8)); // hot: one thread
+    }
+
+    @Test
+    public void aHotPhonePausesThenCoolsBackToMining() throws Exception {
+        TestKit.FakeClock clock = new TestKit.FakeClock(Consensus.GENESIS_TIME + 300);
+        Node node = new Node(Files.createTempDirectory("miner-hot").toFile(), clock);
+        final int[] heat = {3};
+        node.miner.setSource(() -> lockedReading(clock.nowSec() * 1000, 11.11));
+        node.miner.setThermal(() -> heat[0]);
+        node.miner.start(TestKit.id(TestKit.key(57)), 4);
+        try {
+            assertTrue(waitFor(() -> String.valueOf(node.miner.status().get("gate")).startsWith("cooling down"), 10_000));
+            assertEquals(Boolean.FALSE, node.miner.status().get("mining"));
+
+            heat[0] = 1;
+            node.miner.refresh();
+            assertTrue(waitFor(() -> Boolean.TRUE.equals(node.miner.status().get("mining")), 10_000));
+            assertEquals(2L, node.miner.status().get("active")); // high would use all 4; warm halves it
+            assertEquals(1L, node.miner.status().get("heat"));
+        } finally {
+            node.miner.stop();
+        }
+    }
+
+    @Test
     public void startNeedsAPayoutAddress() throws Exception {
         Node node = new Node(Files.createTempDirectory("miner2").toFile(), null);
         try {

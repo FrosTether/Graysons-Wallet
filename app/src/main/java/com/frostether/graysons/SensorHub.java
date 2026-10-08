@@ -2,6 +2,7 @@ package com.frostether.graysons;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -11,6 +12,7 @@ import android.media.AudioRecord;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import com.frostether.frostchain.Api;
@@ -193,6 +195,43 @@ final class SensorHub implements Api.Platform {
     @Override // com.frostether.frostchain.Api.Platform
     public String name() {
         return "Android " + Build.VERSION.RELEASE + " · " + Build.MANUFACTURER + " " + Build.MODEL;
+    }
+
+    /** Battery temperatures (°C) where heat levels 1, 2 and 3 start. A level holds until 2 °C below its start. */
+    private static final double[] HEAT_START = {39.0d, 42.0d, 45.0d};
+    private volatile int heat;
+
+    /**
+     * How hot the phone is, for Frostoise to back off: 1 halves the threads, 2 leaves one, 3 pauses.
+     * Uses the battery temperature, and on Android 10+ the system's own thermal status too.
+     */
+    @Override // com.frostether.frostchain.Api.Platform
+    public int thermalLevel() {
+        int level = 0;
+        try {
+            Intent battery = this.ctx.registerReceiver(null, new IntentFilter("android.intent.action.BATTERY_CHANGED"));
+            int tenths = battery == null ? Integer.MIN_VALUE : battery.getIntExtra("temperature", Integer.MIN_VALUE);
+            if (tenths != Integer.MIN_VALUE) {
+                double celsius = tenths / 10.0d;
+                for (int i = 0; i < HEAT_START.length; i++) {
+                    double start = i < this.heat ? HEAT_START[i] - 2.0d : HEAT_START[i];
+                    if (celsius >= start) {
+                        level = i + 1;
+                    }
+                }
+            }
+            if (Build.VERSION.SDK_INT >= 29) {
+                PowerManager powerManager = (PowerManager) this.ctx.getSystemService("power");
+                if (powerManager != null) {
+                    // LIGHT 1, MODERATE 2, SEVERE and worse 3.
+                    level = Math.max(level, Math.min(3, powerManager.getCurrentThermalStatus()));
+                }
+            }
+        } catch (RuntimeException e) {
+            Log.w("frostoise", "thermal: " + e);
+        }
+        this.heat = level;
+        return level;
     }
 
     boolean micRunning() {
