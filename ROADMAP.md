@@ -8,6 +8,7 @@ Monero is trusted because its code is open, it launched with no premine and no s
 - Two phone nodes on Frostchain.
 - Tone-gated mining at 7.83 Hz on phones.
 - Public accounts with `.frostchain` names and LMS post-quantum signatures.
+- Next: the [v0.4 relaunch](docs/v0.4-plan.md), a new chain with a fair block 1, three tone bands, a sound layer and a visual explorer.
 
 ## 1. Open and reachable
 
