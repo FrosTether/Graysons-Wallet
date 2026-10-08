@@ -489,9 +489,6 @@ public final class Wallets {
             if (!Address.validName(strip)) {
                 throw new IllegalArgumentException("names are 3-24 letters, digits or inner hyphens (no double hyphens)");
             }
-            if (strip.equals(Consensus.FOUNDER_NAME) && this.node.chain.lookupName(strip) == null) {
-                throw new IllegalArgumentException(strip + ".frostchain is reserved: it goes to whoever mines block 1 with Frostoise");
-            }
             if (this.node.chain.lookupName(strip) != null || this.node.mempool.nameTaken(strip)) {
                 throw new IllegalArgumentException(strip + ".frostchain is taken");
             }

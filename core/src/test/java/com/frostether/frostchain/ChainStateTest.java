@@ -24,10 +24,16 @@ public class ChainStateTest {
     }
 
     @Test
-    public void blockOneMinerGetsTheFounderName() {
-        ChainState s = funded();
-        assertArrayEquals(TestKit.id(ALICE), s.lookupName("jacobfrost"));
-        assertEquals("jacobfrost", s.account(TestKit.id(ALICE)).name);
+    public void theFounderNameBelongsToItsAddressFromGenesis() {
+        ChainState s = new ChainState();
+        assertArrayEquals(Consensus.founderAccount(), s.lookupName("jacobfrost"));
+        assertEquals("jacobfrost", s.account(Consensus.founderAccount()).name);
+        // Mining block 1 doesn't come with a name any more.
+        s = funded();
+        assertNull(s.account(TestKit.id(ALICE)).name);
+        assertArrayEquals(Consensus.founderAccount(), s.lookupName("jacobfrost"));
+        // A copy keeps it.
+        assertArrayEquals(Consensus.founderAccount(), s.copy().lookupName("jacobfrost"));
     }
 
     @Test
@@ -91,15 +97,16 @@ public class ChainStateTest {
     }
 
     @Test
-    public void namesAreClaimedOnceAndTheFounderNameIsReserved() {
+    public void namesAreClaimedOnceAndTheFounderNameIsTaken() {
         ChainState s = funded();
         assertNull(s.apply(TestKit.send(ALICE, 0, TestKit.id(BOB), 10 * QOIN, CHAIN)));
-        assertEquals("jacobfrost.frostchain is reserved for the miner of block 1", s.apply(TestKit.claimName(BOB, 0, "jacobfrost", CHAIN)));
+        assertEquals("name already taken", s.apply(TestKit.claimName(BOB, 0, "jacobfrost", CHAIN)));
         assertNull(s.apply(TestKit.claimName(BOB, 0, "oofmaster", CHAIN)));
         assertArrayEquals(TestKit.id(BOB), s.lookupName("oofmaster"));
         assertEquals(10 * QOIN - Consensus.MIN_FEE, s.account(TestKit.id(BOB)).balance);
         assertEquals("this account already has a name", s.apply(TestKit.claimName(BOB, 1, "another", CHAIN)));
-        assertEquals("this account already has a name", s.apply(TestKit.claimName(ALICE, 1, "oofmaster", CHAIN)));
+        // Alice mined block 1 but has no name: the founder name was never hers to get.
+        assertEquals("name already taken", s.apply(TestKit.claimName(ALICE, 1, "oofmaster", CHAIN)));
     }
 
     @Test

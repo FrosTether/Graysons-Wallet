@@ -31,7 +31,8 @@ public class ChainTest {
             clock.now += 1800;
         }
         assertEquals(13, chain.height());
-        assertArrayEquals(miner, chain.lookupName("jacobfrost"));
+        assertArrayEquals(Consensus.founderAccount(), chain.lookupName("jacobfrost"));
+        assertEquals(null, chain.nameOf(miner));
 
         // Block 1's reward (a normal one since v0.4) unlocked at height 13. Blocks 2 to 13 are still maturing.
         ChainState.Account a = chain.account(miner);

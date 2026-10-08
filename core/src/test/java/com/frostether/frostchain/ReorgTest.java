@@ -35,8 +35,8 @@ public class ReorgTest {
             }
             assertEquals(2, a.chain.height());
             assertEquals(b.chain.tip().hashHex(), a.chain.tip().hashHex());
-            // Block 1 now belongs to B's miner, including the founder name.
-            assertEquals(Bytes.hex(minerB), Bytes.hex(a.chain.lookupName("jacobfrost")));
+            // Block 1 now belongs to B's miner. The founder name stays with its address on both forks.
+            assertEquals(Bytes.hex(Consensus.founderAccount()), Bytes.hex(a.chain.lookupName("jacobfrost")));
             assertTrue(a.chain.account(minerA) == null || a.chain.account(minerA).immature == 0);
         } finally {
             a.stop();

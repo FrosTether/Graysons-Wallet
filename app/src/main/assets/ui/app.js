@@ -333,7 +333,7 @@
     var k = e.kind, inc = k === 'received' || k === 'mined', icon = { sent: '↗', received: '↙', mined: '❄', name: '@', rekey: '⟳' }[k] || '•';
     var other = nameFn ? nameFn(e.otherText) : e.otherText;
     var title = { sent: 'To ' + other, received: 'From ' + other, mined: 'Mined block ' + e.height,
-      name: (e.height === 1 && e.name === 'jacobfrost' ? 'Got ' : 'Claimed ') + (nameFn ? '@' + e.name : e.name + '.frostchain'), rekey: 'Rotated to a fresh key' }[k];
+      name: 'Claimed ' + (nameFn ? '@' + e.name : e.name + '.frostchain'), rekey: 'Rotated to a fresh key' }[k];
     var sw = nameFn && (k === 'sent' || k === 'received') ? /^swap ([0-9.]+) DOGE/.exec(e.memo || '') : null;
     if (sw) { icon = '⇄'; title = k === 'received' ? 'Bought with ' + sw[1] + ' DOGE' : 'Swap: ' + sw[1] + ' DOGE from ' + other; }
     var when = e.pending ? 'pending' : ago(e.time);
@@ -448,7 +448,7 @@
     call('node.blocks', { count: 8 }).then(function (l) {
       $('blocks').innerHTML = l.length ? l.map(function (b) {
         return '<li><span>#' + b.height + ' · ' + esc(b.miner) + '</span><span>' + esc(b.paid) + ' QOIN · ' + b.hz.toFixed(2) + ' Hz ' + esc(b.sensor) + '<br>' + ago(b.time) + '</span></li>';
-      }).join('') : '<li class="muted small">No blocks yet. Block 1 pays the normal reward and gives its miner the name jacobfrost.frostchain.</li>';
+      }).join('') : '<li class="muted small">No blocks yet. Mining opens Friday 9 October at 13:37 Eastern.</li>';
     });
     loadExplorer();
   }
@@ -490,7 +490,7 @@
         '<dt>Reward</dt><dd>' + esc(b.paid) + ' QOIN</dd>' +
         '<dt>Transactions</dt><dd>' + b.txs + '</dd>' +
         '<dt>Hash</dt><dd class="mono">' + esc(b.hash) + '</dd>'
-      : '<dt>Blocks</dt><dd>None yet. Block 1 pays the normal reward and gives its miner the name jacobfrost.frostchain.</dd>';
+      : '<dt>Blocks</dt><dd>None yet. Mining opens Friday 9 October at 13:37 Eastern.</dd>';
   }
   function rezStart() { if (!REZ.raf) REZ.raf = requestAnimationFrame(rezFrame); }
   function rezFrame(now) {

@@ -1,5 +1,6 @@
 package com.frostether.frostchain;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -28,7 +29,8 @@ public class WalletFlowTest {
             TestKit.mine(node, clock, miner);
             clock.now += 1800;
         }
-        assertEquals("jacobfrost", node.chain.nameOf(miner));
+        assertEquals(null, node.chain.nameOf(miner));
+        assertArrayEquals(Consensus.founderAccount(), node.chain.lookupName("jacobfrost"));
 
         // Preview, then send 250 QOIN to the friend by their raw address.
         Map<String, Object> preview = w.send(Address.raw(friend), "250", "first send", true);

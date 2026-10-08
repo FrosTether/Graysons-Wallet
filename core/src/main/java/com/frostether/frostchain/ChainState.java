@@ -13,6 +13,13 @@ public final class ChainState {
     final TreeMap<Long, List<Credit>> locked = new TreeMap<>();
     public long height = -1;
 
+    /** A new state, at genesis: the founder name is already registered (v0.4). */
+    public ChainState() {
+        byte[] founder = Consensus.founderAccount();
+        getOrCreate(founder).name = Consensus.FOUNDER_NAME;
+        this.names.put(Consensus.FOUNDER_NAME, Bytes.hex(founder));
+    }
+
     public static final class Account {
         public long balance;
         public final byte[] id;
@@ -134,9 +141,6 @@ public final class ChainState {
             return "insufficient funds";
         }
         if (tx.type == Tx.NAME) {
-            if (tx.name.equals(Consensus.FOUNDER_NAME)) {
-                return "jacobfrost.frostchain is reserved for the miner of block 1";
-            }
             if (account != null && account.name != null) {
                 return "this account already has a name";
             }
@@ -180,13 +184,6 @@ public final class ChainState {
 
     public void beginBlock(long j, byte[] bArr) {
         unlock(j);
-        if (j == 1 && !this.names.containsKey(Consensus.FOUNDER_NAME)) {
-            Account orCreate = getOrCreate(bArr);
-            if (orCreate.name == null) {
-                orCreate.name = Consensus.FOUNDER_NAME;
-                this.names.put(Consensus.FOUNDER_NAME, Bytes.hex(bArr));
-            }
-        }
     }
 
     void unlock(long j) {

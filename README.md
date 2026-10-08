@@ -58,14 +58,15 @@ Phones on the same Wi-Fi find each other automatically. To reach anyone else, op
 | Block time | 5 minutes, LWMA difficulty over 60 blocks |
 | Proof of work | double SHA-256 |
 | Block reward | (2⁶⁴ − coins mined so far) ÷ 2²⁰ × 1.5, about 263.88 QOIN at launch |
-| Block 1 | Mined like any block, at the normal reward. Its miner gets the name `jacobfrost.frostchain` |
+| Block 1 | Mined like any block, at the normal reward |
+| Founder name | `jacobfrost.frostchain` belongs to `fc72wlnkh65dywzf6n3ap6xxm7dpl5axhzxv5k` from genesis, and the genesis block says so |
 | Mined coins unlock | after 12 blocks |
 | Minimum fee | 0.0001 QOIN |
 | Signatures | LMS_SHA256_M32_H10 with LMOTS_SHA256_N32_W4 (RFC 8554), 1,024 per key, automatic key rotation |
 | Accounts | public, with optional `.frostchain` names |
 | Resonance proof | 3.75–4.25, 7.50–8.20 or 10.80–11.40 Hz, peak ≥ 10× noise, 4–60 s window, ≥ 200 samples at ≥ 16 Hz and above twice the tone, at most 15 minutes old |
 | P2P | HTTP on TCP 7830, LAN discovery on UDP 7830 |
-| Genesis | 9 October 2026, 13:37 Eastern. Chain ID `303c4abcc5626d0b…` |
+| Genesis | 9 October 2026, 13:37 Eastern. Chain ID `5f8a7ec5b9db1444…` |
 
 The emission curve follows CryptoNote and Wownero. Signatures and accounts do not: there are no ring signatures or stealth addresses, so transfers are public.
 

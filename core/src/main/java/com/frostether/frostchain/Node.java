@@ -680,9 +680,6 @@ public final class Node {
             throw new IllegalArgumentException("\"" + str.trim() + "\" isn't a valid .frostchain name or address");
         }
         byte[] lookupName = this.chain.lookupName(strip);
-        if (lookupName == null && strip.equals(Consensus.FOUNDER_NAME)) {
-            throw new IllegalArgumentException(strip + ".frostchain is reserved: it goes to whoever mines block 1");
-        }
         if (lookupName == null) {
             throw new IllegalArgumentException(strip + ".frostchain isn't registered yet");
         }

@@ -10,6 +10,16 @@ public final class Consensus {
     public static final int COINBASE_MATURITY = 12;
     public static final int EMISSION_SPEED_FACTOR = 20;
     public static final String FOUNDER_NAME = "jacobfrost";
+    /**
+     * jacobfrost.frostchain belongs to this address from genesis. 0.3.x gave the name to whoever mined block 1,
+     * which anyone running the public app could do. The genesis marker names it, so it's part of the chain ID.
+     */
+    public static final String FOUNDER_ADDRESS = "fc72wlnkh65dywzf6n3ap6xxm7dpl5axhzxv5k";
+    private static final byte[] FOUNDER_ACCOUNT = Address.decodeRaw(FOUNDER_ADDRESS);
+
+    public static byte[] founderAccount() {
+        return FOUNDER_ACCOUNT.clone();
+    }
     public static final long FUTURE_TIME_LIMIT = 900;
     /**
      * v0.4 relaunch: Friday 9 October 2026, 13:37 Eastern. Mining opens at this moment, and changing it

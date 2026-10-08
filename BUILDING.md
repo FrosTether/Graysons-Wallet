@@ -87,7 +87,7 @@ The suite takes a few minutes, because several tests mine real blocks:
 | `NodeSyncTest` | Two nodes syncing over HTTP |
 | `ReorgTest` | Two forks meeting, with the lighter one switching over |
 | `WalletFlowTest` | Mine into a wallet, send by address and by name, claim a name |
-| `MinerTest` | The real Frostoise miner: waits for the tone, then finds a block |
+| `MinerTest` | The real Frostoise miner: waits for launch and the tone, finds a block, backs off when the phone is hot |
 
 ## The server node
 
@@ -105,7 +105,7 @@ The app shows it under **Graysons Wallet → Node**, and `frostnode` prints it w
 | Version | Chain ID | Where |
 |---|---|---|
 | 0.3.x | `98ede167f7885dae…` | The phones today. The exact rebuild is the [`v0.3.0-source`](https://github.com/FrosTether/Graysons-Wallet/tree/v0.3.0-source) branch. |
-| 0.4 | `303c4abcc5626d0b…` | This branch: the relaunch. Genesis is Friday 9 October 2026, 13:37 Eastern. |
+| 0.4 | `5f8a7ec5b9db1444…` | This branch: the relaunch. Genesis is Friday 9 October 2026, 13:37 Eastern. |
 
 `ConsensusTest` fails if a change would alter the chain ID.
 

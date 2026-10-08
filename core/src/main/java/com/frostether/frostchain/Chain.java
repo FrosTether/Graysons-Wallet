@@ -456,15 +456,6 @@ public final class Chain {
         event.amount = block.paid;
         event.txid = block.hashHex();
         push(block.miner, event);
-        if (block.height == 1) {
-            Event event2 = new Event();
-            event2.height = 1L;
-            event2.time = block.time;
-            event2.kind = "name";
-            event2.name = Consensus.FOUNDER_NAME;
-            event2.txid = block.hashHex();
-            push(block.miner, event2);
-        }
         for (Tx tx : block.txs) {
             String hex = Bytes.hex(tx.id(this.chainId));
             Event event3 = new Event();

@@ -441,6 +441,7 @@ public final class Resonance {
     }
 
     public static byte[] genesisMarker() {
-        return Sha256.hash(Bytes.utf8("Frostchain genesis: Schumann resonance 7.83 Hz, 9 Oct 2026 13:37 ET"));
+        return Sha256.hash(Bytes.utf8("Frostchain genesis: Schumann resonance 7.83 Hz, 9 Oct 2026 13:37 ET. "
+                + Consensus.FOUNDER_NAME + Address.SUFFIX + " is " + Consensus.FOUNDER_ADDRESS));
     }
 }
