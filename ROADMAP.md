@@ -40,7 +40,7 @@ Monero is trusted because its code is open, it launched with no premine and no s
 ## 5. Ecosystem
 
 - [ ] **Oofcoins**: reward points for finux games like FrostGames and FrostMines. They're earned and spent inside games only. They're never sold and never swap for QOIN, which keeps them safe for kids. Start them off-chain, then move them onto Frostchain as a balance that can't be transferred.
-- [ ] **One wrapped QOIN on one outside chain**, once Frostchain has outside users. GCII on Ethereum Classic is already designed as a 1:1 wrapper, and Solana is the alternative. Pick one. A wrapper is a vault: every wrapped coin must be backed by QOIN locked at a public Frostchain address, and the key that mints wrapped coins is the most valuable key in the project.
+- [ ] **GCII, wrapped QOIN on Ethereum Classic**, once Frostchain has outside users. It's already designed as a 1:1 wrapper and stays the only one. A wrapper is a vault: every wrapped coin must be backed by QOIN locked at a public Frostchain address, and the key that mints wrapped coins is the most valuable key in the project.
 
 ## How to help
 
