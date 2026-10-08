@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Builds the Get Qoin page.
+"""Builds the Qoin site: Get Qoin, Run a node, QNR vs XMR and Temporal.
 
-    python3 site/build.py [out-dir] [page-url]
+    python3 site/build.py [out-dir] [site-url]
 
-Writes two versions into out-dir (default site/out):
-  pages/     the hosted page: index.html with the fonts and og.png beside it
-  preview/   getqoin.html, the same page as a body fragment that loads its fonts from Google Fonts
-
-page-url is the address the page is served at, for link previews
-(default https://get.finux.tech/, which also writes the CNAME file GitHub Pages needs). og.png comes from tools/og.js, which needs Playwright.
+Writes out-dir/pages (default site/out/pages): one folder per page, the fonts, the link-preview images, the
+node installer and, for a custom domain, the CNAME file GitHub Pages needs. site-url is where it's served
+(default https://get.finux.tech/). The preview images come from tools/og.js, which needs Playwright.
 """
+import hashlib
 import html
 import pathlib
 import shutil
@@ -18,21 +16,61 @@ import sys
 
 SITE = pathlib.Path(__file__).resolve().parent
 REPO = SITE.parent
-APK_URL = "https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk"
-RELEASE_URL = "https://github.com/FrosTether/Graysons-Wallet/releases/latest"
-TITLE = "Get Qoin | finux"
-DESCRIPTION = ("Install Graysons Wallet and mine Qoin on your Android phone, only while it hears a tone. "
-               "Mining is open.")
-GOOGLE_FONTS = ("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900"
-                "&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap")
+RELEASE = "https://github.com/FrosTether/Graysons-Wallet/releases/latest"
+APK_URL = RELEASE + "/download/GraysonsWallet.apk"
+NODE_URL = RELEASE + "/download/frostnode.zip"
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
         "%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E")
-
-FONT_FACES = """@font-face { font-family: "Archivo"; src: url("fonts/archivo.woff") format("woff");
+FONT_FACES = """@font-face { font-family: "Archivo"; src: url("/fonts/archivo.woff") format("woff");
   font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
-@font-face { font-family: "Martian Mono"; src: url("fonts/martian-mono.woff") format("woff");
+@font-face { font-family: "Martian Mono"; src: url("/fonts/martian-mono.woff") format("woff");
   font-weight: 100 800; font-stretch: 75% 112.5%; font-display: swap; }
 """
+
+PAGES = [
+    dict(slug="", folder="getqoin", nav="Get Qoin", title="Get Qoin | finux",
+         description="Install Graysons Wallet and mine Qoin (QNR) on your Android phone, only while it hears a tone. Mining is open.",
+         og="home", og_query="t=Get Qoin&l=Mined on phones, only while they hear a tone.",
+         og_alt="Get Qoin. Three mining tones: 4.0, 7.83 and 11.11 Hz."),
+    dict(slug="node", folder="node", nav="Nodes", title="Run a node | Qoin",
+         description="Keep Frostchain online while phones sleep: run frostnode on a server, a laptop or a spare phone, "
+                     "and show the chain live in FrostExplorer.",
+         og="node", og_query="t=Run a node&l=Keep the chain online while phones sleep.&lamps=0"
+                            "&f=One command on a server. FrostExplorer built in.",
+         og_alt="Run a node: keep the chain online while phones sleep."),
+    dict(slug="qnr", folder="qnr", nav="QNR vs XMR", title="QNR vs XMR | Qoin",
+         description="How Qoin (QNR) compares with Monero (XMR), and what it could take next from Monero, Zcash and Dash.",
+         og="qnr", og_query="t=QNR vs XMR&l=Monero's emission curve, quantum-safe keys and tone mining.&lamps=0"
+                           "&f=Side by side, as of 8 October 2026.",
+         og_alt="QNR vs XMR, side by side."),
+    dict(slug="temporal", folder="temporal", nav="Temporal", title="Temporal | Qoin",
+         description="A time machine for Frostchain: seal a message for the future, or go back to any block. "
+                     "Each seal burns 1 QNR as gas.",
+         og="temporal", og_query="t=Temporal&l=A time machine for Frostchain. It runs on QNR.&lamps=0"
+                                "&f=Seal a message for the future. Go back to any block.",
+         og_alt="Temporal: a time machine for Frostchain.",
+         scripts=[REPO / "app/src/main/assets/ui/qr.js"]),
+]
+
+
+def burn_address():
+    """Temporal's burn address: the same derivation as Temporal.BURN_ADDRESS in the chain core."""
+    b32 = "abcdefghijklmnopqrstuvwxyz234567"
+
+    def base32(data):
+        out, acc, bits = [], 0, 0
+        for byte in data:
+            acc, bits = (acc << 8) | byte, bits + 8
+            while bits >= 5:
+                out.append(b32[(acc >> (bits - 5)) & 31])
+                bits -= 5
+        if bits:
+            out.append(b32[(acc << (5 - bits)) & 31])
+        return "".join(out)
+
+    account = hashlib.sha256(b"frostchain/burn" + b"temporal/v1").digest()[:20]
+    check = base32(hashlib.sha256(b"frostchain/address-checksum" + account).digest()[:5])[:4]
+    return "fc" + base32(account) + check
 
 
 def qr_svg(text):
@@ -42,62 +80,112 @@ def qr_svg(text):
     return out.stdout
 
 
-def body():
-    b = (SITE / "getqoin/body.html").read_text()
-    b = b.replace("{{APK_URL}}", APK_URL).replace("{{RELEASE_URL}}", RELEASE_URL)
-    b = b.replace("{{QR_SVG}}", qr_svg(APK_URL))
-    assert "{{" not in b, "unfilled placeholder"
-    return b
+def header(active):
+    links = "\n".join(
+        f'      <a href="/{p["slug"] + "/" if p["slug"] else ""}"'
+        + (' aria-current="page"' if p["slug"] == active else "") + f'>{p["nav"]}</a>'
+        for p in PAGES)
+    return f"""  <header class="top">
+    <a class="brand" href="/">Qoin <span class="tick mono">QNR</span></a>
+    <nav aria-label="Qoin">
+{links}
+    </nav>
+  </header>"""
 
 
-def main():
-    out = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else SITE / "out"
-    page_url = sys.argv[2] if len(sys.argv) > 2 else "https://get.finux.tech/"
-    css = (SITE / "getqoin/style.css").read_text()
-    js = (SITE / "getqoin/script.js").read_text()
-    content = body()
+FOOTER = """  <footer>
+    <a href="https://finux.tech/">finux.tech</a>
+    <a href="https://finux.tech/projects">Projects</a>
+    <a href="https://finux.tech/contact">Contact</a>
+    <a href="https://github.com/FrosTether/Graysons-Wallet">Source and issues</a>
+    <a href="https://github.com/FrosTether">GitHub @FrosTether</a>
+  </footer>"""
 
-    pages = out / "pages"
-    if pages.exists():
-        shutil.rmtree(pages)
-    (pages / "fonts").mkdir(parents=True)
-    for f in (SITE / "fonts").iterdir():
-        shutil.copy(f, pages / "fonts" / f.name)
+
+def fill(text, values):
+    for key, value in values.items():
+        text = text.replace("{{" + key + "}}", value)
+    assert "{{" not in text, "unfilled placeholder"
+    return text
+
+
+def page_html(p, site_url, values, base_css, site_js):
+    folder = SITE / p["folder"]
+    body = fill((folder / "body.html").read_text(), values)
+    css = (folder / "style.css").read_text() if (folder / "style.css").exists() else ""
+    js = fill((folder / "script.js").read_text(), values) if (folder / "script.js").exists() else ""
+    url = site_url + (p["slug"] + "/" if p["slug"] else "")
+    image = site_url + "og/" + p["og"] + ".png"
     meta = f"""<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>{html.escape(TITLE)}</title>
-<meta name="description" content="{html.escape(DESCRIPTION)}">
+<title>{html.escape(p["title"])}</title>
+<meta name="description" content="{html.escape(p["description"])}">
+<link rel="canonical" href="{url}">
 <meta name="theme-color" content="#f5f0fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#150e1a" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Get Qoin">
-<meta property="og:description" content="{html.escape(DESCRIPTION)}">
-<meta property="og:url" content="{page_url}">
-<meta property="og:image" content="{page_url}og.png">
+<meta property="og:title" content="{html.escape(p["title"].split(" | ")[0])}">
+<meta property="og:description" content="{html.escape(p["description"])}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{image}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Get Qoin. Three mining tones: 4.0, 7.83 and 11.11 Hz.">
+<meta property="og:image:alt" content="{html.escape(p["og_alt"])}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{ICON}">
-<link rel="preload" href="fonts/archivo.woff" as="font" type="font/woff" crossorigin>"""
-    (pages / "index.html").write_text(
-        f"<!doctype html>\n<html lang=\"en\">\n<head>\n{meta}\n<style>\n{FONT_FACES}{css}</style>\n</head>\n"
-        f"<body>\n{content}<script>\n{js}</script>\n</body>\n</html>\n")
-    (pages / ".nojekyll").write_text("")
-    host = page_url.split("/")[2]
-    if not host.endswith("github.io"):
-        (pages / "CNAME").write_text(host + "\n")
-    try:
-        subprocess.run(["node", str(SITE / "tools/og.js"), str(pages / "og.png")], check=True, timeout=120)
-    except (OSError, subprocess.SubprocessError) as e:
-        print("og.png not made (needs Playwright):", e)
+<link rel="preload" href="/fonts/archivo.woff" as="font" type="font/woff" crossorigin>"""
+    extra = "".join(f"<script>\n{s.read_text()}</script>\n" for s in p.get("scripts", []))
+    page_js = f"<script>\n{js}</script>\n" if js else ""
+    return (f"<!doctype html>\n<html lang=\"en\">\n<head>\n{meta}\n<style>\n{FONT_FACES}{base_css}{css}</style>\n</head>\n"
+            f"<body>\n<div class=\"wrap\">\n{header(p['slug'])}\n  <main>\n{body}  </main>\n{FOOTER}\n</div>\n"
+            f"<script>\n{site_js}</script>\n{extra}{page_js}</body>\n</html>\n")
 
-    preview = out / "preview"
-    preview.mkdir(parents=True, exist_ok=True)
-    (preview / "getqoin.html").write_text(
-        f"<title>Get Qoin</title>\n<link rel=\"stylesheet\" href=\"{GOOGLE_FONTS}\">\n"
-        f"<style>\n{css}</style>\n{content}<script>\n{js}</script>\n")
-    print("built", pages / "index.html", "and", preview / "getqoin.html")
+
+def main():
+    out = (pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else SITE / "out") / "pages"
+    site_url = sys.argv[2] if len(sys.argv) > 2 else "https://get.finux.tech/"
+    if not site_url.endswith("/"):
+        site_url += "/"
+    values = {"APK_URL": APK_URL, "RELEASE_URL": RELEASE, "NODE_URL": NODE_URL, "BURN_ADDRESS": burn_address(),
+              "QR_SVG": qr_svg(APK_URL)}
+    base_css = (SITE / "common/base.css").read_text()
+    site_js = (SITE / "common/site.js").read_text()
+
+    if out.exists():
+        shutil.rmtree(out)
+    (out / "fonts").mkdir(parents=True)
+    for f in (SITE / "fonts").iterdir():
+        shutil.copy(f, out / "fonts" / f.name)
+    for p in PAGES:
+        target = out / p["slug"] / "index.html" if p["slug"] else out / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(page_html(p, site_url, values, base_css, site_js))
+    shutil.copy(REPO / "node/install.sh", out / "node/install.sh")
+
+    missing = dict(PAGES[0], slug="404", title="Not here | Qoin")
+    (out / "404.html").write_text(
+        f"<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
+        f"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
+        f"<title>{missing['title']}</title>\n<link rel=\"icon\" href=\"{ICON}\">\n<style>\n{FONT_FACES}{base_css}</style>\n</head>\n"
+        f"<body>\n<div class=\"wrap\">\n{header('404')}\n  <main>\n    <div class=\"opener\">\n      <h1>Not here</h1>\n"
+        f"      <p class=\"lede\">That page doesn't exist, or it moved. <a href=\"/\">Get Qoin</a> starts from the top.</p>\n"
+        f"    </div>\n  </main>\n{FOOTER}\n</div>\n</body>\n</html>\n")
+    (out / ".nojekyll").write_text("")
+    host = site_url.split("/")[2]
+    if not host.endswith("github.io"):
+        (out / "CNAME").write_text(host + "\n")
+
+    (out / "og").mkdir()
+    for p in PAGES:
+        try:
+            subprocess.run(["node", str(SITE / "tools/og.js"), str(out / "og" / (p["og"] + ".png")), p["og_query"]],
+                           check=True, timeout=120)
+        except (OSError, subprocess.SubprocessError) as e:
+            print("og image not made (needs Playwright):", e)
+            break
+    if (out / "og/home.png").exists():
+        shutil.copy(out / "og/home.png", out / "og.png")  # links shared before the site had more pages
+    print("built", ", ".join("/" + p["slug"] for p in PAGES), "into", out)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,75 @@
+    <div class="opener">
+      <h1 class="long">QNR vs XMR</h1>
+      <p class="lede">Qoin's ticker is QNR, for its CryptoNote roots: it borrows Monero's emission curve and its 25-word seeds. The rest is new. Here's how the two compare today, and what QNR could take next from Monero, Zcash and Dash.</p>
+    </div>
+
+    <section id="compare" aria-labelledby="compare-h">
+      <h2 id="compare-h">Side by side</h2>
+      <p class="intro">As of 8 October 2026.</p>
+      <div class="table" tabindex="0" role="region" aria-labelledby="compare-h">
+        <table>
+          <thead>
+            <tr><th scope="col"></th><th scope="col">Monero (XMR)</th><th scope="col">Qoin (QNR)</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Started</th><td data-coin="XMR">April 2014</td><td data-coin="QNR">8 October 2026</td></tr>
+            <tr><th scope="row">Blocks</th><td data-coin="XMR">Every 2 minutes</td><td data-coin="QNR">Every 5 minutes, never sooner than 4½</td></tr>
+            <tr><th scope="row">Mining</th><td data-coin="XMR">RandomX, on any computer's CPU</td><td data-coin="QNR">SHA-256d on phones, only while they hear a 4.0, 7.83 or 11.11 Hz tone. Each block records the reading.</td></tr>
+            <tr><th scope="row">Signatures</th><td data-coin="XMR">Elliptic-curve ring signatures (CLSAG)</td><td data-coin="QNR">Hash-based one-time keys (LMS, RFC 8554)</td></tr>
+            <tr><th scope="row">Quantum computers</th><td data-coin="XMR">A large enough one could break elliptic-curve cryptography</td><td data-coin="QNR">Hash-based signatures are built to hold up against them</td></tr>
+            <tr><th scope="row">Privacy</th><td data-coin="XMR">Private by default: each spend hides among 16 possible senders, receivers get one-time addresses, and amounts are hidden</td><td data-coin="QNR">None. Balances and payments are public, like Bitcoin's.</td></tr>
+            <tr><th scope="row">Next upgrade</th><td data-coin="XMR">FCMP++ hides each spend among every output on the chain instead of 15 decoys. It's on test networks, with no mainnet date yet.</td><td data-coin="QNR">Still being decided. See below.</td></tr>
+            <tr><th scope="row">Emission</th><td data-coin="XMR">A smooth curve that ended in 2022 at about 18.1 million XMR, then a tail of 0.6 XMR a block forever</td><td data-coin="QNR">The same kind of curve: (2<sup>64</sup> − mined) ÷ 2<sup>20</sup> × 1.5 per block. <span class="mono">263.88</span> QNR a block at launch, and half of all QNR mined after about 4.6 years. No tail yet.</td></tr>
+            <tr><th scope="row">Most there'll ever be</th><td data-coin="XMR">No cap, because of the tail. It adds under 1% a year, shrinking.</td><td data-coin="QNR"><span class="mono">184,467,440.737</span> QNR</td></tr>
+            <tr><th scope="row">Smallest unit</th><td data-coin="XMR">12 decimal places</td><td data-coin="QNR">11 decimal places</td></tr>
+            <tr><th scope="row">Mined coins unlock</th><td data-coin="XMR">After 60 blocks, about 2 hours</td><td data-coin="QNR">After 12 blocks, about 1 hour</td></tr>
+            <tr><th scope="row">Wallet recovery</th><td data-coin="XMR">25 words (16 in newer wallets that use Polyseed)</td><td data-coin="QNR">25 words</td></tr>
+            <tr><th scope="row">Names</th><td data-coin="XMR">None on the chain. OpenAlias uses DNS instead.</td><td data-coin="QNR"><span class="mono">.frostchain</span> names on the chain, so you can pay @name</td></tr>
+            <tr><th scope="row">Difficulty</th><td data-coin="XMR">Recalculated every block from the last 720</td><td data-coin="QNR">Recalculated every block from the last 60 (LWMA)</td></tr>
+            <tr><th scope="row">Node</th><td data-coin="XMR">monerod</td><td data-coin="QNR">frostnode, with FrostExplorer built in</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="next" aria-labelledby="next-h">
+      <h2 id="next-h">What QNR could take next</h2>
+      <p class="intro">Ideas on the table. Nothing here is decided until I finish the parameters, and anything that changes the rules ships as a planned upgrade.</p>
+      <div class="borrow">
+        <article>
+          <h3>From Monero</h3>
+          <ul>
+            <li><b>A tail.</b> A small fixed reward forever, so mining still pays once the curve flattens.</li>
+            <li><b>View keys.</b> Let someone see a wallet's payments without being able to spend, like a crew member watching a manager's register.</li>
+            <li><b>One-time receive addresses.</b> Monero's are built on elliptic curves, so QNR would need a hash-based version to stay quantum-safe.</li>
+          </ul>
+        </article>
+        <article>
+          <h3>From Zcash</h3>
+          <ul>
+            <li><b>Viewing keys.</b> Private by default, provable on demand to whoever you choose.</li>
+            <li><b>Burning fees.</b> Zcash's next upgrade, NU7, takes 60% of fees out of circulation. <a href="/temporal/">Temporal</a> already burns QNR as its gas.</li>
+            <li><b>A lockbox fund.</b> Part of each block set aside until the community decides how to spend it.</li>
+          </ul>
+        </article>
+        <article>
+          <h3>From Dash</h3>
+          <ul>
+            <li><b>Masternodes.</b> <a href="/node/">Always-on nodes</a> that put up collateral (1,000 DASH) and earn part of every block, about 7% a year right now.</li>
+            <li><b>Instant locks.</b> Groups of nodes confirm payments in seconds and lock each block against rewrites.</li>
+            <li><b>A treasury vote.</b> Node owners vote each month on which proposals get funded.</li>
+          </ul>
+        </article>
+        <article>
+          <h3>From Steem</h3>
+          <ul>
+            <li><b>A backed dollar.</b> Steem Backed Dollars turn into $1 of STEEM after 3.5 days, priced by the median of the witnesses' price feeds and capped at 10% of Steem's market value. A QNR version needs a real market price for QNR first.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="sources" aria-labelledby="sources-h">
+      <h2 id="sources-h">Sources</h2>
+      <p class="print">Monero: <a href="https://www.getmonero.org/resources/moneropedia/">Moneropedia</a> and <a href="https://www.getmonero.org/2026/05/10/deprecating-unlock-time.html">the FCMP++ notes</a>. Zcash: <a href="https://zips.z.cash/">ZIPs</a>. Dash: <a href="https://docs.dash.org/">Dash docs</a> and <a href="https://mnowatch.org/dash-yield/">mnowatch</a> for the yield. Steem: the <a href="https://github.com/steemit/steem">steemd source</a>. Qoin: the <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/core/src/main/java/com/frostether/frostchain/Consensus.java">consensus rules</a>.</p>
+    </section>

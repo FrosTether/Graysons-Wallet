@@ -1,0 +1,27 @@
+/* QNR vs XMR: the comparison table and the four borrow cards */
+.table th[scope="col"]:nth-child(3), .table td:nth-child(3) { background: var(--lamp-soft); }
+.table thead th:nth-child(3) { color: var(--ink); }
+
+.borrow { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.borrow article { padding: 18px 20px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
+.borrow h3 { font-size: 1.2rem; }
+.borrow ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.borrow li { color: var(--muted); }
+.borrow li b { color: var(--ink); }
+
+@media (min-width: 760px) {
+  .borrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Phones: each row becomes a card, Monero above Qoin, so both are in view without scrolling sideways */
+@media (max-width: 680px) {
+  .table { overflow: visible; border: 0; border-radius: 0; background: transparent; }
+  .table table, .table tbody, .table tr, .table th, .table td { display: block; min-width: 0; width: auto; }
+  .table thead { display: none; }
+  .table tr { margin-bottom: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+  .table tbody th { width: auto; border-top: 0; padding: 12px 16px 6px; color: var(--ink); font-size: 1.02rem; font-weight: 700; }
+  .table td { border-top: 0; padding: 6px 16px 12px; display: grid; grid-template-columns: 3.4em minmax(0, 1fr); gap: 10px; }
+  .table td::before { content: attr(data-coin); font-family: "Martian Mono", ui-monospace, monospace; font-size: 0.75rem; font-weight: 600; color: var(--muted); padding-top: 4px; }
+  .table td:nth-child(3) { padding-top: 10px; }
+  .table td:nth-child(3)::before { color: var(--lamp); }
+}

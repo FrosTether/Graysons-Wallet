@@ -1,0 +1,97 @@
+    <div class="opener">
+      <h1>Temporal</h1>
+      <p class="lede">A time machine for Frostchain. Seal a message for the future, or go back to any block since the chain began. Temporal runs on QNR: every seal burns 1&nbsp;QNR as gas.</p>
+    </div>
+
+    <section id="seal" aria-labelledby="seal-h">
+      <h2 id="seal-h">Seal a capsule</h2>
+      <p class="intro">Write something for later. Temporal puts its fingerprint on the chain, which proves you wrote it before that block. Your words stay with you, and Temporal keeps them shut until the day you pick.</p>
+
+      <form class="machine" id="seal-form" novalidate>
+        <label class="field"><span>Your message</span>
+          <textarea id="seal-text" rows="6" maxlength="4000" placeholder="What do you want to tell the future?"></textarea>
+        </label>
+        <div class="row">
+          <label class="field"><span>Opens on</span><input type="datetime-local" id="seal-open"></label>
+          <p class="dial mono" id="seal-dial" aria-live="polite"></p>
+        </div>
+        <div class="cta"><button class="btn" type="submit">Seal it</button></div>
+        <p class="msg" id="seal-msg" role="status"></p>
+      </form>
+
+      <div class="sealed" id="sealed" hidden>
+        <h3>Sealed. Now burn the gas.</h3>
+        <p class="body">Send 1 QNR to the Temporal burn address with this memo. The block that carries it is your proof of when you wrote it.</p>
+        <div class="pay">
+          <div>
+            <a class="btn" id="pay-link" href="#">Pay 1 QNR in MyFrost</a>
+            <p class="fine">On an Android phone with Graysons Wallet, this opens MyFrost with everything filled in. On a computer, scan the code with that phone.</p>
+          </div>
+          <figure class="payqr" id="pay-qr" aria-label="QR code of the payment link"></figure>
+        </div>
+        <dl class="facts">
+          <div><dt>To</dt><dd><span class="mono break" id="burn-to"></span> <button type="button" class="copy" data-copy="burn-to">Copy</button></dd></div>
+          <div><dt>Amount</dt><dd>1 QNR, plus the usual network fee</dd></div>
+          <div><dt>Memo</dt><dd><span class="mono break" id="memo-out"></span> <button type="button" class="copy" data-copy="memo-out">Copy</button></dd></div>
+        </dl>
+        <div class="cta">
+          <button class="btn quiet" type="button" id="save-file">Save the capsule file</button>
+          <button class="btn quiet" type="button" id="copy-code">Copy the capsule code</button>
+        </div>
+        <p class="note">Keep the capsule file. The chain holds only the fingerprint, so the file is the only copy of your words. This browser keeps one too.</p>
+      </div>
+    </section>
+
+    <section id="mine" aria-labelledby="mine-h">
+      <h2 id="mine-h">Your capsules</h2>
+      <p class="intro">The ones kept in this browser. Each stays shut until its day.</p>
+      <ul class="capsules" id="capsules"></ul>
+      <div class="cta">
+        <label class="btn quiet small" for="load-file">Open a capsule file</label>
+        <input type="file" id="load-file" class="sr-only" accept=".json,.temporal,application/json">
+        <button class="btn quiet small" type="button" id="paste-open">Paste a capsule code</button>
+      </div>
+      <div class="paste" id="paste-box" hidden>
+        <label class="field"><span>Capsule code</span><textarea id="paste-text" rows="3" placeholder="temporal1:…"></textarea></label>
+        <div class="cta"><button class="btn small" type="button" id="paste-go">Add it</button></div>
+      </div>
+      <p class="msg" id="mine-msg" role="status"></p>
+    </section>
+
+    <section id="back" aria-labelledby="back-h">
+      <h2 id="back-h">Go back</h2>
+      <p class="intro">Pick any moment since the chain started, 13:37 Eastern on 8 October 2026. Temporal finds the block mined then and plays the tone it was mined on.</p>
+      <form class="machine" id="back-form" novalidate>
+        <div class="row">
+          <label class="field"><span>Take me to</span><input type="datetime-local" id="back-time"></label>
+          <div class="cta"><button class="btn" type="submit" id="back-go">Go</button></div>
+        </div>
+      </form>
+      <div class="arrival" id="arrival" hidden>
+        <p class="when mono" id="arr-when"></p>
+        <h3 id="arr-title"></h3>
+        <dl class="facts">
+          <div><dt>Mined by</dt><dd id="arr-miner"></dd></div>
+          <div><dt>Tone</dt><dd id="arr-tone"></dd></div>
+          <div><dt>QNR mined by then</dt><dd class="mono" id="arr-mined"></dd></div>
+          <div><dt>Capsules sealed by then</dt><dd class="mono" id="arr-seals"></dd></div>
+        </dl>
+        <div class="cta">
+          <button class="btn" type="button" id="arr-play">Play its tone</button>
+          <button class="btn quiet" type="button" id="arr-ride">Ride forward an hour</button>
+        </div>
+        <p class="ride mono" id="arr-ride-now" aria-live="polite"></p>
+      </div>
+      <p class="msg" id="back-msg" role="status"></p>
+    </section>
+
+    <section id="gas" aria-labelledby="gas-h">
+      <h2 id="gas-h">The gas</h2>
+      <dl class="facts">
+        <div><dt>Price</dt><dd>1 QNR a seal, burned for good. Every seal leaves fewer QNR in circulation.</dd></div>
+        <div><dt>Burn address</dt><dd><span class="mono break">{{BURN_ADDRESS}}</span>. It's the SHA-256 of the words <code>frostchain/burn</code> and <code>temporal/v1</code>, not of any key, so nobody can ever spend from it.</dd></div>
+        <div><dt>Burned so far</dt><dd id="burned">Shows here when a live node is in reach.</dd></div>
+        <div><dt>Memo</dt><dd><code>T1 &lt;opens&gt; &lt;fingerprint&gt;</code>: the opening time in Unix seconds, then the first 20 bytes of the capsule's SHA-256 in hex.</dd></div>
+        <div><dt>Fine print</dt><dd>A seal is an ordinary payment, so it works on today's chain. Temporal counts a seal only if it burned at least 1 QNR and landed in a block before its opening time.</dd></div>
+      </dl>
+    </section>

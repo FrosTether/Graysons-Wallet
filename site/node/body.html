@@ -1,0 +1,98 @@
+    <div class="opener">
+      <h1>Run a node</h1>
+      <p class="lede">Phones mine Qoin, but phones sleep. An always-on node keeps the chain online: it stores every block, passes new blocks and payments between phones, and shows the chain live in FrostExplorer.</p>
+      <div class="cta">
+        <a class="btn" href="{{NODE_URL}}">Download frostnode</a>
+        <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md">The full guide</a>
+      </div>
+      <p class="fine">Needs Java 17. It starts in about 100 MB of memory, and the chain grows by about 130 MB a year. It never holds anyone's 25 words.</p>
+    </div>
+
+    <section id="does" aria-labelledby="does-h">
+      <h2 id="does-h">What a node does</h2>
+      <dl class="facts">
+        <div><dt>Keeps the chain</dt><dd>Stores every block and checks every rule, the same checks the phones run.</dd></div>
+        <div><dt>Relays</dt><dd>Passes new blocks and payments between phones that can't reach each other, on TCP port <span class="mono">7830</span>.</dd></div>
+        <div><dt>Shows it</dt><dd>Serves FrostExplorer on port <span class="mono">7831</span>: every block, its tone, names and balances, updating live.</dd></div>
+        <div><dt>No wallet</dt><dd>A node can't spend, mine or see anyone's 25 words. Mining still happens on phones that hear a tone.</dd></div>
+        <div><dt>Rewards</dt><dd>None yet. Paying always-on nodes, the way Dash pays its masternodes, is one of the governance options I'm working out. For now, running one is how you keep the network up.</dd></div>
+      </dl>
+    </section>
+
+    <section id="run" aria-labelledby="run-h">
+      <h2 id="run-h">Pick where it runs</h2>
+      <p class="intro">Anything that stays on and online works. A free cloud server is best, since it never sleeps and has a fixed address.</p>
+
+      <div class="tabs" role="tablist" aria-label="Where the node runs">
+        <button type="button" role="tab" id="tab-server" aria-controls="panel-server" aria-selected="true">Server</button>
+        <button type="button" role="tab" id="tab-laptop" aria-controls="panel-laptop" aria-selected="false" tabindex="-1">Laptop</button>
+        <button type="button" role="tab" id="tab-phone" aria-controls="panel-phone" aria-selected="false" tabindex="-1">Android phone</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-server" aria-labelledby="tab-server">
+        <ol class="steps">
+          <li><b>Get a server.</b><span>Oracle Cloud's Always Free tier gives you a small Ubuntu machine at no cost. Any Ubuntu or Debian server works.</span></li>
+          <li><b>Run the installer.</b><span>It installs Java and the latest frostnode, checks the download against the release checksums, and sets it up as a service that starts on boot. Run it again any time to update.</span>
+            <div class="cmd"><pre>curl -fsSL https://get.finux.tech/node/install.sh | sudo sh</pre><button type="button" data-copy>Copy</button></div>
+          </li>
+          <li><b>Open port 7830.</b><span>The installer opens it on the server itself. Cloud providers block it a second time outside the machine: on Oracle Cloud, go to Networking, your VCN, Security lists, Default, and add an ingress rule for source <span class="mono">0.0.0.0/0</span>, TCP, port <span class="mono">7830</span>.</span></li>
+          <li><b>Check it.</b><span>From your phone's browser, open <span class="mono">http://&lt;server&nbsp;IP&gt;:7830/p2p/info</span>. It should show the chain <span class="mono">aa18513e5ee8db9f</span> and the height.</span></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-laptop" aria-labelledby="tab-laptop" hidden>
+        <ol class="steps">
+          <li><b>Install Java 17.</b><span>On Windows or a Mac, use the Temurin 17 installer from <a href="https://adoptium.net/temurin/releases/?version=17">adoptium.net</a>. On Linux, <span class="mono">sudo apt install openjdk-17-jre-headless</span>.</span></li>
+          <li><b>Download and unzip frostnode.</b><span>Unzip <a href="{{NODE_URL}}">frostnode.zip</a> anywhere you like.</span></li>
+          <li><b>Start it.</b><span>Open a terminal in that folder and run:</span>
+            <div class="cmd"><pre><span class="c"># Mac or Linux</span>
+frostnode/bin/frostnode --data frostnode-data
+<span class="c"># Windows</span>
+frostnode\bin\frostnode.bat --data frostnode-data</pre><button type="button" data-copy>Copy</button></div>
+          </li>
+          <li><b>Keep it awake.</b><span>Set the laptop to never sleep while it's plugged in. Phones on the same Wi-Fi can add it by the laptop's local IP. For phones elsewhere, your router has to forward TCP 7830 to the laptop.</span></li>
+        </ol>
+      </div>
+
+      <div class="panel" role="tabpanel" id="panel-phone" aria-labelledby="tab-phone" hidden>
+        <ol class="steps">
+          <li><b>Install Termux.</b><span>Get it from <a href="https://f-droid.org/packages/com.termux/">F-Droid</a>. A spare phone on a charger makes a decent node.</span></li>
+          <li><b>Run frostnode next to the app.</b><span>Graysons Wallet already uses port 7830 on the phone, so frostnode takes 7832 and 7833 and copies the chain from the app:</span>
+            <div class="cmd"><pre>pkg install openjdk-17 unzip
+curl -LO {{NODE_URL}}
+unzip -o frostnode.zip
+termux-wake-lock
+frostnode/bin/frostnode --data ~/frostnode-data --port 7832 --explorer-port 7833 --peer 127.0.0.1:7830</pre><button type="button" data-copy>Copy</button></div>
+          </li>
+          <li><b>Open the explorer.</b><span>Visit <span class="mono">http://localhost:7833</span> in the phone's browser. It runs while the phone stays awake.</span></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="connect" aria-labelledby="connect-h">
+      <h2 id="connect-h">Connect the phones</h2>
+      <ol class="steps">
+        <li><b>Open Graysons Wallet.</b><span>Go to Node, then Add.</span></li>
+        <li><b>Enter the node's address.</b><span>The server's IP or a name like <span class="mono">node.finux.tech</span> pointing at it. Port 7830 is the default, so the host alone works.</span></li>
+        <li><b>Watch it sync.</b><span>The Node screen shows the node's height. Phones now pass blocks through it, even when they're on different networks.</span></li>
+      </ol>
+    </section>
+
+    <section id="explorer" aria-labelledby="explorer-h">
+      <h2 id="explorer-h">Put FrostExplorer on the web</h2>
+      <p class="intro">A Cloudflare Tunnel gives the explorer an https address on your own domain, with no port to open. It runs on the same machine as the node.</p>
+      <div class="cmd"><pre><span class="c"># try it: prints a temporary https://….trycloudflare.com address</span>
+cloudflared tunnel --url http://localhost:7831
+
+<span class="c"># keep it, on your own name</span>
+cloudflared tunnel login
+cloudflared tunnel create frostexplorer
+cloudflared tunnel route dns frostexplorer explorer.finux.tech
+cloudflared tunnel run --url http://localhost:7831 frostexplorer</pre><button type="button" data-copy>Copy</button></div>
+      <p class="fine">Get <span class="mono">cloudflared</span> from Cloudflare's downloads page, or <span class="mono">pkg install cloudflared</span> in Termux. Keeping it running after a reboot is in the <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md#put-it-on-explorerfinuxtech">full guide</a>.</p>
+    </section>
+
+    <section id="public" aria-labelledby="public-h">
+      <h2 id="public-h">Public nodes</h2>
+      <p class="body">None are listed yet. Running one that's always on? Send me its address on the <a href="https://finux.tech/contact">contact page</a> and I'll list it here, so new phones can find it.</p>
+    </section>

@@ -1,5 +1,6 @@
-// Renders site/getqoin/og.html to a 1200x630 PNG for link previews.
-// Usage: node site/tools/og.js <out.png>   (needs Playwright with a Chromium)
+// Renders site/common/og.html to a 1200x630 PNG for link previews.
+// Usage: node site/tools/og.js <out.png> [query]   e.g. "t=Run a node&l=Keep the chain online&lamps=0"
+// (needs Playwright with a Chromium)
 const path = require('path');
 const fs = require('fs');
 let chromium;
@@ -17,7 +18,8 @@ const types = { '.html': 'text/html', '.woff': 'font/woff', '.css': 'text/css', 
     if (!file.startsWith(site) || !fs.existsSync(file)) return route.fulfill({ status: 404, body: 'not found' });
     route.fulfill({ status: 200, contentType: types[path.extname(file)] || 'application/octet-stream', body: fs.readFileSync(file) });
   });
-  await page.goto('http://site.local/getqoin/og.html');
+  const query = process.argv[3] ? '?' + new URLSearchParams(process.argv[3]).toString() : '';
+  await page.goto('http://site.local/common/og.html' + query);
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: process.argv[2] || 'og.png' });
   await browser.close();

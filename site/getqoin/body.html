@@ -1,19 +1,7 @@
-<div class="wrap">
-  <header class="top">
-    <a class="brand" href="https://finux.tech/">finux</a>
-    <nav aria-label="finux">
-      <a href="https://finux.tech/projects">Projects</a>
-      <a href="https://finux.tech/opensource">Open source</a>
-      <a href="https://finux.tech/contact">Contact</a>
-      <a href="https://github.com/FrosTether">GitHub</a>
-    </nav>
-  </header>
-
-  <main>
     <div class="hero">
       <div>
         <h1>Get Qoin</h1>
-        <p class="lede">Qoin is mined on phones, and only while the phone hears a tone. Install Graysons Wallet, play a tone nearby, and your phone starts mining.</p>
+        <p class="lede">Qoin (QNR) is mined on phones, and only while the phone hears a tone. Install Graysons Wallet, play a tone nearby, and your phone starts mining.</p>
         <div class="cta">
           <a class="btn" href="{{APK_URL}}">Download Graysons Wallet</a>
           <a href="{{RELEASE_URL}}">Release notes and checksums</a>
@@ -84,53 +72,37 @@
     <section id="start" aria-labelledby="start-h">
       <h2 id="start-h">How to start</h2>
       <ol class="steps">
-        <li><b>Install Graysons Wallet.</b><span>One install adds three apps: Graysons Wallet, Frostoise and MyFrost.</span></li>
-        <li><b>Create a wallet.</b><span>Tap Create wallet and write down your 25 words. They're the only way back into your coins, so keep them offline and never share them. Coming from 0.3? Uninstall it first. 0.4 is a new chain, so everyone starts with a new wallet.</span></li>
-        <li><b>Mine.</b><span>Open Frostoise, play a tone and tap Start mining. Phones on the same Wi-Fi find each other. To reach everyone else, add a public node from the <a href="https://github.com/FrosTether/Graysons-Wallet/discussions">project discussions</a>. Mined coins unlock after 12 blocks, about an hour.</span></li>
+        <li><b>Install Graysons Wallet.</b><span>One install adds the apps that come with it: Graysons Wallet, Frostoise and MyFrost.</span></li>
+        <li><b>Create a wallet.</b><span>Tap Create wallet and write down your 25 words. They're the only way back into your coins, so keep them offline and never share them. Updating from an earlier build? Uninstall it first, then tap Restore and enter your 25 words. Wallets from 0.3 belong to the old chain, so make a new one.</span></li>
+        <li><b>Mine.</b><span>Open Frostoise, play a tone and tap Start mining. Phones on the same Wi-Fi find each other. To reach everyone else, add an <a href="/node/">always-on node</a>. Mined coins unlock after 12 blocks, about an hour.</span></li>
         <li><b>Claim your name.</b><span>Pick a <span class="mono">.frostchain</span> name, so people can pay you as @you instead of a long address.</span></li>
       </ol>
     </section>
 
-    <section id="buy" aria-labelledby="buy-h">
-      <h2 id="buy-h">Or buy a starter bundle</h2>
-      <div class="deal">
-        <div>
-          <p class="price">10 QOIN<span>for $5</span></p>
-          <p class="opens"><span class="before">Orders open at launch, Thursday 8 October at 13:37 Eastern.</span><span class="after">Orders are open.</span> Coins go out once my first mined blocks unlock, about an hour after launch.</p>
-          <div class="cta"><a class="btn quiet" href="https://finux.tech/contact">Message me</a></div>
-        </div>
-        <ul class="pay">
-          <li><h3>Chime</h3><p>Message me and I'll send my Chime details.</p></li>
-          <li><h3>Dogecoin</h3><p>$5 of DOGE at the day's rate, sent to <b>@frostcoin</b> on MyDoge. Message me for the exact amount before you send.</p></li>
-        </ul>
-      </div>
-      <p class="then">With your payment, send me your <span class="mono">.frostchain</span> name or Receive address, and I'll send the 10 QOIN there.</p>
-      <p class="note">Pay here, not in the app. MyFrost doesn't do swaps, so don't send DOGE through it.</p>
+    <section id="more" aria-labelledby="more-h">
+      <h2 id="more-h">Keep going</h2>
+      <ul class="cards">
+        <li><a href="/node/"><b>Run a node</b><span>Keep the chain online while phones sleep, and show it live in FrostExplorer.</span></a></li>
+        <li><a href="/qnr/"><b>QNR vs XMR</b><span>How Qoin compares with Monero, and what it takes next from Monero, Zcash and Dash.</span></a></li>
+        <li><a href="/temporal/"><b>Temporal</b><span>A time machine for the chain. Seal a message for the future, paid for in QNR.</span></a></li>
+      </ul>
     </section>
 
     <section id="chain" aria-labelledby="chain-h">
       <h2 id="chain-h">The chain</h2>
       <dl class="facts">
         <div><dt>Blocks</dt><dd>About one every 5 minutes, and never sooner than 4½ minutes after the last, so two Frost blocks for every Bitcoin Cash block.</dd></div>
-        <div><dt>Reward</dt><dd>About <span class="mono">263.88</span> QOIN a block at launch, shrinking slowly as coins are mined.</dd></div>
+        <div><dt>Reward</dt><dd>About <span class="mono nowrap">263.88</span> QNR a block at launch, shrinking slowly as coins are mined.</dd></div>
+        <div><dt>Supply</dt><dd>Never more than <span class="mono nowrap">184,467,440.737</span> QNR. Half of it takes about 4.6 years to mine.</dd></div>
         <div><dt>Unlock</dt><dd>Mined coins can be spent after 12 more blocks.</dd></div>
-        <div><dt>Mining tones</dt><dd><span class="mono">3.75–4.25</span>, <span class="mono">7.50–8.20</span> or <span class="mono">10.80–11.40</span> Hz. Every block carries a record of the reading.</dd></div>
+        <div><dt>Mining tones</dt><dd><span class="mono nowrap">3.75–4.25</span>, <span class="mono nowrap">7.50–8.20</span> or <span class="mono nowrap">10.80–11.40</span> Hz. Every block carries a record of the reading.</dd></div>
         <div><dt>Signatures</dt><dd>Hash-based LMS keys (RFC 8554), built to hold up against quantum computers.</dd></div>
-        <div><dt>Units</dt><dd>QOIN, divisible to 11 decimal places.</dd></div>
+        <div><dt>Units</dt><dd>QNR, divisible to 11 decimal places.</dd></div>
         <div><dt>Source</dt><dd>Open source under GPL-3.0, on <a href="https://github.com/FrosTether/Graysons-Wallet">GitHub</a>.</dd></div>
       </dl>
     </section>
 
     <section id="fine-print" aria-labelledby="print-h">
       <h2 id="print-h">Fine print</h2>
-      <p class="print">Qoin is an early proof of concept I'm building myself. QOIN has no guaranteed value and isn't an investment. Only buy some if you'd enjoy trying a homemade blockchain, and only spend what you're fine losing. The tones are for mining. They aren't health or wellness advice.</p>
+      <p class="print">Qoin is an early proof of concept I'm building myself. QNR has no guaranteed value and isn't an investment, and nothing on this site sells it. The tones are for mining. They aren't health or wellness advice.</p>
     </section>
-  </main>
-
-  <footer>
-    <a href="https://finux.tech/">finux.tech</a>
-    <a href="https://finux.tech/contact">Contact</a>
-    <a href="https://github.com/FrosTether/Graysons-Wallet">Source and issues</a>
-    <a href="https://github.com/FrosTether">GitHub @FrosTether</a>
-  </footer>
-</div>
