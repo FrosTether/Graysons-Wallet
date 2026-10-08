@@ -26,7 +26,8 @@ The APK lands in `app/build/outputs/apk/`.
 
 ### Builds on GitHub
 
-Every push to `main` that changes the code runs the chain tests, builds the app and `frostnode`, and replaces the release for the current version.
+Every push to `main` that changes the app or the chain runs the chain tests, builds the app and `frostnode`, and replaces the release for the current version.
+A push that only changes `node/` rebuilds `frostnode.zip`, checks that FrostExplorer answers, and swaps the zip into that release. The app stays as it was, so phones don't reinstall for a server change.
 This link always serves the newest build:
 
 https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk
@@ -96,6 +97,7 @@ The suite takes a few minutes, because several tests mine real blocks:
 ```
 
 This makes `node/build/install/frostnode/`, which is the folder that goes to `/opt/frostnode` on the server.
+It also serves FrostExplorer, the public block explorer, on port 7831. See [node/README.md](node/README.md).
 
 ## Chain IDs
 

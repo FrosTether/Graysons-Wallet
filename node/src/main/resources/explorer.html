@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FrostExplorer</title>
+<meta name="description" content="The live Frostchain block explorer: Qoin blocks, their miners, the tones they were mined on, and every transaction.">
+<meta name="theme-color" content="#07060f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600&family=Share+Tech+Mono&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+<style>
+/* One deep-space column, the dark vector look of Rez, with the three mining bands as the only colors. */
+:root {
+  color-scheme: dark;
+  --void: #07060f;
+  --deck: #0f0d1f;
+  --line: #2b2654;
+  --ink: #ece9ff;
+  --dim: #9c96cb;
+  --delta: #ffb547;
+  --theta: #3fe9ff;
+  --alpha: #ff52d9;
+  --warn: #ffb547;
+  --focus: #ffffff;
+  --display: "Syncopate", "Saira", system-ui, sans-serif;
+  --body: "Saira", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Share Tech Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--void); color: var(--ink); }
+body { margin: 0; font-family: var(--body); font-size: 16px; line-height: 1.5; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 48px; display: grid; gap: 20px; }
+a { color: var(--theta); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 20px; }
+.eyebrow { font-family: var(--mono); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+h1 { font-family: var(--display); font-size: clamp(22px, 5vw, 36px); letter-spacing: .06em; margin: 2px 0 0; text-wrap: balance; }
+h1 span { color: var(--theta); }
+.live-tag { font-family: var(--mono); font-size: 13px; color: var(--dim); border: 1px solid var(--line); padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.live-tag.on { color: var(--theta); border-color: var(--theta); }
+
+.search { display: flex; gap: 8px; }
+.search input { flex: 1; min-width: 0; font: inherit; font-size: 15px; color: var(--ink); background: var(--deck); border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; }
+.search input::placeholder { color: var(--dim); }
+.banner { margin: 0; padding: 10px 14px; border: 1px solid var(--warn); color: var(--warn); border-radius: 4px; font-size: 15px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin: 0; }
+.stat { background: var(--void); padding: 10px 14px; min-width: 0; }
+.stat dt { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+.stat dd { margin: 2px 0 0; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.mix { display: flex; height: 8px; margin-top: 10px; gap: 2px; }
+.mix i { display: block; height: 100%; }
+
+.stage { position: relative; border: 1px solid var(--line); background: radial-gradient(ellipse at 50% 40%, var(--deck), var(--void) 70%); height: clamp(280px, 56vw, 460px); overflow: hidden; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: pointer; touch-action: manipulation; }
+.hud { position: absolute; left: 12px; right: 12px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; pointer-events: none; font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.hud.top { top: 10px; }
+.hud.bottom { bottom: 10px; }
+.hud button { pointer-events: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+
+button, select { font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+button:hover, select:hover { border-color: var(--dim); }
+button.primary { border-color: var(--theta); color: var(--theta); }
+button[aria-pressed="true"] { background: var(--line); }
+
+.main { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 780px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.list { border: 1px solid var(--line); max-height: 560px; overflow-y: auto; }
+.list h2, .panel h2, .panel h3 { font-family: var(--mono); font-weight: 400; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 0; }
+.list h2 { padding: 10px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--void); }
+.list ul { list-style: none; margin: 0; padding: 0; }
+.list li button { width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 9px 12px; display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; align-items: center; text-transform: none; letter-spacing: 0; font-family: var(--body); font-size: 15px; }
+.list li button[aria-current="true"] { background: var(--deck); box-shadow: inset 3px 0 0 var(--band, var(--theta)); }
+.list .h { font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+.list .who { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.list .age { font-family: var(--mono); font-size: 12px; color: var(--dim); white-space: nowrap; }
+.list .none { padding: 12px; color: var(--dim); font-size: 14px; }
+
+.panel { border: 1px solid var(--line); padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.panel-head .num { font-family: var(--display); font-size: clamp(20px, 4vw, 30px); letter-spacing: .04em; overflow-wrap: anywhere; min-width: 0; }
+.band-chip { font-family: var(--mono); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--band, var(--theta)); color: var(--band, var(--theta)); border-radius: 999px; white-space: nowrap; }
+dl.kv { display: grid; grid-template-columns: minmax(0, 130px) minmax(0, 1fr); gap: 6px 14px; margin: 0; }
+dl.kv dt { color: var(--dim); font-size: 14px; }
+dl.kv dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+.mono { font-family: var(--mono); font-size: 14px; }
+@media (max-width: 460px) { dl.kv { grid-template-columns: minmax(0, 1fr); gap: 0; } dl.kv dd { margin-bottom: 8px; } }
+.linkish { background: none; border: 0; padding: 0; color: var(--theta); font: inherit; letter-spacing: 0; text-transform: none; text-align: left; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+
+.spectrum svg { width: 100%; height: auto; display: block; }
+.spectrum figcaption { font-size: 13px; color: var(--dim); margin-top: 4px; }
+
+.listen { display: grid; gap: 10px; }
+.listen .row { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.listen label { font-size: 14px; color: var(--dim); display: inline-flex; gap: 8px; align-items: center; }
+.listen input[type="range"] { accent-color: var(--theta); width: 140px; }
+.listen input[type="checkbox"] { accent-color: var(--theta); width: 18px; height: 18px; }
+.note { font-size: 14px; color: var(--dim); margin: 0; max-width: 62ch; }
+
+.txs { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+th { text-align: left; font-family: var(--mono); font-weight: 400; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); border-bottom: 1px solid var(--line); padding: 6px 8px; }
+td { border-bottom: 1px solid var(--line); padding: 7px 8px; vertical-align: top; font-variant-numeric: tabular-nums; }
+td.amt { text-align: right; font-family: var(--mono); white-space: nowrap; }
+th.amt { text-align: right; }
+.empty { color: var(--dim); font-size: 14px; margin: 0; }
+
+footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); padding-top: 14px; max-width: 80ch; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Qoin · Frostchain</div>
+      <h1>Frost<span>Explorer</span></h1>
+    </div>
+    <span class="live-tag" id="live">Connecting…</span>
+  </header>
+
+  <form class="search" id="search" role="search">
+    <label class="sr" for="q">Search the chain</label>
+    <input id="q" type="search" placeholder="Block number, block hash, address or name" autocomplete="off" autocapitalize="none" spellcheck="false">
+    <button type="submit" class="primary">Search</button>
+  </form>
+  <p class="banner" id="banner" role="status" hidden></p>
+
+  <dl class="stats" aria-label="Chain summary">
+    <div class="stat"><dt>Height</dt><dd id="s-height">–</dd></div>
+    <div class="stat"><dt>Last block</dt><dd id="s-age">–</dd></div>
+    <div class="stat"><dt>Next block</dt><dd id="s-next">–</dd></div>
+    <div class="stat"><dt>QOIN mined</dt><dd id="s-supply">–</dd></div>
+    <div class="stat"><dt>Difficulty</dt><dd id="s-diff">–</dd></div>
+    <div class="stat"><dt>Tones, last 24</dt><dd><span id="s-mixtext">–</span><div class="mix" id="s-mix" aria-hidden="true"></div></dd></div>
+  </dl>
+
+  <section class="stage" aria-label="Wireframe view of the newest blocks. Tap a block to open it.">
+    <canvas id="tunnel"></canvas>
+    <div class="hud top"><span>Newest block in front</span><button type="button" id="motion" aria-pressed="false">Pause motion</button></div>
+    <div class="hud bottom legend" aria-hidden="true">
+      <span><i class="dot" style="background: var(--delta)"></i>4.0 Hz delta · low</span>
+      <span><i class="dot" style="background: var(--theta)"></i>7.83 Hz theta · medium</span>
+      <span><i class="dot" style="background: var(--alpha)"></i>11.11 Hz alpha · high</span>
+    </div>
+  </section>
+
+  <div class="main">
+    <nav class="list" aria-label="Recent blocks">
+      <h2>Recent blocks</h2>
+      <ul id="blocks"><li class="none">Loading blocks…</li></ul>
+    </nav>
+
+    <article class="panel" id="detail" aria-live="polite">
+      <div class="panel-head">
+        <div class="num" id="d-num">Block –</div>
+        <span class="band-chip" id="d-band">–</span>
+      </div>
+      <dl class="kv">
+        <dt>Mined</dt><dd id="d-time">–</dd>
+        <dt>Miner</dt><dd id="d-miner" class="mono">–</dd>
+        <dt>Paid</dt><dd id="d-reward" class="mono">–</dd>
+        <dt>Difficulty</dt><dd id="d-diff" class="mono">–</dd>
+        <dt>Nonce</dt><dd id="d-nonce" class="mono">–</dd>
+        <dt>Hash</dt><dd id="d-hash" class="mono">–</dd>
+        <dt>Previous</dt><dd id="d-prev" class="mono">–</dd>
+      </dl>
+      <div>
+        <h3>Resonance proof</h3>
+        <dl class="kv" style="margin-top: 8px">
+          <dt>Sensor</dt><dd id="r-sensor">–</dd>
+          <dt>Peak</dt><dd id="r-hz" class="mono">–</dd>
+          <dt>Strength</dt><dd id="r-snr" class="mono">–</dd>
+          <dt>Window</dt><dd id="r-window" class="mono">–</dd>
+        </dl>
+      </div>
+      <figure class="spectrum" style="margin: 0">
+        <svg id="spectrum" viewBox="0 0 640 180" role="img" aria-label="Spectrum of the resonance reading"></svg>
+        <figcaption>The 33-step spectrum the miner's phone recorded, 2–14.8 Hz. Dashed lines mark the three mining tones.</figcaption>
+      </figure>
+      <div class="listen">
+        <h3>Hear this block's tone</h3>
+        <div class="row">
+          <label for="mode">Mode
+            <select id="mode">
+              <option value="iso">Pulse · speaker</option>
+              <option value="bin">Binaural · headphones</option>
+            </select>
+          </label>
+          <label for="gamma"><input type="checkbox" id="gamma"> Add 40 Hz layer</label>
+          <label for="vol">Volume <input type="range" id="vol" min="0" max="0.6" step="0.01" value="0.3"></label>
+          <button type="button" class="primary" id="play" aria-pressed="false">Play</button>
+        </div>
+        <p class="note">Pulse mode is the same 880 Hz pulse Frostoise plays, so a phone nearby can lock on it and mine. A binaural beat only exists between your ears: it's for listening, not mining.</p>
+      </div>
+      <div>
+        <h3>Transactions</h3>
+        <div class="txs" id="d-txs" style="margin-top: 8px"></div>
+      </div>
+    </article>
+
+    <article class="panel" id="account" aria-live="polite" hidden>
+      <div class="panel-head">
+        <div class="num" id="a-name">Account</div>
+        <button type="button" id="a-close">Back to blocks</button>
+      </div>
+      <dl class="kv">
+        <dt>Address</dt><dd id="a-addr" class="mono">–</dd>
+        <dt>Balance</dt><dd id="a-balance" class="mono">–</dd>
+        <dt>Unlocking</dt><dd id="a-immature" class="mono">–</dd>
+      </dl>
+      <div>
+        <h3>History</h3>
+        <div class="txs" id="a-history" style="margin-top: 8px"></div>
+      </div>
+    </article>
+  </div>
+
+  <footer>
+    FrostExplorer reads this node's copy of Frostchain and only reads: it can't move anyone's QOIN.
+    Blocks come about every 5 minutes, never sooner than 4½ minutes after the last.
+    Mined coins unlock after 12 blocks. Blocks glow slower than once a second, so nothing here flashes.
+    <a href="https://get.finux.tech">Get Graysons Wallet</a> · <a href="https://github.com/FrosTether/Graysons-Wallet">Source</a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const API = new URLSearchParams(location.search).get("node") || "";
+  const BANDS = {
+    delta: { hz: 4.0, level: "low" },
+    theta: { hz: 7.83, level: "medium" },
+    alpha: { hz: 11.11, level: "high" },
+  };
+  const el = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const COLORS = { delta: cssVar("--delta"), theta: cssVar("--theta"), alpha: cssVar("--alpha"), line: cssVar("--line"), dim: cssVar("--dim"), ink: cssVar("--ink") };
+
+  let status = null, blocks = [], selected = null, detail = null;
+  let skew = 0; // the node's clock minus ours, so countdowns match the chain
+  let nextAt = 0; // our clock, in seconds, when the next block window opens
+
+  const nowSec = () => Date.now() / 1000;
+  const ago = (t) => {
+    const d = Math.max(0, Math.floor(nowSec() + skew - t));
+    if (d < 60) return d + " s ago";
+    if (d < 3600) return Math.floor(d / 60) + " min ago";
+    if (d < 86400) return Math.floor(d / 3600) + " h " + Math.floor((d % 3600) / 60) + " min ago";
+    return Math.floor(d / 86400) + " d ago";
+  };
+  const two = (n) => (n < 10 ? "0" : "") + n;
+  const short = (addr, name) => name ? name.replace(/\.frostchain$/, "") : addr ? addr.slice(0, 8) + "…" + addr.slice(-4) : "–";
+  const qoin = (s, dp) => {
+    if (s == null) return "–";
+    const [w, f = ""] = String(s).split(".");
+    if (dp === undefined) return f ? w + "." + f : w;
+    return dp === 0 || !f ? w : w + "." + (f + "00000000000").slice(0, dp);
+  };
+  const bandOf = (b) => (b && b.reso && BANDS[b.reso.band] ? b.reso.band : "");
+  const colorOf = (b) => COLORS[bandOf(b)] || COLORS.dim;
+
+  async function get(path) {
+    const r = await fetch(API + path, { cache: "no-store" });
+    const body = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(body.error || ("HTTP " + r.status));
+    return body;
+  }
+
+  function banner(text) {
+    el("banner").textContent = text || "";
+    el("banner").hidden = !text;
+  }
+
+  // ---------- status and blocks ----------
+  async function refresh() {
+    try {
+      const s = await get("/api/explorer/status");
+      const changed = !status || s.tip !== status.tip;
+      status = s;
+      skew = s.now - nowSec();
+      nextAt = nowSec() + s.nextIn;
+      el("live").textContent = "Live · chain " + s.chain.slice(0, 8);
+      el("live").classList.add("on");
+      banner("");
+      if (changed) {
+        blocks = await get("/api/explorer/blocks?count=30");
+        renderList();
+        if (selected == null || !blocks.some((b) => b.height === selected)) {
+          if (blocks.length) select(blocks[0].height); else renderEmpty();
+        }
+      }
+      renderStats();
+    } catch (e) {
+      el("live").textContent = "Offline";
+      el("live").classList.remove("on");
+      banner("Can't reach the node right now (" + e.message + "). Trying again every 15 seconds.");
+    }
+  }
+
+  function renderStats() {
+    if (!status) return;
+    el("s-height").textContent = "#" + status.height;
+    el("s-supply").textContent = qoin(status.generated, 2);
+    el("s-diff").textContent = Number(status.difficulty).toLocaleString("en-US");
+    const last = blocks.slice(0, 24), counts = { delta: 0, theta: 0, alpha: 0 };
+    last.forEach((b) => { const k = bandOf(b); if (k) counts[k]++; });
+    el("s-mixtext").textContent = last.length ? `${counts.delta} · ${counts.theta} · ${counts.alpha}` : "–";
+    el("s-mix").innerHTML = ["delta", "theta", "alpha"].map((k) => `<i style="flex:${counts[k]};background:var(--${k})"></i>`).join("");
+    tick();
+  }
+
+  function tick() {
+    if (!status) return;
+    el("s-age").textContent = status.height > 0 ? ago(status.tipTime) : "none yet";
+    const left = Math.ceil(nextAt - nowSec());
+    el("s-next").textContent = left > 0 ? Math.floor(left / 60) + ":" + two(left % 60) : "open now";
+    el("blocks").querySelectorAll("[data-age]").forEach((s) => { s.textContent = ago(+s.dataset.age); });
+  }
+
+  function renderList() {
+    const list = el("blocks");
+    if (!blocks.length) {
+      list.innerHTML = `<li class="none">No blocks yet. Mining is open: play a tone in Frostoise to find block 1.</li>`;
+      return;
+    }
+    list.innerHTML = blocks.map((b) => `
+      <li><button type="button" data-h="${b.height}" style="--band:${colorOf(b)}" aria-current="${b.height === selected}">
+        <span class="dot" style="background:${colorOf(b)}" aria-hidden="true"></span>
+        <span class="who"><span class="h">#${b.height}</span> · ${esc(short(b.miner, b.minerName))}</span>
+        <span class="age" data-age="${b.time}">${ago(b.time)}</span>
+      </button></li>`).join("");
+  }
+  el("blocks").addEventListener("click", (e) => { const b = e.target.closest("button[data-h]"); if (b) select(+b.dataset.h); });
+
+  function renderEmpty() {
+    el("d-num").textContent = "No blocks yet";
+    el("d-band").textContent = "Waiting for block 1";
+    draw();
+  }
+
+  // ---------- one block ----------
+  async function select(h) {
+    selected = h;
+    el("account").hidden = true;
+    el("detail").hidden = false;
+    el("blocks").querySelectorAll("button[data-h]").forEach((btn) => btn.setAttribute("aria-current", String(+btn.dataset.h === h)));
+    const quick = blocks.find((b) => b.height === h);
+    if (quick) renderDetail(quick);
+    try {
+      const full = await get("/api/explorer/block?h=" + h);
+      if (selected === h) renderDetail(full);
+    } catch (e) {
+      banner("Couldn't load block " + h + ": " + e.message);
+    }
+    if (!animating) draw();
+  }
+
+  function renderDetail(b) {
+    detail = b;
+    const k = bandOf(b), band = BANDS[k];
+    el("detail").style.setProperty("--band", colorOf(b));
+    el("d-num").textContent = "Block #" + b.height;
+    el("d-band").textContent = band ? `${band.hz === 4 ? "4.0" : band.hz} Hz ${k} · ${band.level}` : "–";
+    el("d-time").textContent = `${new Date(b.time * 1000).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })} · ${ago(b.time)}`;
+    el("d-miner").innerHTML = b.miner ? `<button type="button" class="linkish" data-addr="${esc(b.miner)}">${esc(b.minerName || b.miner)}</button>` : "–";
+    el("d-reward").textContent = qoin(b.paid) + " QOIN";
+    el("d-diff").textContent = Number(b.difficulty).toLocaleString("en-US");
+    el("d-nonce").textContent = b.nonce;
+    el("d-hash").textContent = b.hash;
+    el("d-prev").textContent = b.prev;
+    const p = b.reso;
+    if (p) {
+      el("r-sensor").textContent = p.sensor === "mic" ? "Microphone" : p.sensor === "mag" ? `Magnetometer · ${(p.ampMilli / 1000).toFixed(2)} µT` : p.sensor;
+      el("r-hz").textContent = (p.hzMilli / 1000).toFixed(2) + " Hz";
+      el("r-snr").textContent = (p.snrX100 / 100).toFixed(1) + "× noise (needs 10×)";
+      el("r-window").textContent = `${(p.durMs / 1000).toFixed(1)} s · ${p.samples} samples at ${(p.rateCenti / 100).toFixed(0)} Hz`;
+    } else {
+      ["r-sensor", "r-hz", "r-snr", "r-window"].forEach((id) => { el(id).textContent = "–"; });
+    }
+    renderSpectrum(b);
+    const txs = b.txList;
+    el("d-txs").innerHTML = !txs ? `<p class="empty">Loading…</p>` : txs.length ? `<table><thead><tr><th>Type</th><th>From</th><th>To</th><th class="amt">QOIN</th><th>Memo</th></tr></thead><tbody>${
+      txs.map((x) => `<tr><td>${x.type === "send" ? "Send" : x.type === "name" ? "Name" : "New key"}</td>
+        <td><button type="button" class="linkish mono" data-addr="${esc(x.from)}">${esc(short(x.from, x.fromName))}</button></td>
+        <td>${x.to ? `<button type="button" class="linkish mono" data-addr="${esc(x.to)}">${esc(short(x.to, x.toName))}</button>` : (x.type === "name" ? esc(x.name) + ".frostchain" : "–")}</td>
+        <td class="amt">${x.type === "send" ? qoin(x.amount, 4) : "–"}</td><td>${esc(x.memo)}</td></tr>`).join("")
+    }</tbody></table>` : `<p class="empty">Only the mining reward in this block.</p>`;
+    retune();
+  }
+
+  function renderSpectrum(b) {
+    const W = 640, H = 180, L = 34, R = 10, T = 12, Bm = 28;
+    const spec = (b.reso && b.reso.spectrum) || [];
+    const max = Math.max(1, ...spec);
+    const x = (f) => L + ((f - 2) / 12.8) * (W - L - R);
+    const y = (v) => T + (1 - v / max) * (H - T - Bm);
+    const bw = ((W - L - R) / 33) * 0.62;
+    const peak = b.reso ? b.reso.hzMilli / 1000 : 0, color = colorOf(b);
+    let s = "";
+    for (let gx = 2; gx <= 14; gx += 2) {
+      s += `<line x1="${x(gx)}" x2="${x(gx)}" y1="${T}" y2="${H - Bm}" stroke="${COLORS.line}" stroke-width="1"/>`;
+      s += `<text x="${x(gx)}" y="${H - 9}" fill="${COLORS.dim}" font-family="Share Tech Mono, monospace" font-size="12" text-anchor="middle">${gx} Hz</text>`;
+    }
+    Object.keys(BANDS).forEach((k) => { s += `<line x1="${x(BANDS[k].hz)}" x2="${x(BANDS[k].hz)}" y1="${T}" y2="${H - Bm}" stroke="${COLORS[k]}" stroke-width="1" stroke-dasharray="3 4" opacity="0.7"/>`; });
+    spec.forEach((v, i) => {
+      const f = 2 + i * 0.4, near = Math.abs(f - peak) < 0.4;
+      s += `<rect x="${(x(f) - bw / 2).toFixed(1)}" y="${y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(H - Bm - y(v)).toFixed(1)}" fill="${near ? color : COLORS.dim}" opacity="${near ? 1 : 0.45}"/>`;
+    });
+    s += `<line x1="${L}" x2="${W - R}" y1="${H - Bm}" y2="${H - Bm}" stroke="${COLORS.dim}" stroke-width="1"/>`;
+    el("spectrum").innerHTML = s;
+  }
+
+  // ---------- search and accounts ----------
+  el("search").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const q = el("q").value.trim();
+    if (!q) return;
+    await find(q);
+  });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-addr]");
+    if (b) { e.preventDefault(); find(b.dataset.addr); }
+  });
+  el("a-close").addEventListener("click", () => { el("account").hidden = true; el("detail").hidden = false; });
+
+  async function find(q) {
+    try {
+      const r = await get("/api/explorer/search?q=" + encodeURIComponent(q));
+      banner("");
+      if (r.kind === "block") {
+        if (!blocks.some((b) => b.height === r.block.height)) blocks = [r.block].concat(blocks);
+        selected = r.block.height;
+        el("account").hidden = true;
+        el("detail").hidden = false;
+        renderDetail(r.block);
+      } else {
+        showAccount(r);
+      }
+    } catch (err) {
+      banner(err.message);
+    }
+  }
+
+  function showAccount(a) {
+    el("detail").hidden = true;
+    el("account").hidden = false;
+    el("a-name").textContent = a.name || "Account";
+    el("a-addr").textContent = a.address;
+    el("a-balance").textContent = qoin(a.balance) + " QOIN";
+    el("a-immature").textContent = qoin(a.immature) + " QOIN";
+    const rows = a.history || [];
+    el("a-history").innerHTML = rows.length ? `<table><thead><tr><th>Block</th><th>What</th><th class="amt">QOIN</th><th>Memo</th></tr></thead><tbody>${
+      rows.map((r) => `<tr><td class="mono"><button type="button" class="linkish" data-block="${r.height}">#${r.height}</button></td>
+        <td>${esc(r.kind === "mined" ? "Mined a block" : r.kind === "received" ? "Received" : r.kind === "sent" ? "Sent" : r.kind === "name" ? "Claimed " + r.name + ".frostchain" : r.kind === "rekey" ? "Moved to a fresh key" : r.kind)}</td>
+        <td class="amt">${r.kind === "name" || r.kind === "rekey" ? "–" : (r.kind === "sent" ? "−" : "") + fmtMinor(r.amount)}</td><td>${esc(r.memo)}</td></tr>`).join("")
+    }</tbody></table>` : `<p class="empty">Nothing on the chain for this account yet.</p>`;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-block]");
+    if (b) { e.preventDefault(); select(+b.dataset.block); }
+  });
+  function fmtMinor(s) {
+    const n = BigInt(s || "0"), coin = 10n ** 11n;
+    const f = (n % coin).toString().padStart(11, "0").slice(0, 4);
+    return (n / coin).toLocaleString("en-US") + "." + f;
+  }
+
+  // ---------- the tunnel ----------
+  const canvas = el("tunnel"), ctx = canvas.getContext("2d");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let animating = !reduce, motionTime = 0, prevFrame = performance.now();
+  const motionBtn = el("motion");
+  if (reduce) { motionBtn.textContent = "Start motion"; motionBtn.setAttribute("aria-pressed", "true"); }
+  motionBtn.addEventListener("click", () => {
+    animating = !animating;
+    motionBtn.textContent = animating ? "Pause motion" : "Start motion";
+    motionBtn.setAttribute("aria-pressed", String(!animating));
+    prevFrame = performance.now();
+    if (animating) requestAnimationFrame(loop); else draw();
+  });
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), r = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.round(r.width * dpr));
+    canvas.height = Math.max(1, Math.round(r.height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+  new ResizeObserver(resize).observe(canvas);
+
+  const EDGES = [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]];
+  const CORNERS = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+  const SPACING = 4.2, NEAR = 5.5, SHOWN = 26;
+  let hit = [];
+  const pathX = (z, ph) => Math.sin(z * 0.075 + ph) * 3.2;
+  const pathY = (z, ph) => Math.cos(z * 0.052 + ph * 0.7) * 1.1 - 0.4;
+
+  function draw() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0, 0, w, h);
+    const ph = motionTime * 0.09, f = Math.min(w, h) * 0.95, cx = w / 2, cy = h * 0.46;
+    const camX = pathX(0, ph) * 0.7, camY = pathY(0, ph) * 0.7;
+    const proj = (x, y, z) => [cx + ((x - camX) * f) / z, cy + ((y - camY) * f) / z];
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = COLORS.line;
+    const off = (motionTime * 1.1) % 6;
+    for (let z = 2 + (6 - off); z < 150; z += 6) {
+      const a = proj(-40, 3, z), b = proj(40, 3, z);
+      ctx.globalAlpha = Math.max(0, 1 - z / 150) * 0.8;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    }
+    for (let x = -40; x <= 40; x += 4) {
+      const a = proj(x, 3, 2), b = proj(x, 3, 150);
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    }
+    hit = [];
+    if (!blocks.length) {
+      ctx.globalAlpha = 1; ctx.fillStyle = COLORS.dim; ctx.textAlign = "center";
+      ctx.font = "14px 'Share Tech Mono', monospace";
+      ctx.fillText("Waiting for block 1", cx, cy);
+      return;
+    }
+    const tipH = blocks[0].height;
+    const visible = blocks.slice(0, SHOWN).slice().reverse();
+    const centers = visible.map((b) => { const z = NEAR + (tipH - b.height) * SPACING; return [b, pathX(z, ph), pathY(z, ph), z]; });
+    ctx.globalAlpha = 0.55; ctx.strokeStyle = COLORS.dim; ctx.beginPath();
+    centers.forEach(([, x, y, z], i) => { const p = proj(x, y, z); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); });
+    ctx.stroke();
+    centers.forEach(([b, x, y, z], i) => {
+      const depth = Math.max(0, 1 - (z - NEAR) / (SHOWN * SPACING));
+      const sel = b.height === selected, color = colorOf(b);
+      const band = BANDS[bandOf(b)];
+      // the glow breathes at the block's tone divided by 16: slower than once a second
+      const glow = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(2 * Math.PI * motionTime * ((band ? band.hz : 7.83) / 16) + b.height));
+      const ang = motionTime * 0.35 + b.height * 0.6, ca = Math.cos(ang), sa = Math.sin(ang), ct = Math.cos(0.45), st = Math.sin(0.45);
+      const s = sel ? 0.75 : 0.55;
+      const pts = CORNERS.map(([px, py, pz]) => {
+        const X = px * s, Y = py * s, Z = pz * s;
+        const X1 = X * ca + Z * sa, Z1 = -X * sa + Z * ca;
+        return proj(x + X1, y + (Y * ct - Z1 * st), z + (Y * st + Z1 * ct));
+      });
+      ctx.globalAlpha = Math.max(0.12, depth) * (sel ? 1 : 0.85);
+      ctx.strokeStyle = color; ctx.shadowColor = color;
+      ctx.shadowBlur = (sel ? 18 : 10) * glow * depth;
+      ctx.lineWidth = (sel ? 2.4 : 1.4) * (0.5 + depth);
+      ctx.beginPath();
+      EDGES.forEach(([a, c]) => { ctx.moveTo(pts[a][0], pts[a][1]); ctx.lineTo(pts[c][0], pts[c][1]); });
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      const c = proj(x, y, z);
+      hit.push({ h: b.height, x: c[0], y: c[1], r: Math.max(16, (s * f * 1.6) / z) });
+      if (sel || i === centers.length - 1) {
+        ctx.globalAlpha = 1; ctx.fillStyle = sel ? COLORS.ink : COLORS.dim;
+        ctx.font = "13px 'Share Tech Mono', monospace"; ctx.textAlign = "center";
+        ctx.fillText("#" + b.height, c[0], c[1] - (s * f * 1.9) / z);
+      }
+    });
+    ctx.globalAlpha = 1;
+  }
+  function loop(now) {
+    if (!animating) return;
+    motionTime += Math.min(0.05, (now - prevFrame) / 1000);
+    prevFrame = now;
+    draw();
+    requestAnimationFrame(loop);
+  }
+  canvas.addEventListener("click", (e) => {
+    const r = canvas.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
+    let best = null, bd = Infinity;
+    hit.forEach((c) => { const d = Math.hypot(c.x - px, c.y - py); if (d < c.r && d < bd) { bd = d; best = c; } });
+    if (best) select(best.h);
+  });
+
+  // ---------- sound: the same pulse Frostoise plays ----------
+  let ac = null, master = null, nodes = [];
+  const playBtn = el("play");
+  function stopNodes() { nodes.forEach((n) => { try { n.stop && n.stop(); } catch (_) {} try { n.disconnect(); } catch (_) {} }); nodes = []; }
+  function buildSound() {
+    stopNodes();
+    const band = BANDS[bandOf(detail)] || BANDS.theta;
+    if (el("mode").value === "iso") {
+      const carrier = ac.createOscillator(); carrier.frequency.value = 880;
+      const amp = ac.createGain(); amp.gain.value = 0.5;
+      const lfo = ac.createOscillator(); lfo.frequency.value = band.hz;
+      const depth = ac.createGain(); depth.gain.value = 0.5;
+      lfo.connect(depth).connect(amp.gain);
+      carrier.connect(amp).connect(master);
+      carrier.start(); lfo.start();
+      nodes.push(carrier, lfo, amp, depth);
+    } else {
+      const merger = ac.createChannelMerger(2);
+      const l = ac.createOscillator(); l.frequency.value = 200;
+      const r = ac.createOscillator(); r.frequency.value = 200 + band.hz;
+      l.connect(merger, 0, 0); r.connect(merger, 0, 1); merger.connect(master);
+      l.start(); r.start();
+      nodes.push(l, r, merger);
+    }
+    if (el("gamma").checked) {
+      const c = ac.createOscillator(); c.frequency.value = 400;
+      const g = ac.createGain(); g.gain.value = 0.2;
+      const lfo = ac.createOscillator(); lfo.frequency.value = 40;
+      const d = ac.createGain(); d.gain.value = 0.2;
+      lfo.connect(d).connect(g.gain); c.connect(g).connect(master);
+      c.start(); lfo.start();
+      nodes.push(c, g, lfo, d);
+    }
+  }
+  function retune() { if (ac && playBtn.getAttribute("aria-pressed") === "true") buildSound(); }
+  playBtn.addEventListener("click", async () => {
+    if (playBtn.getAttribute("aria-pressed") === "true") {
+      master.gain.setTargetAtTime(0, ac.currentTime, 0.05);
+      setTimeout(stopNodes, 250);
+      playBtn.textContent = "Play"; playBtn.setAttribute("aria-pressed", "false");
+      return;
+    }
+    try {
+      if (!ac) { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = 0; master.connect(ac.destination); }
+      if (ac.state === "suspended") await ac.resume();
+      buildSound();
+      master.gain.setTargetAtTime(+el("vol").value, ac.currentTime, 0.08);
+      playBtn.textContent = "Stop"; playBtn.setAttribute("aria-pressed", "true");
+    } catch (err) {
+      playBtn.textContent = "Sound unavailable";
+    }
+  });
+  el("vol").addEventListener("input", (e) => { if (master && ac) master.gain.setTargetAtTime(+e.target.value, ac.currentTime, 0.05); });
+  el("mode").addEventListener("change", retune);
+  el("gamma").addEventListener("change", retune);
+
+  // ---------- start ----------
+  resize();
+  if (animating) requestAnimationFrame((n) => { prevFrame = n; loop(n); });
+  refresh();
+  setInterval(refresh, 15000);
+  setInterval(tick, 1000);
+})();
+</script>
+</body>
+</html>

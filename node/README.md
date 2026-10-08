@@ -2,6 +2,7 @@
 
 The headless Frostchain node. It runs on a server, stores the chain and relays blocks and transactions between phones.
 It has no wallet and never holds anyone's 25 words. It stays up when the phones sleep.
+It also serves [FrostExplorer](#frostexplorer), the public block explorer.
 
 Phones on the same Wi-Fi find each other on their own. Everyone else needs a node like this one to connect through.
 
@@ -14,6 +15,7 @@ On any machine with Java 11+ (no Android SDK needed):
 ```
 
 That makes `node/build/install/frostnode/` with `bin/frostnode` and `lib/`.
+The same folder, zipped, is `frostnode.zip` on the [latest release](https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip).
 
 ## Install on the server (Ubuntu, for example an Oracle Cloud VM)
 
@@ -55,10 +57,81 @@ Check it from your phone's browser: `http://<server-ip>:7830/p2p/info` should sh
 On each phone, open **Graysons Wallet → Node → Add** and enter the server's public IP. Port 7830 is the default, so `host` alone works.
 A name like `node.finux.tech` pointing at the server is easier to share and survives an IP change.
 
+## FrostExplorer
+
+frostnode serves FrostExplorer on port 7831: the live chain in the same look as the app.
+
+- Height, a countdown to the next block window (blocks every 5 minutes, never within 270 seconds), QOIN mined so far and the difficulty.
+- Every block's resonance proof: the tone it was mined on, its band, its spectrum, and a button that plays the tone back.
+- Search by block number, block hash, address or `.frostchain` name. An account shows its balance and history.
+
+Open `http://<server>:7831/` (on Oracle Cloud, open port 7831 the same way as 7830, or use the tunnel below). It only reads the chain, so it's safe on the open internet.
+Other sites can use the same data. It's JSON with CORS open:
+
+| Path | Returns |
+|---|---|
+| `/api/explorer/status` | Height, tip, seconds until the next block window, difficulty, QOIN mined |
+| `/api/explorer/blocks?before=HEIGHT&count=30` | The newest blocks, up to 100 at a time |
+| `/api/explorer/block?h=HEIGHT` | One block with its transactions |
+| `/api/explorer/search?q=TEXT` | A block, or an account with its balance and history |
+
+### Put it on explorer.finux.tech
+
+A Cloudflare Tunnel gives the explorer an https address on finux.tech without opening a port.
+`cloudflared` runs on Linux, Windows, macOS and Termux (`pkg install cloudflared`).
+
+To try it first, this prints a temporary `https://….trycloudflare.com` address. No account needed:
+
+```bash
+cloudflared tunnel --url http://localhost:7831
+```
+
+For the real name:
+
+```bash
+cloudflared tunnel login                                   # a browser opens: pick finux.tech
+cloudflared tunnel create frostexplorer                    # prints the tunnel ID and its credentials file
+cloudflared tunnel route dns frostexplorer explorer.finux.tech
+cloudflared tunnel run --url http://localhost:7831 frostexplorer
+```
+
+To keep the tunnel up on a server after a reboot, save this as `~/.cloudflared/config.yml`:
+
+```yaml
+tunnel: <tunnel ID>
+credentials-file: /home/<you>/.cloudflared/<tunnel ID>.json
+ingress:
+  - hostname: explorer.finux.tech
+    service: http://localhost:7831
+  - service: http_status:404
+```
+
+Then install it as a service:
+
+```bash
+sudo cloudflared --config ~/.cloudflared/config.yml service install
+```
+
+## Run it on a phone with Termux
+
+Running a node on a phone is a quick way to see FrostExplorer before there's a server. It works while the phone stays awake.
+Graysons Wallet already uses port 7830 on the phone, so give frostnode other ports and let it sync from the app:
+
+```bash
+pkg install openjdk-17 unzip
+curl -LO https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip
+unzip -o frostnode.zip
+termux-wake-lock
+frostnode/bin/frostnode --data ~/frostnode-data --port 7832 --explorer-port 7833 --peer 127.0.0.1:7830
+```
+
+Then open `http://localhost:7833` in the phone's browser.
+
 ## Options
 
 ```
-frostnode [--data DIR] [--port 7830] [--peer HOST[:PORT]]...
+frostnode [--data DIR] [--port 7830] [--explorer-port 7831] [--peer HOST[:PORT]]...
 ```
 
-`--peer` adds a node to sync from at startup. Every 5 minutes the node logs its height, how many peers it reached and its mempool size.
+`--peer` adds a node to sync from at startup. `--explorer-port 0` turns FrostExplorer off.
+Every 5 minutes the node logs its height, how many peers it reached and its mempool size.
