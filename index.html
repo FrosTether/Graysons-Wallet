@@ -368,7 +368,7 @@ footer a { color: var(--muted); }
     <section id="chain" aria-labelledby="chain-h">
       <h2 id="chain-h">The chain</h2>
       <dl class="facts">
-        <div><dt>Blocks</dt><dd>One every 5 minutes, so two Frost blocks for every Bitcoin Cash block.</dd></div>
+        <div><dt>Blocks</dt><dd>About one every 5 minutes, and never sooner than 4½ minutes after the last, so two Frost blocks for every Bitcoin Cash block.</dd></div>
         <div><dt>Reward</dt><dd>About <span class="mono">263.88</span> QOIN a block at launch, shrinking slowly as coins are mined.</dd></div>
         <div><dt>Unlock</dt><dd>Mined coins can be spent after 12 more blocks.</dd></div>
         <div><dt>Mining tones</dt><dd><span class="mono">3.75–4.25</span>, <span class="mono">7.50–8.20</span> or <span class="mono">10.80–11.40</span> Hz. Every block carries a record of the reading.</dd></div>
@@ -425,7 +425,7 @@ footer a { color: var(--muted); }
   } catch (e) { /* no Intl time zones: the Eastern time stands alone */ }
 
   // ---------- tone station ----------
-  // The same pulse as Frostoise's own tone player: a 220 Hz hum whose loudness swells and fades
+  // The same pulse as Frostoise's own tone player: an 880 Hz hum (small speakers barely play lower) whose loudness swells and fades
   // at the mining tone, which is what the phone's microphone listens for.
   var tone = { hz: 7.83, ac: null, master: null, nodes: null, on: false };
   var station = $('station'), play = $('play'), vol = $('vol'), msg = $('tone-msg');
@@ -456,7 +456,7 @@ footer a { color: var(--muted); }
 
   function build() {
     var ac = tone.ac;
-    var carrier = ac.createOscillator(); carrier.frequency.value = 220;
+    var carrier = ac.createOscillator(); carrier.frequency.value = 880;
     var amp = ac.createGain(); amp.gain.value = 0.5;
     var lfo = ac.createOscillator(); lfo.frequency.value = tone.hz;
     var depth = ac.createGain(); depth.gain.value = 0.5;
