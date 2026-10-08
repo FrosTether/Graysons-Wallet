@@ -24,6 +24,8 @@ public final class Miner {
     private volatile ThermalSource thermal;
     /** The last heat level read: 0 fine to 3 too hot. */
     private volatile int heat;
+    /** Seconds until the chain accepts the next block (Consensus.MIN_BLOCK_SPACING), 0 when it's open. */
+    private volatile long nextIn;
     private volatile int threads = 1;
     /** How many of the threads hash right now: set by the band the phone is locked on (v0.4). */
     private volatile int active = 1;
@@ -219,6 +221,7 @@ public final class Miner {
         Map<String, Object> o = Json.o(objArr);
         o.put("active", Long.valueOf(this.active));
         o.put("heat", Long.valueOf(this.heat));
+        o.put("nextIn", Long.valueOf(this.nextIn));
         o.put("band", this.band >= 0 ? Resonance.BAND_NAMES[this.band] : "");
         o.put("level", this.band == 0 ? "low" : this.band == 1 ? "medium" : this.band == 2 ? "high" : "");
         if (this.payout != null) {
@@ -271,6 +274,15 @@ public final class Miner {
             this.gateWhy = "mining opens at launch: " + LAUNCH;
             return null;
         }
+        long opens = this.node.chain.tip().time + Consensus.MIN_BLOCK_SPACING;
+        long nowSec = this.node.chain.now();
+        if (nowSec < opens) {
+            long wait = opens - nowSec;
+            this.nextIn = wait;
+            this.gateWhy = "next block in " + (wait / 60) + ":" + String.format(Locale.ROOT, "%02d", Long.valueOf(wait % 60));
+            return null;
+        }
+        this.nextIn = 0;
         if (latest == null) {
             this.gateWhy = "resonance sensor is off";
             return null;

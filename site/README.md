@@ -18,6 +18,6 @@ python3 site/build.py site/out https://get.finux.tech/
 `site/out/pages/` is the hosted page: the `gh-pages` branch, served at https://get.finux.tech through a CNAME record in finux.tech's Cloudflare DNS. `site/out/preview/getqoin.html` is the same page
 as a fragment that loads its fonts from Google Fonts.
 
-The tone player makes the same pulse as Frostoise's: a 220 Hz hum whose loudness swells and fades at the
+The tone player makes the same pulse as Frostoise's: an 880 Hz hum whose loudness swells and fades at the
 mining tone. Run through Frostoise's own analysis, all three tones lock and give valid block proofs.
 Nothing on the page flashes at the tone rate.

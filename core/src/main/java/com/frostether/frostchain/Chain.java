@@ -192,7 +192,7 @@ public final class Chain {
     }
 
     public synchronized long minNextTime() {
-        return medianTime(this.blocks, this.blocks.size()) + 1;
+        return Math.max(medianTime(this.blocks, this.blocks.size()) + 1, tip().time + Consensus.MIN_BLOCK_SPACING);
     }
 
     public long now() {
@@ -321,8 +321,11 @@ public final class Chain {
         if (block.time <= medianTime(list, i)) {
             return "timestamp too early";
         }
-        if (block.time > this.clock.nowSec() + 900) {
+        if (block.time > this.clock.nowSec() + Consensus.FUTURE_TIME_LIMIT) {
             return "timestamp too far in the future";
+        }
+        if (block.time < block2.time + Consensus.MIN_BLOCK_SPACING) {
+            return "too soon after the last block";
         }
         if (block.difficulty != nextDifficulty(list, i)) {
             return "wrong difficulty";
@@ -546,6 +549,9 @@ public final class Chain {
             }
             if (!Bytes.equal(block.prev, tip().hash())) {
                 return "bad link";
+            }
+            if (block.time < tip().time + Consensus.MIN_BLOCK_SPACING) {
+                return "bad spacing";
             }
             if (block.difficulty != nextDifficulty(this.blocks, this.blocks.size())) {
                 return "bad difficulty";

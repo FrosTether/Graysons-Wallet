@@ -105,6 +105,26 @@ public class MinerTest {
     }
 
     @Test
+    public void theMinerWaitsForTheNextBlockWindow() throws Exception {
+        TestKit.FakeClock clock = new TestKit.FakeClock(Consensus.GENESIS_TIME + 300);
+        Node node = new Node(Files.createTempDirectory("miner-wait").toFile(), clock);
+        TestKit.mine(node, clock, TestKit.id(TestKit.key(59)));
+        node.miner.setSource(() -> lockedReading(clock.nowSec() * 1000, 7.83));
+        node.miner.start(TestKit.id(TestKit.key(59)), 1);
+        try {
+            assertTrue(waitFor(() -> "next block in 4:30".equals(node.miner.status().get("gate")), 10_000));
+            assertEquals(270L, node.miner.status().get("nextIn"));
+            assertEquals(Boolean.FALSE, node.miner.status().get("mining"));
+
+            clock.now += 270;
+            node.miner.refresh();
+            assertTrue(waitFor(() -> Boolean.TRUE.equals(node.miner.status().get("mining")) || node.chain.height() == 2, 10_000));
+        } finally {
+            node.miner.stop();
+        }
+    }
+
+    @Test
     public void heatBacksOffTheThreads() {
         assertEquals(8, Miner.coolCap(0, 8)); // fine: as the tone says
         assertEquals(4, Miner.coolCap(1, 8)); // warm: half

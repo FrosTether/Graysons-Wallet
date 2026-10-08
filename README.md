@@ -7,7 +7,7 @@ One install gives you three apps:
 - **Frostoise**: the tone-gated miner. It only hashes while your phone hears a mining tone
 - **MyFrost**: send and receive QOIN by `@name`
 
-> **Proof of concept (v0.4.0).** QOIN has no guaranteed value. Expect bugs and breaking changes.
+> **Proof of concept (v0.4.1).** QOIN has no guaranteed value. Expect bugs and breaking changes.
 
 ## Download
 
@@ -19,7 +19,7 @@ Your phone will ask you to allow installs from your browser, since the app isn't
 **Coming from 0.3.x?** 0.4 runs a new chain, so you start fresh:
 
 1. Uninstall 0.3.x. Android won't install 0.4 over it.
-2. Install 0.4.0, tap **Create wallet** and write down your new 25 words.
+2. Install the latest version, tap **Create wallet** and write down your new 25 words.
 
 Nothing from 0.3.x carries over: not coins, names or blocks. If you restore your 0.3.x words anyway, you get a new, empty account, because 0.4 derives fresh signing keys from them. That keeps the old chain's one-time keys from ever signing again.
 
@@ -56,7 +56,7 @@ Phones on the same Wi-Fi find each other automatically. To reach anyone else, op
 | | |
 |---|---|
 | Coin | QOIN, 11 decimal places |
-| Block time | 5 minutes, LWMA difficulty over 60 blocks |
+| Block time | 5 minutes on average, never sooner than 4½ minutes after the last block. LWMA difficulty over 60 blocks; blocks may be at most 30 s ahead of a node's clock |
 | Proof of work | double SHA-256 |
 | Block reward | (2⁶⁴ − coins mined so far) ÷ 2²⁰ × 1.5, about 263.88 QOIN at launch |
 | Block 1 | Mined like any block, at the normal reward |
@@ -67,7 +67,7 @@ Phones on the same Wi-Fi find each other automatically. To reach anyone else, op
 | Accounts | public, with optional `.frostchain` names |
 | Resonance proof | 3.75–4.25, 7.50–8.20 or 10.80–11.40 Hz, peak ≥ 10× noise, 4–60 s window, ≥ 200 samples at ≥ 16 Hz and above twice the tone, at most 15 minutes old |
 | P2P | HTTP on TCP 7830, LAN discovery on UDP 7830 |
-| Genesis | 8 October 2026, 13:37 Eastern. Chain ID `7cf2e3422f69c1e7…` |
+| Genesis | 8 October 2026, 13:37 Eastern. Chain ID `aa18513e5ee8db9f…` |
 
 The emission curve follows CryptoNote and Wownero. Signatures and accounts do not: there are no ring signatures or stealth addresses, so transfers are public.
 

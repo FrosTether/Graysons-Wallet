@@ -105,7 +105,7 @@ The app shows it under **Graysons Wallet → Node**, and `frostnode` prints it w
 | Version | Chain ID | Where |
 |---|---|---|
 | 0.3.x | `98ede167f7885dae…` | The phones today. The exact rebuild is the [`v0.3.0-source`](https://github.com/FrosTether/Graysons-Wallet/tree/v0.3.0-source) branch. |
-| 0.4 | `7cf2e3422f69c1e7…` | This branch: the relaunch. Genesis was Thursday 8 October 2026, 13:37 Eastern. |
+| 0.4 | `aa18513e5ee8db9f…` | This branch: the relaunch. Genesis was Thursday 8 October 2026, 13:37 Eastern. |
 
 `ConsensusTest` fails if a change would alter the chain ID.
 

@@ -31,7 +31,7 @@
   } catch (e) { /* no Intl time zones: the Eastern time stands alone */ }
 
   // ---------- tone station ----------
-  // The same pulse as Frostoise's own tone player: a 220 Hz hum whose loudness swells and fades
+  // The same pulse as Frostoise's own tone player: an 880 Hz hum (small speakers barely play lower) whose loudness swells and fades
   // at the mining tone, which is what the phone's microphone listens for.
   var tone = { hz: 7.83, ac: null, master: null, nodes: null, on: false };
   var station = $('station'), play = $('play'), vol = $('vol'), msg = $('tone-msg');
@@ -62,7 +62,7 @@
 
   function build() {
     var ac = tone.ac;
-    var carrier = ac.createOscillator(); carrier.frequency.value = 220;
+    var carrier = ac.createOscillator(); carrier.frequency.value = 880;
     var amp = ac.createGain(); amp.gain.value = 0.5;
     var lfo = ac.createOscillator(); lfo.frequency.value = tone.hz;
     var depth = ac.createGain(); depth.gain.value = 0.5;

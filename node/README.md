@@ -34,7 +34,7 @@ sudo systemctl enable --now frostnode
 journalctl -u frostnode -f      # watch it start
 ```
 
-The first log line shows the chain ID prefix. For v0.4 it's `7cf2e3422f69c1e7`, and the phones' Node screen must show the same.
+The first log line shows the chain ID prefix. For v0.4 it's `aa18513e5ee8db9f`, and the phones' Node screen must show the same.
 
 ## Open port 7830
 

@@ -82,5 +82,5 @@ public class ConsensusTest {
     }
 
     /** v0.4 chain ID. 0.3.x phones are on 98ede167f7885dae… and won't connect to it. */
-    static final String CHAIN_ID = "7cf2e3422f69c1e7918b191964dd1411d28392b4b6b2f94b44f289d6b9882ebe";
+    static final String CHAIN_ID = "aa18513e5ee8db9f7371c88ec2aca9b414288355ccc8faa071b23368b39be292";
 }

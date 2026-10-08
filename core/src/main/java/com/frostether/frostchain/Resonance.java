@@ -445,7 +445,7 @@ public final class Resonance {
         for (String alias : Consensus.FOUNDER_ALIASES) {
             names.append(" and ").append(alias).append(Address.SUFFIX);
         }
-        return Sha256.hash(Bytes.utf8("Frostchain genesis: Schumann resonance 7.83 Hz, 8 Oct 2026 13:37 ET. "
+        return Sha256.hash(Bytes.utf8("Frostchain genesis: Schumann resonance 7.83 Hz, 8 Oct 2026 13:37 ET. Blocks every 5 minutes, never within 270 s. "
                 + names + (Consensus.FOUNDER_ALIASES.isEmpty() ? " is " : " are ") + Consensus.FOUNDER_ADDRESS));
     }
 }

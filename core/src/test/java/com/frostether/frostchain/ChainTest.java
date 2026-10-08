@@ -18,6 +18,27 @@ public class ChainTest {
     private static final long QOIN = TestKit.QOIN;
 
     @Test
+    public void blocksComeAtMostEvery270SecondsAndNotFromTheFuture() throws Exception {
+        TestKit.FakeClock clock = new TestKit.FakeClock(Consensus.GENESIS_TIME + 300);
+        Chain chain = new Chain(null, clock);
+        byte[] miner = TestKit.id(MINER);
+        Block one = TestKit.mine(chain, clock, miner, Collections.<Tx>emptyList());
+        assertEquals(one.time + Consensus.MIN_BLOCK_SPACING, chain.minNextTime());
+
+        clock.now += 200;
+        Block early = TestKit.searchAt(chain, one.time + 200, miner, Collections.<Tx>emptyList(), 7.83);
+        assertEquals("too soon after the last block", chain.addBlock(early).error);
+
+        // Stamping it 270 s after block 1 doesn't help while that's more than 30 s ahead of the clock.
+        Block ahead = TestKit.searchAt(chain, one.time + 270, miner, Collections.<Tx>emptyList(), 7.83);
+        assertEquals("timestamp too far in the future", chain.addBlock(ahead).error);
+
+        clock.now += 70;
+        assertTrue(chain.addBlock(ahead).ok);
+        assertEquals(2, chain.height());
+    }
+
+    @Test
     public void mineSendNameAndReload() throws Exception {
         File dir = Files.createTempDirectory("frostchain-test").toFile();
         TestKit.FakeClock clock = new TestKit.FakeClock(Consensus.GENESIS_TIME + 300);

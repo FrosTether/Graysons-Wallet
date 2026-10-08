@@ -570,7 +570,7 @@
     toneStopNodes();
     var ac = TONE.ac, out = TONE.master;
     if (TONE.mode === 'pulse') {
-      var carrier = ac.createOscillator(); carrier.frequency.value = 220;
+      var carrier = ac.createOscillator(); carrier.frequency.value = 880; // phone speakers barely play 220 Hz
       var amp = ac.createGain(); amp.gain.value = 0.5;
       var lfo = ac.createOscillator(); lfo.frequency.value = TONE.hz;
       var depth = ac.createGain(); depth.gain.value = 0.5;
@@ -756,7 +756,7 @@
     var m = s.miner;
     if (S.lastAccepted != null && m.accepted > S.lastAccepted) toast('❄ Found block ' + s.node.height + '!');
     S.lastAccepted = m.accepted;
-    $('mine-tag').textContent = m.running ? (m.mining ? 'mining' + (m.level ? ' · ' + m.level + ' (' + m.active + ' of ' + m.threads + ')' : '') + (m.heat > 0 ? ' · cooling' : '') : (m.heat >= 3 ? 'cooling down' : 'waiting for a tone')) : 'stopped';
+    $('mine-tag').textContent = m.running ? (m.mining ? 'mining' + (m.level ? ' · ' + m.level + ' (' + m.active + ' of ' + m.threads + ')' : '') + (m.heat > 0 ? ' · cooling' : '') : (m.heat >= 3 ? 'cooling down' : m.nextIn > 0 ? 'next block in ' + Math.floor(m.nextIn / 60) + ':' + ('0' + m.nextIn % 60).slice(-2) : 'waiting for a tone')) : 'stopped';
     $('mine-tag').className = 'tag' + (m.mining ? ' frost' : '');
     $('mine-btn').textContent = m.running ? 'Stop mining' : 'Start mining';
     $('m-rate').textContent = rate(m.mining ? m.hashrate : 0);

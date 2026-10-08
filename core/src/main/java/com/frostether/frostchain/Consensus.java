@@ -25,7 +25,14 @@ public final class Consensus {
     public static byte[] founderAccount() {
         return FOUNDER_ACCOUNT.clone();
     }
-    public static final long FUTURE_TIME_LIMIT = 900;
+    /** How far ahead of a node's clock a block's time may be. Short, so the block spacing below holds in real time. */
+    public static final long FUTURE_TIME_LIMIT = 30;
+    /**
+     * A block's time must be at least this long after the previous block's (v0.4.1). The difficulty still aims
+     * for BLOCK_TIME, so the last 30 seconds of each 5 minutes is the proof-of-work race: blocks come about every
+     * 5 minutes and never in bursts. A floor equal to BLOCK_TIME would let the difficulty sink to nothing.
+     */
+    public static final long MIN_BLOCK_SPACING = 270;
     /**
      * v0.4 relaunch: Thursday 8 October 2026, 13:37 Eastern. Mining opens at this moment, and changing it
      * (with the marker in Resonance.genesisMarker) makes a different chain. 0.3.x started on 3 October.

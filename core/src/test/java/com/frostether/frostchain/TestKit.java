@@ -119,11 +119,16 @@ final class TestKit {
     }
 
     private static Block search(Chain chain, FakeClock clock, byte[] miner, List<Tx> txs, double hz) throws InterruptedException {
+        return searchAt(chain, Math.max(clock.nowSec(), chain.minNextTime()), miner, txs, hz);
+    }
+
+    /** A valid next block with the given timestamp, whether or not the chain's time rules accept it. */
+    static Block searchAt(Chain chain, long time, byte[] miner, List<Tx> txs, double hz) throws InterruptedException {
         Block tip = chain.tip();
         Block b = new Block();
         b.height = tip.height + 1;
         b.prev = tip.hash();
-        b.time = Math.max(clock.nowSec(), chain.minNextTime());
+        b.time = time;
         b.difficulty = chain.nextDifficulty();
         b.txs.addAll(txs);
         b.root = Block.txRoot(b.txs, chain.chainId);
