@@ -6,8 +6,8 @@ name: Build
 # always serves the newest build (GraysonsWallet.apk too, the app's name before 0.4.2, for old links). A push that only changes frostnode goes through node.yml
 # instead, which swaps in a new frostnode.zip and leaves the app alone.
 #
-# Signing: with the SIGNING_* repository secrets set (see BUILDING.md), the app is signed with
-# the release key. Without them it's signed with a throwaway test key, and the release says so.
+# Signing: with the SIGNING_* repository secrets set (see BUILDING.md), the app is signed with the release key.
+# Without them it's signed with a throwaway test key and kept in the run's artifacts, but never published.
 
 on:
   push:
@@ -89,28 +89,53 @@ jobs:
           cp out/GraysonsVault.apk out/GraysonsWallet.apk
           cp node/build/distributions/*.zip out/frostnode.zip
           cd out && sha256sum * | tee SHA256SUMS
-          { echo "### Graysons Vault $VERSION ($BUILD_KIND key)"; echo '```'; cat SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Read the signing certificate
+        # Phones accept an update only when it's signed by the same certificate as the app they have.
+        run: |
+          APKSIGNER=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          CERT=$("$APKSIGNER" verify --print-certs out/GraysonsVault.apk | sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -n 1)
+          if [ -z "$CERT" ]; then echo "::error::Couldn't read the app's signing certificate."; exit 1; fi
+          # Written the way keytool writes it (AB:CD:…), which is what tools/release-key.sh prints.
+          CERT=$(printf '%s' "$CERT" | tr a-f A-F | sed 's/../&:/g; s/:$//')
+          echo "CERT=$CERT" >> "$GITHUB_ENV"
+          { echo "### Graysons Vault $VERSION ($BUILD_KIND key)"
+            echo "Signing certificate SHA-256: \`$CERT\`"
+            echo '```'; cat out/SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: graysons-wallet-${{ env.VERSION }}-${{ env.BUILD_KIND }}
           path: out/*
       - name: Publish the release
+        # Only builds signed with the release key are published, and once .github/release-cert.sha256 holds the
+        # release certificate, only builds signed with that one. Anything else would refuse to install over the app
+        # people already have. A build that isn't published is still in this run's artifacts, for testing.
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "$BUILD_KIND" = release ]; then
-            TITLE="Graysons Vault $VERSION"
-            KEY_NOTE="Signed with the Graysons Vault release key. Later versions install over it as normal updates."
-          else
-            TITLE="Graysons Vault $VERSION (test key)"
-            KEY_NOTE="**Test key.** This build is signed with a temporary test key. When the release key arrives, you'll uninstall once more and restore with your 25 words."
+          if [ "$BUILD_KIND" != release ]; then
+            echo "::error::Not published: GitHub has no release key, so this build is signed with a test key. Run tools/release-key.sh (see BUILDING.md), then run this workflow again."
+            exit 1
           fi
-          { cat .github/release-notes.md; echo; echo "$KEY_NOTE"; } > "$RUNNER_TEMP/notes.md"
+          norm() { tr -d ' :\r\n' | tr a-f A-F; }
+          PIN=""
+          if [ -f .github/release-cert.sha256 ]; then PIN=$(norm < .github/release-cert.sha256); fi
+          if [ -n "$PIN" ] && [ "$PIN" != "$(printf '%s' "$CERT" | norm)" ]; then
+            echo "::error::Not published: this build is signed by certificate $CERT, but Graysons Vault releases are signed by $(tr -d ' \r\n' < .github/release-cert.sha256). Put the original release key back in the SIGNING_* secrets (tools/release-key.sh, run where the backup of graysons-release-key is)."
+            exit 1
+          fi
+          { cat .github/release-notes.md
+            echo
+            echo "Signed with the Graysons Vault release key. Its certificate's SHA-256 is"
+            echo
+            echo "\`$CERT\`"
+            echo
+            echo "Every later version is signed with the same key, so it installs over this one as a normal update."
+          } > "$RUNNER_TEMP/notes.md"
           gh release delete "v$VERSION-test" --yes --cleanup-tag || true
           gh release delete "v$VERSION" --yes --cleanup-tag || true
           gh release create "v$VERSION" out/* --latest --target "$GITHUB_SHA" \
-            --title "$TITLE" --notes-file "$RUNNER_TEMP/notes.md"
+            --title "Graysons Vault $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
       - name: Point the old 0.3.0 download link at this build
         # The first finux.tech pages linked releases/GraysonsWallet-0.3.0-poc.apk straight from main. That build runs
         # a dead chain, so the file there is always the newest app. The original is kept in releases/0.3.0/.

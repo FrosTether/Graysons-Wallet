@@ -32,7 +32,9 @@ This link always serves the newest build, and each build also replaces `releases
 
 https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsVault.apk
 
-Until the repository has the release key, those builds are signed with a throwaway test key, and the release title says "(test key)".
+Only builds signed with the release key are published, and the release notes give the SHA-256 of its certificate.
+Without the key, a build is signed with a throwaway test key and kept in the run's artifacts instead.
+Once `.github/release-cert.sha256` records the release certificate, a build signed by any other key isn't published either, since it couldn't install over the app people have.
 
 ### Signing
 
@@ -40,7 +42,8 @@ Phones only accept an update signed with the same key as the version already ins
 Keep a backup of the keystore and its password somewhere other than the build machine. Losing the key means every phone has to uninstall before it can update.
 
 **The quick way**, in Termux on the phone: [`tools/release-key.sh`](tools/release-key.sh) makes the key, keeps it in
-`~/graysons-release-key/`, and adds the four secrets below with the GitHub CLI. Run it again any time; it reuses the key.
+`~/graysons-release-key/`, adds the four secrets below with the GitHub CLI, and offers to start a build. Run it again any time; it reuses the key.
+It won't give GitHub a different key from the one in `.github/release-cert.sha256`, so on a new machine, copy the backed-up folder to `~/graysons-release-key/` first.
 
 ```bash
 curl -fsSLO https://github.com/FrosTether/Graysons-Wallet/raw/main/tools/release-key.sh && sh release-key.sh
