@@ -69,11 +69,17 @@ The suite takes a few minutes, because several tests mine real blocks:
 
 This makes `node/build/install/frostnode/`, which is the folder that goes to `/opt/frostnode` on the server.
 
-## Checking the rebuild against the phones
+## Chain IDs
 
-The chain ID is the hash of the genesis block, so it only matches when consensus code matches byte for byte.
-In the app, open **Graysons Wallet → Node**. It shows `chain 98ede167f7885dae`, and `frostnode` prints the same prefix when it starts.
-If they differ, the rebuilt code and the phones are on different chains.
+The chain ID is the hash of the genesis block, so two builds only share a chain when their consensus code matches byte for byte.
+The app shows it under **Graysons Wallet → Node**, and `frostnode` prints it when it starts.
+
+| Version | Chain ID | Where |
+|---|---|---|
+| 0.3.x | `98ede167f7885dae…` | The phones today. The exact rebuild is the [`v0.3.0-source`](https://github.com/FrosTether/Graysons-Wallet/tree/v0.3.0-source) branch. |
+| 0.4 | `303c4abcc5626d0b…` | This branch: the relaunch. Genesis is Friday 9 October 2026, 13:37 Eastern. |
+
+`ConsensusTest` fails if a change would alter the chain ID.
 
 ## Where this source came from
 

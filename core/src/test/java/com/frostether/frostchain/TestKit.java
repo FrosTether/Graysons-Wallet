@@ -71,9 +71,14 @@ final class TestKit {
 
     /** A proof that passes every consensus check for a block at the given time. */
     static Resonance.Proof proof(long blockTimeSec) {
+        return proof(blockTimeSec, 7.83);
+    }
+
+    /** A valid proof locked on the given tone. */
+    static Resonance.Proof proof(long blockTimeSec, double hz) {
         Resonance.Proof p = new Resonance.Proof();
         p.sensor = "mic";
-        p.hzMilli = 7830;
+        p.hzMilli = (int) Math.round(hz * 1000);
         p.snrX100 = 2390;
         p.ampMilli = 120;
         p.samples = 800;
@@ -84,7 +89,7 @@ final class TestKit {
         Arrays.fill(p.digest, (byte) 0x5a);
         p.spectrum = new byte[33];
         Arrays.fill(p.spectrum, (byte) 20);
-        p.spectrum[15] = (byte) 255; // bin 15 is 7.75 Hz, within 0.38 Hz of 7.83
+        p.spectrum[(int) Math.round((hz - Resonance.GRID_MIN) / Resonance.SPECTRUM_STEP_HZ)] = (byte) 255;
         return p;
     }
 

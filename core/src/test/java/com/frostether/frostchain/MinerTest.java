@@ -66,6 +66,30 @@ public class MinerTest {
     }
 
     @Test
+    public void toneSetsHowManyThreadsHash() {
+        assertEquals(2, Miner.threadsForBand(0, 8)); // delta 4.0 Hz: low
+        assertEquals(1, Miner.threadsForBand(0, 1));
+        assertEquals(4, Miner.threadsForBand(1, 8)); // theta 7.83 Hz: medium
+        assertEquals(4, Miner.threadsForBand(1, 7));
+        assertEquals(8, Miner.threadsForBand(2, 8)); // alpha 11.11 Hz: high
+    }
+
+    @Test
+    public void lockingOnAlphaRunsAtHigh() throws Exception {
+        TestKit.FakeClock clock = new TestKit.FakeClock(Consensus.GENESIS_TIME + 300);
+        Node node = new Node(Files.createTempDirectory("miner-alpha").toFile(), clock);
+        node.miner.setSource(() -> lockedReading(clock.nowSec() * 1000, 11.11));
+        node.miner.start(TestKit.id(TestKit.key(53)), 4);
+        try {
+            assertTrue(waitFor(() -> "high".equals(node.miner.status().get("level")), 10_000));
+            assertEquals("alpha", node.miner.status().get("band"));
+            assertEquals(4L, node.miner.status().get("active"));
+        } finally {
+            node.miner.stop();
+        }
+    }
+
+    @Test
     public void startNeedsAPayoutAddress() throws Exception {
         Node node = new Node(Files.createTempDirectory("miner2").toFile(), null);
         try {

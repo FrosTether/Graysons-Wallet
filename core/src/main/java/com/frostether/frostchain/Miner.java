@@ -19,6 +19,9 @@ public final class Miner {
     private volatile boolean running;
     private volatile ResonanceSource source;
     private volatile int threads = 1;
+    /** How many of the threads hash right now: set by the band the phone is locked on (v0.4). */
+    private volatile int active = 1;
+    private volatile int band = -1;
     private Thread[] workers = new Thread[0];
     private final long[] hashCounts = new long[64];
     private volatile String lastBlock = "";
@@ -90,6 +93,8 @@ public final class Miner {
         stop();
         this.payout = (byte[]) bArr.clone();
         this.threads = Math.max(1, Math.min(Math.min(32, this.hashCounts.length), i));
+        this.active = this.threads;
+        this.band = -1;
         this.running = true;
         this.found = 0;
         this.accepted = 0;
@@ -170,6 +175,9 @@ public final class Miner {
         objArr[14] = "lastBlock";
         objArr[15] = this.lastBlock;
         Map<String, Object> o = Json.o(objArr);
+        o.put("active", Long.valueOf(this.active));
+        o.put("band", this.band >= 0 ? Resonance.BAND_NAMES[this.band] : "");
+        o.put("level", this.band == 0 ? "low" : this.band == 1 ? "medium" : this.band == 2 ? "high" : "");
         if (this.payout != null) {
             o.put("payout", Address.raw(this.payout));
         }
@@ -220,7 +228,7 @@ public final class Miner {
             return null;
         }
         if (!latest.locked) {
-            this.gateWhy = "waiting for 7.83 Hz: " + latest.why;
+            this.gateWhy = "waiting for a mining tone: " + latest.why;
             return null;
         }
         if (now - (latest.startMs + latest.durMs) > MAX_READING_AGE_MS) {
@@ -243,6 +251,9 @@ public final class Miner {
             return null;
         }
         block.resoHash = block.reso.hash();
+        int locked = latest.band >= 0 ? latest.band : Resonance.lockBand(latest.peakHz);
+        this.band = locked;
+        this.active = threadsForBand(locked, this.threads);
         this.gateWhy = "mining: locked on " + String.format(Locale.ROOT, "%.2f", Double.valueOf(latest.peakHz)) + " Hz";
         return new Template(block);
     }
@@ -253,7 +264,7 @@ public final class Miner {
         int[] iArr3 = new int[8];
         while (this.running) {
             Template template = this.current;
-            if (template == null) {
+            if (template == null || i >= this.active) {
                 synchronized (this.wake) {
                     try {
                         this.wake.wait(500L);
@@ -276,7 +287,7 @@ public final class Miner {
                 long nextLong = this.rng.nextLong();
                 // Hash in batches of 16,384, then recheck that the job is still current.
                 // Rebuilt from the 0.3.0 bytecode; the decompiled batch loop never ended.
-                while (this.running && this.current == template) {
+                while (this.running && this.current == template && i < this.active) {
                     for (int i4 = 0; i4 < 16384; i4++) {
                         System.arraycopy(template.mid, 0, iArr3, 0, 8);
                         iArr[4] = (int) (nextLong >>> 32);
@@ -295,6 +306,22 @@ public final class Miner {
                     jArr[i] = jArr[i] + 16384;
                 }
             }
+        }
+    }
+
+    /**
+     * v0.4 tone presets. The thread slider sets the most a phone may use; the band picks how many of those hash:
+     * delta 4.0 Hz is low (up to 2), theta 7.83 Hz is medium (about half), alpha 11.11 Hz is high (all of them).
+     */
+    public static int threadsForBand(int band, int max) {
+        int m = Math.max(1, max);
+        switch (band) {
+            case 0:
+                return Math.min(2, m);
+            case 1:
+                return Math.max(1, (m + 1) / 2);
+            default:
+                return m;
         }
     }
 

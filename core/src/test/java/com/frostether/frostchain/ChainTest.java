@@ -33,9 +33,9 @@ public class ChainTest {
         assertEquals(13, chain.height());
         assertArrayEquals(miner, chain.lookupName("jacobfrost"));
 
-        // Block 1's reward unlocked at height 13. Blocks 2 to 13 are still maturing.
+        // Block 1's reward (a normal one since v0.4) unlocked at height 13. Blocks 2 to 13 are still maturing.
         ChainState.Account a = chain.account(miner);
-        assertEquals(Consensus.PREMINE, a.balance);
+        assertEquals(Consensus.reward(1, 0), a.balance);
         assertTrue(a.immature > 0);
 
         // A signed send is checked like a phone would check it, then mined into block 14.

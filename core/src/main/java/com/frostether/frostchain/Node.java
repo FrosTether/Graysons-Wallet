@@ -36,7 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class Node {
-    public static final String AGENT = "Frostchain/0.1 (Graysons Wallet)";
+    public static final String AGENT = "Frostchain/0.4 (Graysons Wallet)";
     static final long MAX_REORG_BYTES = 25165824;
     static final int MAX_RESPONSE = 6291456;
     private Thread beaconThread;
@@ -654,7 +654,7 @@ public final class Node {
         if (str.equals("/") || str.equals("/p2p")) {
             HttpServer.Response response = new HttpServer.Response();
             response.type = "text/plain; charset=utf-8";
-            response.body = Bytes.utf8("Frostchain/0.1 (Graysons Wallet)\nFrostchain node. Height " + this.chain.height() + ".\n");
+            response.body = Bytes.utf8(AGENT + "\nFrostchain node. Height " + this.chain.height() + ".\n");
             return response;
         }
         return null;

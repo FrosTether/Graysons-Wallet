@@ -5,13 +5,17 @@ import java.util.List;
 
 public final class Consensus {
     public static final long BLOCK_TIME = 300;
-    public static final String CHAIN_NAME = "Frostchain (proof of concept)";
+    public static final String CHAIN_NAME = "Frostchain v0.4";
     public static final String COIN = "QOIN";
     public static final int COINBASE_MATURITY = 12;
     public static final int EMISSION_SPEED_FACTOR = 20;
     public static final String FOUNDER_NAME = "jacobfrost";
     public static final long FUTURE_TIME_LIMIT = 900;
-    public static final long GENESIS_TIME = 1791049020;
+    /**
+     * v0.4 relaunch: Friday 9 October 2026, 13:37 Eastern. Mining opens at this moment, and changing it
+     * (with the marker in Resonance.genesisMarker) makes a different chain. 0.3.x started on 3 October.
+     */
+    public static final long GENESIS_TIME = 1791567420;
     public static final long INITIAL_DIFFICULTY = 20000000;
     public static final int LWMA_N = 60;
     public static final int MAX_BLOCK_TXS = 200;
@@ -21,18 +25,21 @@ public final class Consensus {
     public static final long MIN_FEE = 10000000;
     public static final long MONEY_SUPPLY = -1;
     public static final int P2P_PORT = 7830;
-    public static final long PREMINE = 1337008241991000L;
     private static final BigInteger TWO256 = BigInteger.ONE.shiftLeft(256);
     public static final int VERSION = 1;
 
     private Consensus() {
     }
 
+    /**
+     * Block reward for height j after j2 coins have been mined: (2^64 - mined) / 2^20 x 1.5.
+     * Since v0.4 block 1 follows the same curve as every other block; 0.3.x paid it a fixed 13,370.08241991.
+     */
     public static long reward(long j, long j2) {
         if (j <= 0) {
             return 0L;
         }
-        return j == 1 ? PREMINE : ((((-1) - j2) >>> 20) * 3) / 2;
+        return ((((-1) - j2) >>> 20) * 3) / 2;
     }
 
     public static byte[] target(long j) {

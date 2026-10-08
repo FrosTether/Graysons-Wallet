@@ -8,27 +8,57 @@ import java.util.Locale;
 import java.util.Map;
 
 public final class Resonance {
-    public static final int GRID = ((int) Math.round(160.0d)) + 1;
-    public static final double GRID_MAX = 12.0d;
-    public static final double GRID_MIN = 4.0d;
+    // v0.4: the analysis grid runs 2.0-14.8 Hz in 0.05 Hz steps (257 points), so the 33-bin proof
+    // spectrum lands on whole 0.4 Hz steps. 0.3.x used 4.0-12.0 Hz.
+    public static final double GRID_MIN = 2.0d;
+    public static final double GRID_MAX = 14.8d;
     public static final double GRID_STEP = 0.05d;
+    public static final int GRID = ((int) Math.round((GRID_MAX - GRID_MIN) / GRID_STEP)) + 1;
+    public static final int SPECTRUM_BINS = 33;
+    public static final double SPECTRUM_STEP_HZ = ((GRID - 1) / (SPECTRUM_BINS - 1)) * GRID_STEP;
     public static final double LOCK_MIN_SNR = 12.0d;
     public static final double LOCK_TOLERANCE_HZ = 0.25d;
     public static final double MAG_MIN_AMPLITUDE_UT = 0.02d;
     public static final long MAX_AGE_MS = 900000;
     public static final long MAX_AHEAD_MS = 120000;
     public static final int MAX_DUR_MS = 60000;
-    public static final int MAX_MHZ = 8200;
     public static final double MIC_MIN_DEPTH = 0.05d;
     public static final int MIN_DUR_MS = 4000;
-    public static final int MIN_MHZ = 7500;
     public static final int MIN_RATE_CENTI_HZ = 1600;
     public static final int MIN_SAMPLES = 200;
     public static final int MIN_SNR_X100 = 1000;
-    public static final int SPECTRUM_BINS = 33;
     public static final double TARGET_HZ = 7.83d;
 
+    /**
+     * v0.4 mining bands. The band a phone locks on sets how many threads it mines with (Miner.threadsForBand);
+     * every band earns the same reward. A proof's frequency must sit inside one of these ranges.
+     */
+    public static final double[] BAND_HZ = {4.0d, 7.83d, 11.11d};
+    public static final String[] BAND_NAMES = {"delta", "theta", "alpha"};
+    public static final int[] BAND_MIN_MHZ = {3750, 7500, 10800};
+    public static final int[] BAND_MAX_MHZ = {4250, 8200, 11400};
+
     private Resonance() {
+    }
+
+    /** The band whose consensus range contains this frequency, or -1. */
+    public static int bandOfMilli(int hzMilli) {
+        for (int b = 0; b < BAND_HZ.length; b++) {
+            if (hzMilli >= BAND_MIN_MHZ[b] && hzMilli <= BAND_MAX_MHZ[b]) {
+                return b;
+            }
+        }
+        return -1;
+    }
+
+    /** The band a reading locks on: within LOCK_TOLERANCE_HZ of its tone, or -1. */
+    public static int lockBand(double hz) {
+        for (int b = 0; b < BAND_HZ.length; b++) {
+            if (Math.abs(hz - BAND_HZ[b]) <= LOCK_TOLERANCE_HZ) {
+                return b;
+            }
+        }
+        return -1;
     }
 
     public static final class Reading {
@@ -38,6 +68,8 @@ public final class Resonance {
         public byte[] digest;
         public long durMs;
         public boolean locked;
+        /** Index into BAND_HZ when locked, otherwise -1. */
+        public int band = -1;
         public double peakHz;
         public double rateHz;
         public int samples;
@@ -73,6 +105,8 @@ public final class Resonance {
             linkedHashMap.put("samples", Integer.valueOf(this.samples));
             linkedHashMap.put("locked", Boolean.valueOf(this.locked));
             linkedHashMap.put("alias", Boolean.valueOf(this.aliasSuspect));
+            linkedHashMap.put("band", this.band >= 0 ? BAND_NAMES[this.band] : "");
+            linkedHashMap.put("bandHz", Double.valueOf(this.band >= 0 ? BAND_HZ[this.band] : 0.0d));
             linkedHashMap.put("why", this.why);
             int[] iArr = new int[33];
             byte[] spectrumBytes = Resonance.spectrumBytes(this.power);
@@ -133,7 +167,7 @@ public final class Resonance {
         double[][] dArr4 = (double[][]) Array.newInstance((Class<?>) Double.TYPE, fArr.length, GRID);
         double[][] dArr5 = (double[][]) Array.newInstance((Class<?>) Double.TYPE, fArr.length, GRID);
         for (int i6 = 0; i6 < GRID; i6++) {
-            double d6 = 6.283185307179586d * (4.0d + (i6 * 0.05d));
+            double d6 = 6.283185307179586d * (GRID_MIN + (i6 * GRID_STEP));
             double d7 = 0.0d;
             for (int i7 = 0; i7 < fArr.length; i7++) {
                 double d8 = 0.0d;
@@ -167,11 +201,11 @@ public final class Resonance {
                 d12 = Math.max(-0.5d, Math.min(0.5d, ((d13 - d15) * 0.5d) / d16));
             }
         }
-        reading.peakHz = ((d12 + i9) * 0.05d) + 4.0d;
+        reading.peakHz = ((d12 + i9) * GRID_STEP) + GRID_MIN;
         double[] dArr7 = new double[GRID];
         int i11 = 0;
         for (int i12 = 0; i12 < GRID; i12++) {
-            if (Math.abs((4.0d + (i12 * 0.05d)) - reading.peakHz) > 0.5d) {
+            if (Math.abs((GRID_MIN + (i12 * GRID_STEP)) - reading.peakHz) > 0.5d) {
                 dArr7[i11] = reading.power[i12];
                 i11++;
             }
@@ -205,8 +239,13 @@ public final class Resonance {
             reading.why = "no clear peak";
             return false;
         }
-        if (Math.abs(reading.peakHz - 7.83d) > 0.25d) {
-            reading.why = String.format(Locale.ROOT, "peak at %.2f Hz, not 7.83", Double.valueOf(reading.peakHz));
+        int band = lockBand(reading.peakHz);
+        if (band < 0) {
+            reading.why = String.format(Locale.ROOT, "peak at %.2f Hz, not 4.0, 7.83 or 11.11", Double.valueOf(reading.peakHz));
+            return false;
+        }
+        if (reading.rateHz <= 2.0d * reading.peakHz) {
+            reading.why = "sensor too slow for this tone";
             return false;
         }
         if (reading.aliasSuspect) {
@@ -218,7 +257,8 @@ public final class Resonance {
             return false;
         }
         if (!reading.sensor.equals("mic") || reading.depth >= 0.05d) {
-            reading.why = "locked on 7.83 Hz";
+            reading.band = band;
+            reading.why = String.format(Locale.ROOT, "locked on %s Hz (%s)", BAND_HZ[band] == 4.0d ? "4.0" : String.valueOf(BAND_HZ[band]), BAND_NAMES[band]);
             return true;
         }
         reading.why = "pulse too faint";
@@ -350,8 +390,8 @@ public final class Resonance {
             if (!"mag".equals(this.sensor) && !"mic".equals(this.sensor)) {
                 return "unknown resonance sensor";
             }
-            if (this.hzMilli < 7500 || this.hzMilli > 8200) {
-                return "resonance not near 7.83 Hz";
+            if (bandOfMilli(this.hzMilli) < 0) {
+                return "resonance not at a mining tone";
             }
             if (this.snrX100 < 1000) {
                 return "resonance peak too weak";
@@ -364,6 +404,9 @@ public final class Resonance {
             }
             if (this.rateCenti < 1600) {
                 return "resonance sample rate too low";
+            }
+            if (this.rateCenti * 5L <= this.hzMilli) {
+                return "resonance sample rate too low for its frequency";
             }
             if (this.ampMilli <= 0) {
                 return "no resonance amplitude";
@@ -383,7 +426,7 @@ public final class Resonance {
             if ((this.spectrum[i] & 255) != 255) {
                 return "resonance spectrum not normalised";
             }
-            if (Math.abs(((i * 0.25d) + 4.0d) - (this.hzMilli / 1000.0d)) > 0.38d) {
+            if (Math.abs(((i * SPECTRUM_STEP_HZ) + GRID_MIN) - (this.hzMilli / 1000.0d)) > 0.38d) {
                 return "resonance spectrum peak doesn't match its frequency";
             }
             long j2 = 1000 * j;
@@ -398,6 +441,6 @@ public final class Resonance {
     }
 
     public static byte[] genesisMarker() {
-        return Sha256.hash(Bytes.utf8("Frostchain genesis: Schumann resonance 7.83 Hz, 3 Oct 2026 13:37 ET"));
+        return Sha256.hash(Bytes.utf8("Frostchain genesis: Schumann resonance 7.83 Hz, 9 Oct 2026 13:37 ET"));
     }
 }
