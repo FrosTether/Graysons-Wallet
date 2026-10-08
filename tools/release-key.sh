@@ -1,5 +1,5 @@
 #!/bin/sh
-# Makes the Graysons Wallet release key on this phone (or computer) and gives it to GitHub, so every build
+# Makes the Graysons Vault release key on this phone (or computer) and gives it to GitHub, so every build
 # after this one installs over the last as a normal update.
 #
 #   In Termux:
@@ -38,7 +38,7 @@ else
   PASS=$(head -c 24 /dev/urandom | base64 | tr -d '/+=\n' | cut -c1-28)
   keytool -genkeypair -keystore "$KS" -storetype PKCS12 -storepass "$PASS" -alias "$ALIAS" \
     -keyalg EC -groupname secp256r1 -sigalg SHA256withECDSA -validity 36500 \
-    -dname "CN=Graysons Wallet, OU=Finux, O=FrosTether" 2>/dev/null
+    -dname "CN=Graysons Vault, OU=Finux, O=FrosTether" 2>/dev/null
   printf '%s\n' "$PASS" > "$PW"
   chmod 600 "$KS" "$PW"
   echo "Made a new key in $DIR."
@@ -61,7 +61,7 @@ gh secret list --repo "$REPO"
 
 cat <<DONE
 
-Done. GitHub signs every Graysons Wallet build with this key from now on.
+Done. GitHub signs every Graysons Vault build with this key from now on.
 
 Back it up now:
   - Copy the folder $DIR somewhere off this phone, like a private Google Drive folder.

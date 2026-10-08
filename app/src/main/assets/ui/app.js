@@ -1,4 +1,4 @@
-/* Graysons Wallet + Frostoise + MyFrost + Temporal UI. Talks to the Frostchain node through
+/* Graysons Vault + Frostoise + MyFrost + Temporal UI. Talks to the Frostchain node through
    window.FrostBridge on Android, or POST /wallet/api on desktop. No external libraries. */
 (function () {
   'use strict';
@@ -121,7 +121,7 @@
   var S = { status: null, wallet: null, page: 'home', lastHeight: -1, sensor: 'mag', review: null, cores: 4 };
 
   // ---------------- routing: one page, four apps ----------------
-  var TITLES = { wallet: 'Graysons Wallet', frostoise: 'Frostoise', myfrost: 'MyFrost', temporal: 'Temporal' };
+  var TITLES = { wallet: 'Graysons Vault', frostoise: 'Frostoise', myfrost: 'MyFrost', temporal: 'Temporal' };
   function mode() {
     var h = location.hash || '#wallet';
     return h.indexOf('#frostoise') === 0 ? 'frostoise' : h.indexOf('#myfrost') === 0 ? 'myfrost' : h.indexOf('#temporal') === 0 ? 'temporal' : 'wallet';
@@ -695,7 +695,7 @@
     if (!window.FrostBridge || !window.FrostBridge.requestPermissions || !list.length) return Promise.resolve({ mic: true, notify: true });
     return new Promise(function (resolve) { permWaiter = resolve; window.FrostBridge.requestPermissions(list.join(',')); });
   }
-  var MIC_DENIED = 'Frostoise needs the microphone permission to listen for the resonator. You can allow it in Android Settings → Apps → Graysons Wallet → Permissions.';
+  var MIC_DENIED = 'Frostoise needs the microphone permission to listen for the resonator. You can allow it in Android Settings → Apps → Graysons Vault → Permissions.';
   function startSensor() {
     var btn = $('sensor-btn');
     busy(btn, true, 'Starting…');
@@ -773,7 +773,7 @@
     else $('m-payout').placeholder = w.open ? 'your wallet: ' + walletAddr(w) : 'name.frostchain to pay';
     $('f-wallet').innerHTML = w.open
       ? esc(w.label) + ' · <b>' + esc(walletAddr(w)) + '</b><br>' + esc(w.balanceText) + ' QNR' + (w.immature !== '0' ? ' + ' + esc(w.immatureText) + ' locked from mining' : '')
-      : 'No wallet open. Open Graysons Wallet so Frostoise can pay you, or type a .frostchain name above.';
+      : 'No wallet open. Open Graysons Vault so Frostoise can pay you, or type a .frostchain name above.';
   }
 
   // ---------------- MyFrost: send and receive by @name ----------------
@@ -817,14 +817,14 @@
     if (MF.page === 'home') mfLoadActivity();
   }
 
-  // unlock (wallets are created in Graysons Wallet)
+  // unlock (wallets are created in Graysons Vault)
   function mfLoadWallets() {
     call('wallets.list').then(function (list) {
       $('mf-file').innerHTML = list.map(function (w) {
         return '<option value="' + esc(w.file) + '">' + esc(w.label) + (w.name ? ' · ' + esc(atName(w.name)) : '') + (w.watch ? ' (watch-only)' : '') + '</option>';
       }).join('');
       $('mf-unlock').classList.toggle('hidden', !list.length);
-      if (!list.length) msg('mf-gate-msg', 'No wallets on this phone yet. Make one in Graysons Wallet, then come back.');
+      if (!list.length) msg('mf-gate-msg', 'No wallets on this phone yet. Make one in Graysons Vault, then come back.');
     }).catch(function () {});
   }
   $('mf-unlock').addEventListener('submit', function (e) {
@@ -1054,7 +1054,7 @@
         return '<option value="' + esc(w.file) + '">' + esc(w.label) + (w.name ? ' · ' + esc(atName(w.name)) : '') + '</option>';
       }).join('');
       $('tp-unlock').classList.toggle('hidden', !spendable.length);
-      if (!spendable.length) msg('tp-gate-msg', 'No wallets on this phone yet. Make one in Graysons Wallet, then come back.');
+      if (!spendable.length) msg('tp-gate-msg', 'No wallets on this phone yet. Make one in Graysons Vault, then come back.');
     }).catch(function () {});
   }
   $('tp-unlock').addEventListener('submit', function (e) {

@@ -236,7 +236,7 @@
     var t = fromInput(backTime.value);
     if (isNaN(t)) { say('back-msg', 'Pick a moment.', true); return; }
     if (!live) {
-      $('back-msg').innerHTML = 'Going back needs a live node, and none is in reach yet. <a href="/node/">Run one</a>, or open Temporal in Graysons Wallet.';
+      $('back-msg').innerHTML = 'Going back needs a live node, and none is in reach yet. <a href="/node/">Run one</a>, or open Temporal in Graysons Vault.';
       return;
     }
     say('back-msg', 'Travelling…');

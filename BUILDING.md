@@ -1,4 +1,4 @@
-# Building Graysons Wallet
+# Building Graysons Vault
 
 This repository holds the full source of the Android app and the Frostchain node.
 It was rebuilt from the released 0.3.0 APK (see [Where this source came from](#where-this-source-came-from)).
@@ -9,7 +9,7 @@ It was rebuilt from the released 0.3.0 APK (see [Where this source came from](#w
 |---|---|
 | `core/` | Frostchain itself in plain Java: consensus rules, LMS keys, wallets, the node and its peer-to-peer HTTP. No Android code. |
 | `node/` | `frostnode`, the headless server node. See [node/README.md](node/README.md). |
-| `app/` | The Android app: Graysons Wallet, Frostoise, MyFrost and Temporal. Its screens are web pages in `app/src/main/assets/ui`. |
+| `app/` | The Android app: Graysons Vault (Graysons Wallet before 0.4.2), Frostoise, MyFrost and Temporal. Its screens are web pages in `app/src/main/assets/ui`. |
 
 ## The Android app
 
@@ -30,7 +30,7 @@ Every push to `main` that changes the app or the chain runs the chain tests, bui
 A push that only changes `node/` rebuilds `frostnode.zip`, checks that FrostExplorer answers, and swaps the zip into that release. The app stays as it was, so phones don't reinstall for a server change.
 This link always serves the newest build, and each build also replaces `releases/GraysonsWallet-0.3.0-poc.apk`, so old links to the 0.3.0 file get the current app:
 
-https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk
+https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsVault.apk
 
 Until the repository has the release key, those builds are signed with a throwaway test key, and the release title says "(test key)".
 
@@ -110,7 +110,7 @@ It also serves FrostExplorer, the public block explorer, on port 7831. See [node
 ## Chain IDs
 
 The chain ID is the hash of the genesis block, so two builds only share a chain when their consensus code matches byte for byte.
-The app shows it under **Graysons Wallet → Node**, and `frostnode` prints it when it starts.
+The app shows it under **Graysons Vault → Node**, and `frostnode` prints it when it starts.
 
 | Version | Chain ID | Where |
 |---|---|---|

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>Graysons Wallet</title>
+<title>Graysons Vault</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
 <section id="gate" class="screen hidden">
   <header class="gate-head">
     <img src="graysons.svg" alt="" class="logo">
-    <div><h1>Graysons Wallet</h1><p class="muted">Qoin (QNR) on <b>.frostchain</b> · quantum-safe signatures</p></div>
+    <div><h1>Graysons Vault</h1><p class="muted">Qoin (QNR) on <b>.frostchain</b> · quantum-safe signatures</p></div>
   </header>
   <div class="card">
     <div class="tabs" role="tablist">
@@ -233,7 +233,7 @@
       </div>
       <div class="card" id="etc-card">
         <div class="row-between"><h2>🪶 ETC contracts</h2><span class="tag">Ethereum Classic · chain 61</span></div>
-        <p class="small muted">Public reference list. Graysons Wallet doesn't hold ETC keys: use MetaMask for these.</p>
+        <p class="small muted">Public reference list. Graysons Vault doesn't hold ETC keys: use MetaMask for these.</p>
         <ul class="peers links">
           <li><span>FCN · Frostcoin (8 decimals)<br><b class="mono">0x558b1b3D781B07Df19603d9A7f3411a71Ff3815f</b></span><a class="btn small" href="https://etc.blockscout.com/address/0x558b1b3D781B07Df19603d9A7f3411a71Ff3815f" target="_blank" rel="noopener noreferrer">View</a></li>
           <li><span>FsZT · Frost Sub-Zero Time (18 decimals)<br><b class="mono">0x9eBd3cC53db59169759c90f74D55D55076D6BF01</b></span><a class="btn small" href="https://etc.blockscout.com/address/0x9eBd3cC53db59169759c90f74D55D55076D6BF01" target="_blank" rel="noopener noreferrer">View</a></li>
@@ -260,7 +260,7 @@
           <button class="btn" data-copy="0x9eBd3cC53db59169759c90f74D55D55076D6BF01">Copy FsZT address</button>
         </div>
         <button class="btn mf-primary wide" id="mm-open">Open MetaMask</button>
-        <p class="small muted">MetaMask uses elliptic-curve keys, so it can hold these ETC tokens but not QNR, which needs quantum-safe signatures. QNR stays in Graysons Wallet and MyFrost.</p>
+        <p class="small muted">MetaMask uses elliptic-curve keys, so it can hold these ETC tokens but not QNR, which needs quantum-safe signatures. QNR stays in Graysons Vault and MyFrost.</p>
       </div>
       <div class="card" id="params-card">
         <div class="row-between"><h2>QNR whitepaper numbers</h2><span class="tag frost">proposed</span></div>
@@ -289,7 +289,7 @@
         <p><b>Quantum-safe signatures.</b> Every transaction is signed with LMS (RFC 8554, NIST SP 800-208), a hash-based scheme. Shor's algorithm breaks the elliptic curves under Monero and Wownero; it doesn't apply to SHA-256. Each key has 1,024 one-time signatures. The chain makes sure none is ever used twice, and the wallet rotates to a new key before they run out.</p>
         <p><b>Not private.</b> Balances and transfers are public, like Bitcoin. CryptoNote's ring signatures and stealth addresses use elliptic curves, and no practical quantum-safe replacement exists yet.</p>
         <p><b>Tone-gated mining.</b> Frostoise mines only while the phone hears one of three tones: 4.0 Hz (delta), 7.83 Hz (theta, the Schumann resonance) or 11.11 Hz (alpha). The tone sets how hard it mines: low, medium or high. Each block records the reading. Other nodes can check that the reading is plausible, but they can't prove a physical resonator was there: a synthesized tone looks the same.</p>
-        <p class="muted small">Graysons Wallet · Frostoise · MyFrost · Qoin on Frostchain v0.4 · <span id="about-platform"></span></p>
+        <p class="muted small">Graysons Vault · Frostoise · MyFrost · Qoin on Frostchain v0.4 · <span id="about-platform"></span></p>
       </div>
     </div>
   </main>
@@ -366,7 +366,7 @@
     </div>
 
     <div class="card">
-      <div class="row-between"><b>Wallet</b><a class="link small" href="#wallet">Open Graysons Wallet →</a></div>
+      <div class="row-between"><b>Wallet</b><a class="link small" href="#wallet">Open Graysons Vault →</a></div>
       <p class="small" id="f-wallet"></p>
     </div>
   </main>
@@ -384,7 +384,7 @@
   <main id="mf-gate" class="hidden">
     <div class="card">
       <h2>Unlock your wallet</h2>
-      <p class="small muted">MyFrost sends and receives with a wallet you made in Graysons Wallet.</p>
+      <p class="small muted">MyFrost sends and receives with a wallet you made in Graysons Vault.</p>
       <form id="mf-unlock">
         <label for="mf-file">Wallet</label>
         <select id="mf-file"></select>
@@ -393,7 +393,7 @@
         <button class="btn mf-primary wide" type="submit" id="mf-open">Unlock</button>
       </form>
       <div class="msg" id="mf-gate-msg"></div>
-      <button class="btn wide" data-goto="#wallet">Create a wallet in Graysons Wallet</button>
+      <button class="btn wide" data-goto="#wallet">Create a wallet in Graysons Vault</button>
     </div>
   </main>
 
@@ -411,8 +411,8 @@
         </div>
       </div>
       <div class="card hidden" id="mf-noname">
-        <p class="small" style="margin-top:0">Claim an <b>@name</b> so friends can pay you by name instead of a long address. It's free in Graysons Wallet.</p>
-        <button class="btn wide" data-goto="#wallet">Claim a name in Graysons Wallet</button>
+        <p class="small" style="margin-top:0">Claim an <b>@name</b> so friends can pay you by name instead of a long address. It's free in Graysons Vault.</p>
+        <button class="btn wide" data-goto="#wallet">Claim a name in Graysons Vault</button>
       </div>
       <div class="card">
         <div class="row-between"><b>Activity</b></div>
@@ -490,7 +490,7 @@
     <div data-tp="seal">
       <div class="card tp-gate hidden" id="tp-gate">
         <h2>Unlock a wallet to pay the gas</h2>
-        <p class="small muted">Each seal burns 1 QNR from a wallet you made in Graysons Wallet. Going back in time works without one.</p>
+        <p class="small muted">Each seal burns 1 QNR from a wallet you made in Graysons Vault. Going back in time works without one.</p>
         <form id="tp-unlock">
           <label for="tp-file">Wallet</label>
           <select id="tp-file"></select>

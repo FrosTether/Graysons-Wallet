@@ -267,7 +267,7 @@ public abstract class WebActivity extends Activity {
             WebActivity.this.runOnUiThread(new Runnable() {
                 @Override // java.lang.Runnable
                 public void run() {
-                    WebActivity.this.setTitle("frostoise".equals(str) ? "Frostoise" : "myfrost".equals(str) ? "MyFrost" : "temporal".equals(str) ? "Temporal" : "Graysons Wallet");
+                    WebActivity.this.setTitle("frostoise".equals(str) ? "Frostoise" : "myfrost".equals(str) ? "MyFrost" : "temporal".equals(str) ? "Temporal" : "Graysons Vault");
                 }
             });
         }

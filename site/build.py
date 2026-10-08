@@ -17,7 +17,7 @@ import sys
 SITE = pathlib.Path(__file__).resolve().parent
 REPO = SITE.parent
 RELEASE = "https://github.com/FrosTether/Graysons-Wallet/releases/latest"
-APK_URL = RELEASE + "/download/GraysonsWallet.apk"
+APK_URL = RELEASE + "/download/GraysonsVault.apk"
 NODE_URL = RELEASE + "/download/frostnode.zip"
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
         "%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E")
@@ -29,7 +29,7 @@ FONT_FACES = """@font-face { font-family: "Archivo"; src: url("/fonts/archivo.wo
 
 PAGES = [
     dict(slug="", folder="getqoin", nav="Get Qoin", title="Get Qoin | finux",
-         description="Install Graysons Wallet and mine Qoin (QNR) on your Android phone, only while it hears a tone. Mining is open.",
+         description="Install Graysons Vault and mine Qoin (QNR) on your Android phone, only while it hears a tone. Mining is open.",
          og="home", og_query="t=Get Qoin&l=Mined on phones, only while they hear a tone.",
          og_alt="Get Qoin. Three mining tones: 4.0, 7.83 and 11.11 Hz."),
     dict(slug="node", folder="node", nav="Nodes", title="Run a node | Qoin",

@@ -2,8 +2,8 @@ name: Build
 
 # Every push to main that touches the app or the chain runs the chain tests, then builds the app
 # and frostnode and refreshes the release for the current version (v<versionName>), so
-#   https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk
-# always serves the newest build. A push that only changes frostnode goes through node.yml
+#   https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsVault.apk
+# always serves the newest build (GraysonsWallet.apk too, the app's name before 0.4.2, for old links). A push that only changes frostnode goes through node.yml
 # instead, which swaps in a new frostnode.zip and leaves the app alone.
 #
 # Signing: with the SIGNING_* repository secrets set (see BUILDING.md), the app is signed with
@@ -85,10 +85,11 @@ jobs:
       - name: Collect the files
         run: |
           mkdir -p out
-          cp app/build/outputs/apk/release/app-release.apk out/GraysonsWallet.apk
+          cp app/build/outputs/apk/release/app-release.apk out/GraysonsVault.apk
+          cp out/GraysonsVault.apk out/GraysonsWallet.apk
           cp node/build/distributions/*.zip out/frostnode.zip
           cd out && sha256sum * | tee SHA256SUMS
-          { echo "### Graysons Wallet $VERSION ($BUILD_KIND key)"; echo '```'; cat SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "### Graysons Vault $VERSION ($BUILD_KIND key)"; echo '```'; cat SHA256SUMS; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: graysons-wallet-${{ env.VERSION }}-${{ env.BUILD_KIND }}
@@ -99,10 +100,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ "$BUILD_KIND" = release ]; then
-            TITLE="Graysons Wallet $VERSION"
-            KEY_NOTE="Signed with the Graysons Wallet release key. Later versions install over it as normal updates."
+            TITLE="Graysons Vault $VERSION"
+            KEY_NOTE="Signed with the Graysons Vault release key. Later versions install over it as normal updates."
           else
-            TITLE="Graysons Wallet $VERSION (test key)"
+            TITLE="Graysons Vault $VERSION (test key)"
             KEY_NOTE="**Test key.** This build is signed with a temporary test key. When the release key arrives, you'll uninstall once more and restore with your 25 words."
           fi
           { cat .github/release-notes.md; echo; echo "$KEY_NOTE"; } > "$RUNNER_TEMP/notes.md"
@@ -119,7 +120,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch -q origin main
           git checkout -q -B main origin/main
-          cp out/GraysonsWallet.apk releases/GraysonsWallet-0.3.0-poc.apk
+          cp out/GraysonsVault.apk releases/GraysonsWallet-0.3.0-poc.apk
           if git diff --quiet -- releases/GraysonsWallet-0.3.0-poc.apk; then exit 0; fi
           git add releases/GraysonsWallet-0.3.0-poc.apk
           git commit -q -m "Old 0.3.0 download link now gets $VERSION [skip ci]"

@@ -54,7 +54,7 @@ Check it from your phone's browser: `http://<server-ip>:7830/p2p/info` should sh
 
 ## Connect the phones
 
-On each phone, open **Graysons Wallet → Node → Add** and enter the server's public IP. Port 7830 is the default, so `host` alone works.
+On each phone, open **Graysons Vault → Node → Add** and enter the server's public IP. Port 7830 is the default, so `host` alone works.
 A name like `node.finux.tech` pointing at the server is easier to share and survives an IP change.
 
 ## FrostExplorer
@@ -117,7 +117,7 @@ sudo cloudflared --config ~/.cloudflared/config.yml service install
 ## Run it on a phone with Termux
 
 Running a node on a phone is a quick way to see FrostExplorer before there's a server. It works while the phone stays awake.
-Graysons Wallet already uses port 7830 on the phone, so give frostnode other ports and let it sync from the app:
+Graysons Vault already uses port 7830 on the phone, so give frostnode other ports and let it sync from the app:
 
 ```bash
 pkg install openjdk-17 unzip

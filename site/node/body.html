@@ -57,7 +57,7 @@ frostnode\bin\frostnode.bat --data frostnode-data</pre><button type="button" dat
       <div class="panel" role="tabpanel" id="panel-phone" aria-labelledby="tab-phone" hidden>
         <ol class="steps">
           <li><b>Install Termux.</b><span>Get it from <a href="https://f-droid.org/packages/com.termux/">F-Droid</a>. A spare phone on a charger makes a decent node.</span></li>
-          <li><b>Run frostnode next to the app.</b><span>Graysons Wallet already uses port 7830 on the phone, so frostnode takes 7832 and 7833 and copies the chain from the app:</span>
+          <li><b>Run frostnode next to the app.</b><span>Graysons Vault already uses port 7830 on the phone, so frostnode takes 7832 and 7833 and copies the chain from the app:</span>
             <div class="cmd"><pre>pkg install openjdk-17 unzip
 curl -LO {{NODE_URL}}
 unzip -o frostnode.zip
@@ -72,7 +72,7 @@ frostnode/bin/frostnode --data ~/frostnode-data --port 7832 --explorer-port 7833
     <section id="connect" aria-labelledby="connect-h">
       <h2 id="connect-h">Connect the phones</h2>
       <ol class="steps">
-        <li><b>Open Graysons Wallet.</b><span>Go to Node, then Add.</span></li>
+        <li><b>Open Graysons Vault.</b><span>Go to Node, then Add.</span></li>
         <li><b>Enter the node's address.</b><span>The server's IP or a name like <span class="mono">node.finux.tech</span> pointing at it. Port 7830 is the default, so the host alone works.</span></li>
         <li><b>Watch it sync.</b><span>The Node screen shows the node's height. Phones now pass blocks through it, even when they're on different networks.</span></li>
       </ol>

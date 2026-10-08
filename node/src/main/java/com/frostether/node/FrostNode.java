@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Headless Frostchain node for a server: no wallet, no miner.
  *
- * Phones add this server's address under Graysons Wallet → Node → Add, then sync blocks and send
+ * Phones add this server's address under Graysons Vault → Node → Add, then sync blocks and send
  * transactions through it. Mining still happens on phones locked on the tone; this node stores and
  * relays the chain, and stays up when the phones sleep. It never holds anyone's 25 words.
  *

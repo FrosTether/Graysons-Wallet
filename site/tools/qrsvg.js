@@ -16,5 +16,5 @@ for (let y = 0; y < n; y++) {
     x += run;
   }
 }
-process.stdout.write(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" role="img" aria-label="QR code for the Graysons Wallet download"><rect width="${size}" height="${size}" fill="#fff"/><path fill="#1a0f22" d="${d}"/></svg>`);
+process.stdout.write(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" role="img" aria-label="QR code for the Graysons Vault download"><rect width="${size}" height="${size}" fill="#fff"/><path fill="#1a0f22" d="${d}"/></svg>`);
 console.error(`modules ${n}x${n}, version ${(n - 17) / 4}`);

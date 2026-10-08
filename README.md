@@ -1,9 +1,9 @@
-# Graysons Wallet ⚡
+# Graysons Vault ⚡
 
 Android wallet, node and miner for **Qoin (QNR)** on Frostchain, part of [Finux](https://finux.tech).
 The ticker is QNR, for Qoin's CryptoNote roots. One install gives you four apps:
 
-- **Graysons Wallet**: create or restore a wallet, claim a `.frostchain` name, run your node and watch blocks arrive in the explorer
+- **Graysons Vault** (called Graysons Wallet before 0.4.2): create or restore a wallet, claim a `.frostchain` name, run your node and watch blocks arrive in the explorer
 - **Frostoise**: the tone-gated miner. It only hashes while your phone hears a mining tone
 - **MyFrost**: send and receive QNR by `@name`
 - **Temporal**: a time machine. Seal a message for the future, or go back to any block. Each seal burns 1 QNR as gas
@@ -12,8 +12,8 @@ The ticker is QNR, for Qoin's CryptoNote roots. One install gives you four apps:
 
 ## Download
 
-**[Download GraysonsWallet.apk](https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk)** (Android 8.0 or newer).
-This link always serves the newest build. Checksums and notes are on the [release page](https://github.com/FrosTether/Graysons-Wallet/releases/latest).
+**[Download GraysonsVault.apk](https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsVault.apk)** (Android 8.0 or newer).
+This link always serves the newest build. The old `GraysonsWallet.apk` link still works too. Checksums and notes are on the [release page](https://github.com/FrosTether/Graysons-Wallet/releases/latest).
 To share the app, send people to **[get.finux.tech](https://get.finux.tech)**: the download, the mining tones and how to start, on one page.
 Your phone will ask you to allow installs from your browser, since the app isn't on the Play Store.
 
@@ -55,7 +55,7 @@ Every block carries a *resonance proof* of the reading, and nodes reject blocks 
 
 ## Join the network
 
-Phones on the same Wi-Fi find each other automatically. To reach anyone else, open **Graysons Wallet → Node → Add** and enter a public node's address.
+Phones on the same Wi-Fi find each other automatically. To reach anyone else, open **Graysons Vault → Node → Add** and enter a public node's address.
 Public nodes are listed at **[get.finux.tech/node](https://get.finux.tech/node/)**, which also shows how to run one: a single command on a server.
 
 ## Temporal
