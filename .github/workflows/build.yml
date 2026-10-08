@@ -1,9 +1,10 @@
 name: Build
 
-# Every push to main that touches the code runs the chain tests, then builds the app and
-# frostnode and refreshes the release for the current version (v<versionName>), so
+# Every push to main that touches the app or the chain runs the chain tests, then builds the app
+# and frostnode and refreshes the release for the current version (v<versionName>), so
 #   https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk
-# always serves the newest build.
+# always serves the newest build. A push that only changes frostnode goes through node.yml
+# instead, which swaps in a new frostnode.zip and leaves the app alone.
 #
 # Signing: with the SIGNING_* repository secrets set (see BUILDING.md), the app is signed with
 # the release key. Without them it's signed with a throwaway test key, and the release says so.
@@ -14,7 +15,6 @@ on:
     paths:
       - 'app/**'
       - 'core/**'
-      - 'node/**'
       - 'gradle/**'
       - '*.gradle'
       - 'gradlew'
@@ -24,8 +24,10 @@ on:
 permissions:
   contents: write
 
+# Shares a queue with node.yml. A newer build replaces whatever is running, since it publishes
+# both the app and frostnode.
 concurrency:
-  group: build-${{ github.ref }}
+  group: release-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
