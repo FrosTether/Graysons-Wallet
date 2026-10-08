@@ -1,0 +1,39 @@
+title: "[Miner] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Show off your tone-mining setup and pick your signature tone.
+        Your signature tone is your sound on the network, not your key. **Never post your 25 words.**
+  - type: input
+    id: name
+    attributes:
+      label: Your .frostchain name
+      placeholder: yourname.frostchain
+  - type: dropdown
+    id: tone
+    attributes:
+      label: Signature tone
+      options:
+        - 174 Hz
+        - 285 Hz
+        - 396 Hz
+        - 417 Hz
+        - 528 Hz
+        - 639 Hz
+        - 741 Hz
+        - 852 Hz
+        - 963 Hz
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Your mining setup
+      description: Speaker, where the 7.83 Hz tone came from, your phone, and whether Frostoise locked.
+  - type: input
+    id: node
+    attributes:
+      label: Public node address (optional)
+      description: If your node is reachable from the internet, share it so others can add it under Node → Add.
+      placeholder: host or host:7830

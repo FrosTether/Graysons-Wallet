@@ -51,6 +51,10 @@ Phones on the same Wi-Fi find each other automatically. To reach anyone else, op
 
 The emission curve follows CryptoNote and Wownero. Signatures and accounts do not: there are no ring signatures or stealth addresses, so transfers are public.
 
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for what comes next and how to help.
+
 ## Source
 
 The app source is being moved into this repository. Until then, the release APK is the reference build.
