@@ -39,7 +39,7 @@ Phones on the same Wi-Fi find each other automatically. To reach anyone else, op
 | Coin | QOIN, 11 decimal places |
 | Block time | 5 minutes, LWMA difficulty over 60 blocks |
 | Proof of work | double SHA-256 |
-| Block 1 | 13,370.08241991 QOIN premine to `jacobfrost.frostchain` |
+| Block 1 | Mined like any block, with a fixed first-block reward of 13,370.08241991 QOIN. Its miner gets the name `jacobfrost.frostchain` |
 | Block reward | (2⁶⁴ − coins mined so far) ÷ 2²⁰ × 1.5, about 263.86 QOIN at launch |
 | Mined coins unlock | after 12 blocks |
 | Minimum fee | 0.0001 QOIN |

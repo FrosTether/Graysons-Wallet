@@ -18,7 +18,7 @@ Monero is trusted because its code is open, it launched with no premine and no s
 
 ## 2. Fair and decentralized
 
-- [ ] Publish what the block 1 premine is for. Fair launch is the first thing Monero users will ask about.
+- [ ] Explain the block 1 reward. It was mined, but it pays about 50 times a normal block, and fair launch is the first thing Monero users will ask about.
 - [ ] Review proof of work. Double SHA-256 favors GPUs and ASIC-style hardware over phones. Monero uses RandomX to keep CPUs competitive.
 - [ ] Ten or more independent nodes run by people other than the founder.
 - [ ] Seed node list in the app, so new phones can join without typing an address.
