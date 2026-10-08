@@ -8,7 +8,7 @@ Writes two versions into out-dir (default site/out):
   preview/   getqoin.html, the same page as a body fragment that loads its fonts from Google Fonts
 
 page-url is the address the page is served at, for link previews
-(default https://frostether.github.io/Graysons-Wallet/). og.png comes from tools/og.js, which needs Playwright.
+(default https://get.finux.tech/, which also writes the CNAME file GitHub Pages needs). og.png comes from tools/og.js, which needs Playwright.
 """
 import html
 import pathlib
@@ -52,7 +52,7 @@ def body():
 
 def main():
     out = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else SITE / "out"
-    page_url = sys.argv[2] if len(sys.argv) > 2 else "https://frostether.github.io/Graysons-Wallet/"
+    page_url = sys.argv[2] if len(sys.argv) > 2 else "https://get.finux.tech/"
     css = (SITE / "getqoin/style.css").read_text()
     js = (SITE / "getqoin/script.js").read_text()
     content = body()
@@ -84,6 +84,9 @@ def main():
         f"<!doctype html>\n<html lang=\"en\">\n<head>\n{meta}\n<style>\n{FONT_FACES}{css}</style>\n</head>\n"
         f"<body>\n{content}<script>\n{js}</script>\n</body>\n</html>\n")
     (pages / ".nojekyll").write_text("")
+    host = page_url.split("/")[2]
+    if not host.endswith("github.io"):
+        (pages / "CNAME").write_text(host + "\n")
     try:
         subprocess.run(["node", str(SITE / "tools/og.js"), str(pages / "og.png")], check=True, timeout=120)
     except (OSError, subprocess.SubprocessError) as e:

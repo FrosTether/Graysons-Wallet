@@ -13,6 +13,7 @@ One install gives you three apps:
 
 **[Download GraysonsWallet.apk](https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsWallet.apk)** (Android 8.0 or newer).
 This link always serves the newest build. Checksums and notes are on the [release page](https://github.com/FrosTether/Graysons-Wallet/releases/latest).
+To share the app, send people to **[get.finux.tech](https://get.finux.tech)**: the download, the mining tones and how to start, on one page.
 Your phone will ask you to allow installs from your browser, since the app isn't on the Play Store.
 
 **Coming from 0.3.x?** 0.4 runs a new chain, so you start fresh:

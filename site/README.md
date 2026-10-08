@@ -12,10 +12,10 @@ player, how to start, the starter bundle and the chain facts.
 | `build.py` | Puts it together |
 
 ```bash
-python3 site/build.py site/out https://frostether.github.io/Graysons-Wallet/
+python3 site/build.py site/out https://get.finux.tech/
 ```
 
-`site/out/pages/` is the hosted page (the `gh-pages` branch). `site/out/preview/getqoin.html` is the same page
+`site/out/pages/` is the hosted page: the `gh-pages` branch, served at https://get.finux.tech through a CNAME record in finux.tech's Cloudflare DNS. `site/out/preview/getqoin.html` is the same page
 as a fragment that loads its fonts from Google Fonts.
 
 The tone player makes the same pulse as Frostoise's: a 220 Hz hum whose loudness swells and fades at the
