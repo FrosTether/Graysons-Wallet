@@ -59,6 +59,7 @@ The suite takes a few minutes, because several tests mine real blocks:
 | `NodeSyncTest` | Two nodes syncing over HTTP |
 | `ReorgTest` | Two forks meeting, with the lighter one switching over |
 | `WalletFlowTest` | Mine into a wallet, send by address and by name, claim a name |
+| `MinerTest` | The real Frostoise miner: waits for the tone, then finds a block |
 
 ## The server node
 
@@ -80,5 +81,5 @@ The original source wasn't available, so this code was rebuilt from the 0.3.0 AP
 
 - The screens in `app/src/main/assets/ui` are the original files, unchanged.
 - The manifest and resources were decoded from the APK.
-- The Java code was decompiled with jadx. Every place where the decompiler produced wrong or uncompilable code was rewritten from the original bytecode. The fixes that change behavior are marked with a comment saying so: the transaction rule (`ChainState.apply`), the JSON reader, the API entry point, the HTTP connection handler, the sync loop, chain loading, chain reorgs, the miner's hash loop, seed-word encoding and the unsigned 32-bit reader.
+- The Java code was decompiled with jadx. Every place where the decompiler produced wrong or uncompilable code was rewritten from the original bytecode. The fixes that change behavior are marked with a comment saying so: the transaction rule (`ChainState.apply`), the JSON reader, the API entry point, the HTTP connection handler, the sync loop, chain loading, chain reorgs, the miner's start and hash loop, seed-word encoding and the unsigned 32-bit reader.
 - The tests above check the result end to end.

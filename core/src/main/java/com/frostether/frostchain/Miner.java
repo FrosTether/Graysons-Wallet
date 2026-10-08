@@ -82,40 +82,39 @@ public final class Miner {
         return this.threads;
     }
 
+    // Rebuilt from the 0.3.0 bytecode: the decompiled version threw "needs a payout address" even after starting.
     public synchronized void start(byte[] bArr, int i) {
-        if (bArr != null) {
-            if (bArr.length == 20) {
-                stop();
-                this.payout = (byte[]) bArr.clone();
-                this.threads = Math.max(1, Math.min(Math.min(32, this.hashCounts.length), i));
-                this.running = true;
-                this.found = 0;
-                this.accepted = 0;
-                this.refresher = new Thread(new Runnable() {
-                    @Override // java.lang.Runnable
-                    public void run() {
-                        Miner.this.refreshLoop();
-                    }
-                }, "frostoise-template");
-                this.refresher.setDaemon(true);
-                this.refresher.start();
-                this.workers = new Thread[this.threads];
-                for (int t = 0; t < this.threads; t++) {
-                    final int i2 = t;
-                    this.workers[i2] = new Thread(new Runnable() {
-                        @Override // java.lang.Runnable
-                        public void run() {
-                            Miner.this.hashLoop(i2);
-                        }
-                    }, "frostoise-" + i2);
-                    this.workers[i2].setDaemon(true);
-                    this.workers[i2].setPriority(1);
-                    this.workers[i2].start();
-                }
-                Log.i("frostoise", "mining with " + this.threads + " thread(s) to " + Address.raw(this.payout));
-            }
+        if (bArr == null || bArr.length != 20) {
+            throw new IllegalArgumentException("Frostoise needs a payout address");
         }
-        throw new IllegalArgumentException("Frostoise needs a payout address");
+        stop();
+        this.payout = (byte[]) bArr.clone();
+        this.threads = Math.max(1, Math.min(Math.min(32, this.hashCounts.length), i));
+        this.running = true;
+        this.found = 0;
+        this.accepted = 0;
+        this.refresher = new Thread(new Runnable() {
+            @Override // java.lang.Runnable
+            public void run() {
+                Miner.this.refreshLoop();
+            }
+        }, "frostoise-template");
+        this.refresher.setDaemon(true);
+        this.refresher.start();
+        this.workers = new Thread[this.threads];
+        for (int t = 0; t < this.threads; t++) {
+            final int i2 = t;
+            this.workers[i2] = new Thread(new Runnable() {
+                @Override // java.lang.Runnable
+                public void run() {
+                    Miner.this.hashLoop(i2);
+                }
+            }, "frostoise-" + i2);
+            this.workers[i2].setDaemon(true);
+            this.workers[i2].setPriority(1);
+            this.workers[i2].start();
+        }
+        Log.i("frostoise", "mining with " + this.threads + " thread(s) to " + Address.raw(this.payout));
     }
 
     public synchronized void stop() {
