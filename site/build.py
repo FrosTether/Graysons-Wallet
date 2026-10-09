@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the Qoin site: Get Qoin, Run a node and QNR vs XMR.
+"""Builds the Qoin site: Get Qoin, Run a node, QNR vs XMR and For developers.
 
     python3 site/build.py [out-dir] [site-url]
 
@@ -40,9 +40,15 @@ PAGES = [
          og_alt="Run a node: keep the chain online while phones sleep."),
     dict(slug="qnr", folder="qnr", nav="QNR vs XMR", title="QNR vs XMR | Qoin",
          description="How Qoin (QNR) compares with Monero (XMR), and what it could take next from Monero, Zcash and Dash.",
-         og="qnr", og_query="t=QNR vs XMR&l=Monero's emission curve, quantum-safe keys and tone mining.&lamps=0"
+         og="qnr", og_query="t=QNR vs XMR&l=A Monero-sized supply, quantum-safe keys and tone mining.&lamps=0"
                            "&f=Side by side, as of 8 October 2026.",
          og_alt="QNR vs XMR, side by side."),
+    dict(slug="dev", folder="dev", nav="Developers", title="For developers | Qoin",
+         description="Build frostnode from source, run a Frostchain test network on one machine, use the node's HTTP API "
+                     "and keep a public node healthy.",
+         og="dev", og_query="t=For developers&l=Build, run and script Frostchain nodes.&lamps=0"
+                           "&f=Open source, GPL-3.0. Plain HTTP and JSON.",
+         og_alt="For developers: build, run and script Frostchain nodes."),
 ]
 
 

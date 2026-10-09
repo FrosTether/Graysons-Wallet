@@ -1,11 +1,12 @@
 # The Qoin site
 
-get.finux.tech: three pages that share one look.
+get.finux.tech: four pages that share one look.
 
 | Page | Folder | What it is |
 |---|---|---|
 | `/` | `getqoin/` | Get Qoin: the latest APK, a QR code for computers, the three mining tones as a player, how to start, the chain facts |
 | `/node/` | `node/` | Run a node: what an always-on node does, and how to run one on a server, a laptop or a phone |
+| `/dev/` | `dev/` | For developers: build frostnode, a test network on one machine, the node HTTP API, running a public node |
 | `/qnr/` | `qnr/` | QNR vs XMR, and what QNR could take from Monero, Zcash, Dash and Steem |
 
 Each folder holds `body.html` (the page's main content), and optionally `style.css` and `script.js`.

@@ -1,0 +1,105 @@
+    <div class="opener">
+      <h1>For devs</h1>
+      <p class="lede">Everything you need to build frostnode from source, run a test network on one machine, script against a node's HTTP API and keep a public node healthy. Frostchain is open source under GPL-3.0.</p>
+      <div class="cta">
+        <a class="btn" href="https://github.com/FrosTether/Graysons-Wallet">Source on GitHub</a>
+        <a href="/node/">Just want a node running? One command</a>
+      </div>
+      <p class="fine">Chain <span class="mono">b8b1ec3fefb96834</span> (v0.5) · Java 17 · no Android SDK needed for the node</p>
+    </div>
+
+    <section id="build" aria-labelledby="build-h">
+      <h2 id="build-h">Build from source</h2>
+      <ol class="steps">
+        <li><b>Get the code.</b><span>The node, the chain rules and the Android app live in one repository.</span>
+          <div class="cmd"><pre>git clone https://github.com/FrosTether/Graysons-Wallet.git
+cd Graysons-Wallet</pre><button type="button" data-copy>Copy</button></div>
+        </li>
+        <li><b>Run the chain tests.</b><span>They cover consensus, signatures, sync, reorgs and the wallet. <span class="mono">ConsensusTest</span> fails if a change would alter the chain ID, so you can't fork the network by accident.</span>
+          <div class="cmd"><pre>./gradlew :core:test</pre><button type="button" data-copy>Copy</button></div>
+        </li>
+        <li><b>Build frostnode.</b><span>This makes <span class="mono">node/build/install/frostnode/</span> with <span class="mono">bin/frostnode</span> and its <span class="mono">lib/</span>. The same folder, zipped, is <a href="{{NODE_URL}}">frostnode.zip</a> on each release.</span>
+          <div class="cmd"><pre>./gradlew :node:installDist</pre><button type="button" data-copy>Copy</button></div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="testnet" aria-labelledby="testnet-h">
+      <h2 id="testnet-h">A network on one machine</h2>
+      <p class="intro">Two nodes on different ports, the second syncing from the first. Each keeps its own data folder, so you can stop, wipe and restart either one.</p>
+      <div class="cmd"><pre><span class="c"># node A, with FrostExplorer on 7831</span>
+node/build/install/frostnode/bin/frostnode --data a --port 7830 --explorer-port 7831
+
+<span class="c"># node B, in a second terminal, peered with A, no explorer</span>
+node/build/install/frostnode/bin/frostnode --data b --port 7840 --explorer-port 0 --peer 127.0.0.1:7830</pre><button type="button" data-copy>Copy</button></div>
+      <p class="fine">Mining happens on phones, so blocks come from Graysons Vault phones pointed at your node (Node → Add, your machine's local IP). Phones on the same Wi-Fi also find nodes on their own over UDP 7830.</p>
+    </section>
+
+    <section id="options" aria-labelledby="options-h">
+      <h2 id="options-h">Options and files</h2>
+      <div class="cmd"><pre>frostnode [--data DIR] [--port 7830] [--explorer-port 7831] [--peer HOST[:PORT]]...</pre><button type="button" data-copy>Copy</button></div>
+      <dl class="facts">
+        <div><dt><span class="mono">--peer</span></dt><dd>A node to sync from at startup. Repeat it for more. A node remembers up to 64 peers.</dd></div>
+        <div><dt><span class="mono">--explorer-port 0</span></dt><dd>Turns FrostExplorer off.</dd></div>
+        <div><dt><span class="mono">chain.jsonl</span></dt><dd>Every block, one JSON object a line, in the data folder. It's re-checked from genesis at startup, and a bad line is cut off along with everything after it.</dd></div>
+        <div><dt><span class="mono">peers.json</span>, <span class="mono">settings.json</span></dt><dd>The peers it knows and its settings, next to the chain.</dd></div>
+        <div><dt>Logs</dt><dd>The first line shows the chain ID. Every 5 minutes it logs the height, the peers it reached and the mempool size.</dd></div>
+      </dl>
+    </section>
+
+    <section id="api" aria-labelledby="api-h">
+      <h2 id="api-h">The node's HTTP API</h2>
+      <p class="intro">Nodes talk plain HTTP and JSON on port 7830. These are the same calls phones and other nodes use, so you can sync, watch or submit from any language.</p>
+      <div class="table">
+        <table>
+          <thead><tr><th scope="col">Call</th><th scope="col">Returns</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">GET /p2p/info</td><td>Chain ID, height, tip hash, total work, next difficulty, agent, mempool size, QNR mined. Also at <span class="mono">/api/status</span>.</td></tr>
+            <tr><td class="mono">GET /p2p/hashes?from=H&amp;count=N</td><td>Block hashes from height H, up to 2,000.</td></tr>
+            <tr><td class="mono">GET /p2p/blocks?from=H&amp;count=N</td><td>Full blocks from height H, up to 50 or about 3 MB.</td></tr>
+            <tr><td class="mono">POST /p2p/block</td><td>Submit a block as JSON. <span class="mono">{"ok":true}</span> or a 400 with the reason.</td></tr>
+            <tr><td class="mono">POST /p2p/tx</td><td>Submit a signed transaction. Returns its txid.</td></tr>
+            <tr><td class="mono">GET /p2p/mempool</td><td>Up to 200 waiting transactions.</td></tr>
+            <tr><td class="mono">GET /p2p/peers</td><td>The peers this node has reached.</td></tr>
+            <tr><td class="mono">POST /p2p/hello</td><td><span class="mono">{"port":7830}</span> asks the node to add you as a peer.</td></tr>
+            <tr><td class="mono">GET /api/resolve?addr=X</td><td>An address or <span class="mono">.frostchain</span> name, resolved to the account ID, raw address and name.</td></tr>
+            <tr><td class="mono">GET /api/account?addr=X</td><td>Balance, mining rewards still locked, payments waiting to go out, and name.</td></tr>
+            <tr><td class="mono">GET /api/history?addr=X</td><td>Every payment, reward and name claim for an account.</td></tr>
+            <tr><td class="mono">GET /api/block?h=H</td><td>One block with its hash. No <span class="mono">h</span> gives the tip.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cmd"><pre>curl http://localhost:7830/p2p/info
+curl "http://localhost:7830/api/resolve?addr=jacobfrost"</pre><button type="button" data-copy>Copy</button></div>
+      <p class="fine">Send <span class="mono">X-Frost-Port: 7840</span> with a POST and the node adds you as a peer at that port. FrostExplorer's read-only API on port 7831 (status, blocks, search, CORS open) is listed in the <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md#frostexplorer">node guide</a>.</p>
+    </section>
+
+    <section id="rules" aria-labelledby="rules-h">
+      <h2 id="rules-h">The rules a node checks</h2>
+      <dl class="facts">
+        <div><dt>Blocks</dt><dd>Double SHA-256 over a 152-byte header. One every 5 minutes on average, never within 270 seconds of the last, at most 30 seconds ahead of a node's clock. LWMA difficulty over 60 blocks.</dd></div>
+        <div><dt>Reward</dt><dd>13.37 QNR a block in the first year, then 4.25% less each year, at most 33,069,515.29 QNR. Mined coins unlock after 12 blocks.</dd></div>
+        <div><dt>Tone proof</dt><dd>Every block carries the reading of the tone it was mined on: 3.75–4.25, 7.50–8.20 or 10.80–11.40 Hz, peak at least 10 times the noise, at most 15 minutes old.</dd></div>
+        <div><dt>Signatures</dt><dd>LMS (RFC 8554), 1,024 one-time signatures per key, with key rotation on chain.</dd></div>
+        <div><dt>Where</dt><dd><a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/core/src/main/java/com/frostether/frostchain/Consensus.java">Consensus.java</a> and <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/core/src/main/java/com/frostether/frostchain/Chain.java">Chain.java</a> in the chain core.</dd></div>
+      </dl>
+    </section>
+
+    <section id="operate" aria-labelledby="operate-h">
+      <h2 id="operate-h">Running a public node</h2>
+      <ul class="cards">
+        <li><a href="/node/"><b>Install</b><span>One command on Ubuntu or Debian sets up Java, the service and the firewall. Run it again to update.</span></a></li>
+        <li><a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md#put-it-on-explorerfinuxtech"><b>Put the explorer online</b><span>A Cloudflare Tunnel gives FrostExplorer an https address with no port to open.</span></a></li>
+      </ul>
+      <dl class="facts">
+        <div><dt>Ports</dt><dd>Open TCP 7830 for peers and phones. Keep 7831 closed and use a tunnel instead.</dd></div>
+        <div><dt>Keys</dt><dd>A node holds no wallet and no 25 words, so there's nothing to steal on the server.</dd></div>
+        <div><dt>Backups</dt><dd>Optional: any node can re-sync the chain from its peers. Copying <span class="mono">chain.jsonl</span> just makes a restart faster.</dd></div>
+        <div><dt>Updates</dt><dd>Watch the <a href="https://github.com/FrosTether/Graysons-Wallet/releases">releases</a>. A new chain ID means a rule change, and every node has to update to follow it.</dd></div>
+      </dl>
+    </section>
+
+    <section id="contribute" aria-labelledby="contribute-h">
+      <h2 id="contribute-h">Contribute</h2>
+      <p class="body">Issues and pull requests are welcome on <a href="https://github.com/FrosTether/Graysons-Wallet">GitHub</a>. Keep <span class="mono">./gradlew :core:test</span> passing, and say so in the pull request if a change touches consensus. Next on the list: keeping old blocks on disk instead of in memory, native SHA-256 mining, and the quantum-safe privacy layer. Running a public node? Send its address on the <a href="https://finux.tech/contact">contact page</a> and it goes on the <a href="/node/#public">node list</a>.</p>
+    </section>
