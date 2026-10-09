@@ -119,7 +119,8 @@ The app shows it under **Graysons Vault → Node**, and `frostnode` prints it wh
 | Version | Chain ID | Where |
 |---|---|---|
 | 0.3.x | `98ede167f7885dae…` | The phones today. The exact rebuild is the [`v0.3.0-source`](https://github.com/FrosTether/Graysons-Wallet/tree/v0.3.0-source) branch. |
-| 0.4 | `aa18513e5ee8db9f…` | This branch: the relaunch. Genesis was Thursday 8 October 2026, 13:37 Eastern. |
+| 0.4 | `aa18513e5ee8db9f…` | The launch on Thursday 8 October 2026, 13:37 Eastern, at about 263.88 QNR a block. Retired after 17 blocks. |
+| 0.5 | `b8b1ec3fefb96834…` | This branch: 13.37 QNR a block, 4.25% less each year. Same 13:37 genesis time. |
 
 `ConsensusTest` fails if a change would alter the chain ID.
 

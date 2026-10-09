@@ -263,25 +263,22 @@
         <p class="small muted">MetaMask uses elliptic-curve keys, so it can hold these ETC tokens but not QNR, which needs quantum-safe signatures. QNR stays in Graysons Vault and MyFrost.</p>
       </div>
       <div class="card" id="params-card">
-        <div class="row-between"><h2>QNR whitepaper numbers</h2><span class="tag frost">proposed</span></div>
-        <div class="warnbox small"><b>Proposed, not consensus.</b> These are the draft whitepaper numbers. This chain doesn't use them; nothing below changes how blocks, rewards or balances work.</div>
+        <div class="row-between"><h2>QNR numbers</h2><span class="tag frost">live</span></div>
         <dl class="kv">
-          <dt>Block reward</dt><dd>13.37 QNR (proposed)</dd>
-          <dt>Block time</dt><dd>300 s</dd>
-          <dt>Decimals</dt><dd>8 (proposed)</dd>
-          <dt>Yearly drop</dt><dd>−7.14% every 105,120 blocks</dd>
-          <dt>Max supply</dt><dd>≈ 19,684,233.46 QNR</dd>
-          <dt>Per-block split</dt><dd>35% miners · 15% nodes · 20% treasury · 30% QUID</dd>
-          <dt>Node collateral</dt><dd>masternode 1,000 · micronode 10 QNR</dd>
-        </dl>
-        <h3 class="small" style="margin:14px 0 4px">What this chain actually uses (live consensus)</h3>
-        <dl class="kv">
-          <dt>Block reward</dt><dd id="live-reward">Monero-style smooth emission (≈263.88 QNR now, slowly falling)</dd>
+          <dt>Block reward</dt><dd id="live-reward">13.37 QNR the first year</dd>
+          <dt>Yearly drop</dt><dd>4.25% less every 105,120 blocks (one year)</dd>
+          <dt>Max supply</dt><dd>33,069,515.29 QNR, half of it mined in about 16 years</dd>
           <dt>Block time</dt><dd>300 s · LWMA-60 difficulty</dd>
           <dt>Decimals</dt><dd>11</dd>
+          <dt>Per-block split</dt><dd>100% to the miner for now</dd>
           <dt>Block 1</dt><dd>Normal reward, like every block. jacobfrost.frostchain belongs to Jacob's wallet from genesis</dd>
           <dt>Mining tones</dt><dd>4.0 Hz low · 7.83 Hz medium · 11.11 Hz high</dd>
           <dt>Mining unlock</dt><dd>after 12 blocks</dd>
+        </dl>
+        <h3 class="small" style="margin:14px 0 4px">Still proposed</h3>
+        <dl class="kv">
+          <dt>Per-block split</dt><dd>35% miners · 15% nodes · 20% treasury · 30% QUID</dd>
+          <dt>Node collateral</dt><dd>masternode 1,000 · micronode 10 QNR</dd>
         </dl>
       </div>
       <div class="card about">
@@ -289,7 +286,7 @@
         <p><b>Quantum-safe signatures.</b> Every transaction is signed with LMS (RFC 8554, NIST SP 800-208), a hash-based scheme. Shor's algorithm breaks the elliptic curves under Monero and Wownero; it doesn't apply to SHA-256. Each key has 1,024 one-time signatures. The chain makes sure none is ever used twice, and the wallet rotates to a new key before they run out.</p>
         <p><b>Not private.</b> Balances and transfers are public, like Bitcoin. CryptoNote's ring signatures and stealth addresses use elliptic curves, and no practical quantum-safe replacement exists yet.</p>
         <p><b>Tone-gated mining.</b> Frostoise mines only while the phone hears one of three tones: 4.0 Hz (delta), 7.83 Hz (theta, the Schumann resonance) or 11.11 Hz (alpha). The tone sets how hard it mines: low, medium or high. Each block records the reading. Other nodes can check that the reading is plausible, but they can't prove a physical resonator was there: a synthesized tone looks the same.</p>
-        <p class="muted small">Graysons Vault · Frostoise · MyFrost · Qoin on Frostchain v0.4 · <span id="about-platform"></span></p>
+        <p class="muted small">Graysons Vault · Frostoise · MyFrost · Qoin on Frostchain v0.5 · <span id="about-platform"></span></p>
       </div>
     </div>
   </main>

@@ -61,22 +61,22 @@ public class ChainTest {
         assertTrue(a.immature > 0);
 
         // A signed send is checked like a phone would check it, then mined into block 14.
-        Tx pay = TestKit.send(MINER, 0, friend, 100 * QOIN, chain.chainId);
+        Tx pay = TestKit.send(MINER, 0, friend, 10 * QOIN, chain.chainId);
         assertEquals(null, chain.checkTx(pay));
         TestKit.mine(chain, clock, miner, Collections.singletonList(pay));
         clock.now += 1800;
-        assertEquals(100 * QOIN, chain.account(friend).balance);
+        assertEquals(10 * QOIN, chain.account(friend).balance);
 
         // The friend claims a name with part of what they received.
         Tx claim = TestKit.claimName(FRIEND, 0, "oofmaster", chain.chainId);
         assertEquals(null, chain.checkTx(claim));
         TestKit.mine(chain, clock, miner, Collections.singletonList(claim));
         assertArrayEquals(friend, chain.lookupName("oofmaster"));
-        assertEquals(100 * QOIN - Consensus.MIN_FEE, chain.account(friend).balance);
+        assertEquals(10 * QOIN - Consensus.MIN_FEE, chain.account(friend).balance);
 
         // A forged signature is refused.
         Tx forged = TestKit.send(FRIEND, 1, miner, QOIN, chain.chainId);
-        forged.amount = 50 * QOIN;
+        forged.amount = 5 * QOIN;
         assertNotNull(chain.checkTx(forged));
 
         // Everything survives a restart.

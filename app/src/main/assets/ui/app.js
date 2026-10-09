@@ -430,7 +430,7 @@
     var s = S.status; if (!s) return;
     $('about-platform').textContent = s.platform;
     call('node.blocks', { count: 1 }).then(function (l) {
-      if (l.length) $('live-reward').textContent = 'Monero-style smooth emission · block #' + l[0].height + ' paid ' + short(l[0].paid) + ' QNR';
+      if (l.length) $('live-reward').textContent = 'Block #' + l[0].height + ' paid ' + short(l[0].paid) + ' QNR';
     }).catch(function () {});
   }
   function loadNode() {

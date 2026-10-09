@@ -69,14 +69,14 @@ mined on, and what you held.
 It's not a consensus rule: a seal is an ordinary payment. The same rules run on the web at
 [get.finux.tech/temporal](https://get.finux.tech/temporal/), in `Temporal.java`, and in FrostExplorer's API.
 
-## Chain parameters (v0.4)
+## Chain parameters (v0.5)
 
 | | |
 |---|---|
 | Coin | Qoin, ticker QNR, 11 decimal places |
 | Block time | 5 minutes on average, never sooner than 4½ minutes after the last block. LWMA difficulty over 60 blocks; blocks may be at most 30 s ahead of a node's clock |
 | Proof of work | double SHA-256 |
-| Block reward | (2⁶⁴ − coins mined so far) ÷ 2²⁰ × 1.5, about 263.88 QNR at launch. At most 184,467,440.737 QNR, half of it mined in about 4.6 years |
+| Block reward | 13.37 QNR a block for the first year (105,120 blocks), then 4.25% less each year. All of it goes to the miner. At most 33,069,515.29 QNR, half of it mined in about 16 years |
 | Block 1 | Mined like any block, at the normal reward |
 | Founder names | `jacobfrost.frostchain` and `agorajay.frostchain` belong to `fc3dlrkt7demghofiz7wzjz2st4vzvjiskxumv` from genesis, and the genesis block says so |
 | Mined coins unlock | after 12 blocks |
@@ -85,9 +85,9 @@ It's not a consensus rule: a seal is an ordinary payment. The same rules run on 
 | Accounts | public, with optional `.frostchain` names |
 | Resonance proof | 3.75–4.25, 7.50–8.20 or 10.80–11.40 Hz, peak ≥ 10× noise, 4–60 s window, ≥ 200 samples at ≥ 16 Hz and above twice the tone, at most 15 minutes old |
 | P2P | HTTP on TCP 7830, LAN discovery on UDP 7830 |
-| Genesis | 8 October 2026, 13:37 Eastern. Chain ID `aa18513e5ee8db9f…` |
+| Genesis | 8 October 2026, 13:37 Eastern. Chain ID `b8b1ec3fefb96834…` (v0.5, the 13.37 relaunch) |
 
-The emission curve follows CryptoNote and Wownero. Signatures and accounts do not: there are no ring signatures or stealth addresses, so transfers are public.
+The ticker nods to CryptoNote, and the supply lands in the same range as Monero's. Signatures and accounts do not: there are no ring signatures or stealth addresses, so transfers are public.
 [QNR vs XMR](https://get.finux.tech/qnr/) compares the two side by side.
 
 ## Roadmap
