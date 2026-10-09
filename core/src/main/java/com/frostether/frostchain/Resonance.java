@@ -373,7 +373,7 @@ public final class Resonance {
 
         public static Proof fromJson(Map<String, Object> map) {
             Proof proof = new Proof();
-            proof.sensor = Json.str(map, "sensor");
+            proof.sensor = Json.str(map, "sensor").intern(); // one shared "mic" or "mag", not a copy per block
             proof.hzMilli = (int) Json.num(map, "hz");
             proof.snrX100 = (int) Json.num(map, "snr");
             proof.ampMilli = (int) Json.num(map, "amp");

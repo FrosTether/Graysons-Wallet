@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,25 @@ public final class Chain {
     private final File file;
     private ChainState state;
     private final List<Block> blocks = new ArrayList();
-    private final Map<String, Integer> index = new LinkedHashMap();
+    /**
+     * Height of each block, keyed by the last 8 bytes of its hash (the uniformly random end: proof of work makes the
+     * front zeros). A hit is confirmed against the full hash. A Long key costs about 90 bytes less per block than the
+     * hex string it replaced (0.5.2).
+     */
+    private final Map<Long, Integer> index = new HashMap<>();
+
+    private static Long key(byte[] hash) {
+        long k = 0;
+        for (int i = hash.length - 8; i < hash.length; i++) {
+            k = (k << 8) | (hash[i] & 255);
+        }
+        return Long.valueOf(k);
+    }
+
+    private boolean indexed(byte[] hash) {
+        Integer i = this.index.get(key(hash));
+        return i != null && i.intValue() < this.blocks.size() && Bytes.equal(this.blocks.get(i.intValue()).hash(), hash);
+    }
     private BigInteger work = BigInteger.ZERO;
     private final Set<String> verifiedSigs = Collections.synchronizedSet(new HashSet());
     private Map<String, List<Event>> history = new LinkedHashMap();
@@ -93,7 +112,7 @@ public final class Chain {
         this.index.clear();
         Block genesis = Block.genesis();
         this.blocks.add(genesis);
-        this.index.put(genesis.hashHex(), 0);
+        this.index.put(key(genesis.hash()), 0);
         this.state = new ChainState();
         this.state.height = 0L;
         this.work = BigInteger.valueOf(genesis.difficulty);
@@ -124,7 +143,7 @@ public final class Chain {
     }
 
     public synchronized boolean has(byte[] bArr) {
-        return this.index.containsKey(Bytes.hex(bArr));
+        return indexed(bArr);
     }
 
     public synchronized List<String> hashes(long j, int i) {
@@ -201,7 +220,7 @@ public final class Chain {
 
     public synchronized Result addBlock(Block block) {
         Result ok;
-        if (this.index.containsKey(block.hashHex())) {
+        if (indexed(block.hash())) {
             ok = Result.bad("already have this block");
         } else {
             if (Bytes.equal(block.prev, tip().hash())) {
@@ -266,7 +285,7 @@ public final class Chain {
         this.blocks.addAll(candidate);
         this.index.clear();
         for (int i = 0; i < this.blocks.size(); i++) {
-            this.index.put(this.blocks.get(i).hashHex(), Integer.valueOf(i));
+            this.index.put(key(this.blocks.get(i).hash()), Integer.valueOf(i));
         }
         this.state = replayed;
         this.work = BigInteger.ZERO;
@@ -431,8 +450,15 @@ public final class Chain {
     }
 
     private void commitAppend(Block block, ChainState chainState) {
+        if (!this.blocks.isEmpty()) {
+            // prev is the previous block's hash: share that array instead of keeping a copy per block (0.5.2)
+            byte[] tipHash = this.blocks.get(this.blocks.size() - 1).hash();
+            if (Bytes.equal(block.prev, tipHash)) {
+                block.prev = tipHash;
+            }
+        }
         this.blocks.add(block);
-        this.index.put(block.hashHex(), Integer.valueOf(this.blocks.size() - 1));
+        this.index.put(key(block.hash()), Integer.valueOf(this.blocks.size() - 1));
         this.state = chainState;
         this.work = this.work.add(new BigInteger(Long.toUnsignedString(block.difficulty)));
         addHistory(block);
@@ -457,7 +483,8 @@ public final class Chain {
         event.time = block.time;
         event.kind = "mined";
         event.amount = block.paid;
-        event.txid = block.hashHex();
+        // No txid: a mined reward isn't a transaction, and its block is found by height. Keeping the block's hash
+        // here cost about 100 bytes a block (0.5.2).
         push(block.miner, event);
         for (Tx tx : block.txs) {
             String hex = Bytes.hex(tx.id(this.chainId));

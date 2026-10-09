@@ -7,7 +7,7 @@ The ticker is QNR, for Qoin's CryptoNote roots. One install gives you three apps
 - **Frostoise**: the tone-gated miner. It only hashes while your phone hears a mining tone
 - **MyFrost**: send and receive QNR by `@name`
 
-> **Proof of concept (v0.5.1).** QNR has no guaranteed value. Expect bugs and breaking changes.
+> **Proof of concept (v0.5.2).** QNR has no guaranteed value. Expect bugs and breaking changes.
 
 ## Download
 
