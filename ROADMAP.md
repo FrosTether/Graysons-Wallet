@@ -23,6 +23,7 @@ Monero is trusted because its code is open, it launched with no premine and no s
 - [ ] Explain the block 1 reward. It was mined, but it pays about 50 times a normal block, and fair launch is the first thing Monero users will ask about.
 - [ ] Review proof of work. Double SHA-256 favors GPUs and ASIC-style hardware over phones. Monero uses RandomX to keep CPUs competitive.
 - [ ] Ten or more independent nodes run by people other than the founder.
+- [ ] Merged mining, so a bigger chain's hashpower protects Qoin while tones stay the reward. Design note: [docs/merged-mining.md](docs/merged-mining.md).
 - [ ] Seed node list in the app, so new phones can join without typing an address.
 
 ## 3. Private
