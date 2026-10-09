@@ -73,6 +73,23 @@ public final class Node {
         this.wallets = new Wallets(new File(file, "wallets"), this);
         loadSettings();
         loadPeers();
+        addSeedPeers();
+    }
+
+    /** Built-in seed peers for the Vault QNR chain, tried on every start. A bare host means port 7830. */
+    static final String[] SEED_PEERS = {"149.28.63.221:7830"};
+
+    private void addSeedPeers() {
+        // The chain tests run private test chains and must not reach the public seed.
+        if (Boolean.getBoolean("frostchain.noSeedPeers")) {
+            return;
+        }
+        for (String seed : SEED_PEERS) {
+            String normalizePeer = normalizePeer(seed);
+            if (normalizePeer != null && this.peers.size() < 64) {
+                this.peers.add(normalizePeer);
+            }
+        }
     }
 
     public synchronized void start(int i, boolean z) throws IOException {

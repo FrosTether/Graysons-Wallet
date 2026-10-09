@@ -18,6 +18,8 @@ dependencies {
 test {
     // ChainTest, NodeSyncTest, ReorgTest and WalletFlowTest mine real blocks: the suite takes a few minutes.
     maxHeapSize = '1g'
+    // Keep test nodes off the built-in public seed peer.
+    systemProperty 'frostchain.noSeedPeers', 'true'
     testLogging {
         events 'passed', 'failed'
     }
