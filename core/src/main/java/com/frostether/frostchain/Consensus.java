@@ -59,10 +59,15 @@ public final class Consensus {
     /** The first year's reward, 13.37 QNR a block (v0.5). */
     public static final long FIRST_REWARD = 1_337_000_000_000L;
 
+    /** The tail: the reward never drops below 1.337 QNR a block, so mining always pays (v0.5.3). */
+    public static final long TAIL_REWARD = 133_700_000_000L;
+
     /**
      * Block reward at height j: 13.37 QNR in the first year (blocks 1 to 105,120), then 4.25% less each year,
-     * rounded down to the smallest unit. All of it goes to the miner. The second argument (coins mined so far) is
-     * kept for callers but no longer used. Every reward added up is 33,069,515.28692348 QNR, half of it mined in about 16 years.
+     * rounded down to the smallest unit, until it would fall below the tail of 1.337 QNR. From then on every block
+     * pays 1.337 QNR forever, like Monero's tail, so there's no cap. The decay reaches the tail in year 55 (about
+     * 2081), with about 29.9 million QNR mined; the tail then adds 140,545.44 QNR a year, 0.47% and shrinking.
+     * All of it goes to the miner. The second argument (coins mined so far) is kept for callers but not used.
      * Before v0.5 the reward was (2^64 - mined) / 2^20 x 1.5, about 263.88 QNR a block.
      */
     public static long reward(long j, long j2) {
@@ -70,16 +75,16 @@ public final class Consensus {
             return 0L;
         }
         long r = FIRST_REWARD;
-        for (long year = (j - 1) / BLOCKS_PER_YEAR; year > 0 && r > 0; year--) {
+        for (long year = (j - 1) / BLOCKS_PER_YEAR; year > 0 && r > TAIL_REWARD; year--) {
             r = r * 9575 / 10000;
         }
-        return r;
+        return Math.max(r, TAIL_REWARD);
     }
 
-    /** Every reward added up: the most QNR there will ever be, in the smallest unit. */
-    public static long maxSupply() {
+    /** QNR mined through the last block before the tail starts: about 29.9 million, in the smallest unit. */
+    public static long supplyAtTail() {
         long total = 0;
-        for (long r = FIRST_REWARD; r > 0; r = r * 9575 / 10000) {
+        for (long r = FIRST_REWARD; r >= TAIL_REWARD; r = r * 9575 / 10000) {
             total += r * BLOCKS_PER_YEAR;
         }
         return total;

@@ -9,7 +9,7 @@ Monero is trusted because its code is open, it launched with no premine and no s
 - Tone-gated mining on phones, blocks every 5 minutes.
 - Public accounts with `.frostchain` names and LMS post-quantum signatures.
 - frostnode with FrostExplorer, and a one-line server installer at [get.finux.tech/node](https://get.finux.tech/node/).
-- Next: the QNR parameters, taking from Monero, Zcash, Dash and Steem: tail emission, view keys, node rewards and governance.
+- Next: the QNR parameters, taking from Monero, Zcash, Dash and Steem: view keys, node rewards and governance.
 
 ## 1. Open and reachable
 

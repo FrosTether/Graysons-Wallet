@@ -7,7 +7,7 @@ The ticker is QNR, for Qoin's CryptoNote roots. One install gives you three apps
 - **Frostoise**: the tone-gated miner. It only hashes while your phone hears a mining tone
 - **MyFrost**: send and receive QNR by `@name`
 
-> **Proof of concept (v0.5.2).** QNR has no guaranteed value. Expect bugs and breaking changes.
+> **Proof of concept (v0.5.3).** QNR has no guaranteed value. Expect bugs and breaking changes.
 
 ## Download
 
@@ -64,7 +64,7 @@ Public nodes are listed at **[get.finux.tech/node](https://get.finux.tech/node/)
 | Coin | Qoin, ticker QNR, 11 decimal places |
 | Block time | 5 minutes on average, never sooner than 4½ minutes after the last block. LWMA difficulty over 60 blocks; blocks may be at most 30 s ahead of a node's clock |
 | Proof of work | double SHA-256 |
-| Block reward | 13.37 QNR a block for the first year (105,120 blocks), then 4.25% less each year. All of it goes to the miner. At most 33,069,515.29 QNR, half of it mined in about 16 years |
+| Block reward | 13.37 QNR a block for the first year (105,120 blocks), then 4.25% less each year. From year 55 (about 2081) a tail of 1.337 QNR a block forever, like Monero's, so there's no cap: about 29.9 million QNR by then, then 0.47% a year and shrinking. All of it goes to the miner |
 | Block 1 | Mined like any block, at the normal reward |
 | Founder names | `jacobfrost.frostchain` and `agorajay.frostchain` belong to `fc3dlrkt7demghofiz7wzjz2st4vzvjiskxumv` from genesis, and the genesis block says so |
 | Mined coins unlock | after 12 blocks |
