@@ -363,7 +363,13 @@ public final class Node {
         if (!z2) {
             savePeers();
         }
-        if (bigInteger.compareTo(this.chain.work()) <= 0) {
+        int cmp = bigInteger.compareTo(this.chain.work());
+        if (cmp <= 0) {
+            if (cmp < 0) {
+                // 0.5.5: the peer is behind. A peer that can't dial us (a server, when we're a phone behind NAT)
+                // would never catch up by pulling, so hand it our blocks.
+                pushTo(str, num);
+            }
             pullMempool(str);
             return true;
         }
@@ -451,6 +457,169 @@ public final class Node {
             min = j2 - 1;
             max = Math.max(0L, min - 1999);
         }
+    }
+
+    /** Most blocks one /p2p/fork request may carry. */
+    static final int MAX_PUSH_BLOCKS = 50;
+    /** Body size a pusher aims under: HttpServer refuses bodies over MAX_BODY. */
+    static final int MAX_PUSH_BYTES = HttpServer.MAX_BODY - 262144;
+    /** Deepest fork a peer may push, the same block limit as a pulled reorg. */
+    static final int MAX_PUSH_FORK_DEPTH = 5000;
+    /** Most blocks pushed to one peer in one sync round; the next round carries on. */
+    static final int MAX_PUSH_PER_ROUND = 200;
+    /** After a push a peer refused, wait this long before trying that peer again. */
+    static final long PUSH_BACKOFF_MS = 60000;
+    /** Fewest milliseconds between two /p2p/fork reorgs tried for one address. */
+    static final long FORK_MIN_INTERVAL_MS = 2000;
+    private final Map<String, Long> pushBackoff = Collections.synchronizedMap(new LinkedHashMap());
+    private final Map<String, Long> forkSeen = Collections.synchronizedMap(new LinkedHashMap());
+
+    /**
+     * Sends a peer with less work the blocks it's missing (0.5.5). On our chain it gets them one by one on
+     * /p2p/block; on a fork it gets them on /p2p/fork, where it switches only if they carry more work and validate.
+     */
+    void pushTo(String peer, long peerHeight) throws IOException {
+        Long until = this.pushBackoff.get(peer);
+        if (until != null && System.currentTimeMillis() < until.longValue()) {
+            return;
+        }
+        long fork = findFork(peer, peerHeight);
+        long height = this.chain.height();
+        if (fork >= height) {
+            return;
+        }
+        if (height - fork > MAX_PUSH_FORK_DEPTH) {
+            Log.w("sync", peer + " forked " + (height - fork) + " blocks back, too deep to push");
+            this.pushBackoff.put(peer, Long.valueOf(System.currentTimeMillis() + PUSH_BACKOFF_MS));
+            return;
+        }
+        long last = Math.min(height, fork + MAX_PUSH_PER_ROUND);
+        try {
+            if (fork == peerHeight) {
+                for (long h = fork + 1; h <= last; h++) {
+                    Block b = this.chain.at(h);
+                    if (b == null) {
+                        return;
+                    }
+                    post(peer, "/p2p/block", Json.write(b.toJson()));
+                }
+                Log.i("sync", "pushed blocks " + (fork + 1) + " to " + last + " to " + peer);
+            } else {
+                long next = fork + 1;
+                long base = fork;
+                while (next <= last) {
+                    List<Object> batch = new ArrayList<>();
+                    long bytes = 0;
+                    while (next <= last && batch.size() < MAX_PUSH_BLOCKS) {
+                        Block b = this.chain.at(next);
+                        if (b == null) {
+                            break;
+                        }
+                        Map<String, Object> json = b.toJson();
+                        long size = Json.write(json).length();
+                        if (!batch.isEmpty() && bytes + size > MAX_PUSH_BYTES) {
+                            break;
+                        }
+                        batch.add(json);
+                        bytes += size;
+                        next++;
+                    }
+                    if (batch.isEmpty()) {
+                        return;
+                    }
+                    post(peer, "/p2p/fork", Json.write(Json.o("fork", Long.valueOf(base), "blocks", batch)));
+                    base = next - 1;
+                }
+                Log.i("sync", "pushed our chain from fork " + fork + " to " + last + " to " + peer);
+            }
+            this.pushBackoff.remove(peer);
+        } catch (IOException e) {
+            Log.w("sync", "push to " + peer + " refused: " + e.getMessage());
+            this.pushBackoff.put(peer, Long.valueOf(System.currentTimeMillis() + PUSH_BACKOFF_MS));
+        }
+    }
+
+    /**
+     * POST /p2p/fork {fork, blocks}: blocks that follow our block at height fork, from a peer we may not be able
+     * to dial (0.5.5). Cheap checks first (count, depth, links, each block's own proof of work), then the same
+     * Chain.tryReorg a pulled fork goes through, which wants more work and validates every block.
+     */
+    private HttpServer.Response handleFork(HttpServer.Request request, String from) {
+        if (offline()) {
+            return HttpServer.Response.error(403, "node is offline");
+        }
+        Map<String, Object> body = Json.obj(request.bodyText());
+        long fork = Json.num(body, "fork");
+        List<Object> raw = Json.list(body, "blocks");
+        if (raw.isEmpty() || raw.size() > MAX_PUSH_BLOCKS) {
+            return HttpServer.Response.error(400, "send 1 to " + MAX_PUSH_BLOCKS + " blocks");
+        }
+        long height = this.chain.height();
+        if (fork < 0 || fork > height) {
+            return HttpServer.Response.error(400, "bad fork point");
+        }
+        if (height - fork > MAX_PUSH_FORK_DEPTH) {
+            return HttpServer.Response.error(400, "fork too deep");
+        }
+        List<Block> blocks = new ArrayList<>();
+        Block base = this.chain.at(fork);
+        byte[] prev = base.hash();
+        for (Object o : raw) {
+            if (!(o instanceof Map)) {
+                return HttpServer.Response.error(400, "bad block");
+            }
+            Block b = Block.fromJson((Map) o);
+            if (b.height != fork + 1 + blocks.size() || !Bytes.equal(b.prev, prev)) {
+                return HttpServer.Response.error(400, "blocks don't link");
+            }
+            if (!Consensus.meetsTarget(b.hash(), Consensus.target(b.difficulty))) {
+                return HttpServer.Response.error(400, "not enough proof of work");
+            }
+            blocks.add(b);
+            prev = b.hash();
+        }
+        String who = from != null ? from : request.remote;
+        if (fork == height) {
+            // They extend our tip: take them like any new block.
+            for (Block b : blocks) {
+                if (this.chain.has(b.hash())) {
+                    continue;
+                }
+                Chain.Result r = submitBlock(b, from);
+                if (!r.ok) {
+                    Log.w("p2p", "pushed block " + b.height + " from " + who + " rejected: " + r.error);
+                    return HttpServer.Response.error(400, "block " + b.height + ": " + r.error);
+                }
+            }
+            return HttpServer.Response.json(Json.o("ok", true, "height", Long.valueOf(this.chain.height())));
+        }
+        if (this.chain.has(blocks.get(blocks.size() - 1).hash())) {
+            return HttpServer.Response.json(Json.o("ok", true, "height", Long.valueOf(this.chain.height())));
+        }
+        // A reorg replays the chain state, so one address gets at most one every FORK_MIN_INTERVAL_MS.
+        long nowMs = System.currentTimeMillis();
+        synchronized (this.forkSeen) {
+            Long seen = this.forkSeen.get(request.remote);
+            if (seen != null && nowMs - seen.longValue() < FORK_MIN_INTERVAL_MS) {
+                return HttpServer.Response.error(429, "too many fork pushes, slow down");
+            }
+            if (this.forkSeen.size() > 1024) {
+                this.forkSeen.clear();
+            }
+            this.forkSeen.put(request.remote, Long.valueOf(nowMs));
+        }
+        StringBuilder sb = new StringBuilder();
+        List<Tx> back = this.chain.tryReorg(fork, blocks, sb);
+        if (back == null) {
+            Log.w("p2p", "fork from " + who + " at " + fork + " refused: " + sb);
+            return HttpServer.Response.error(400, sb.toString());
+        }
+        Log.i("p2p", "switched to " + who + "'s chain at fork " + fork + ", height " + this.chain.height());
+        this.mempool.revalidate(back);
+        this.miner.refresh();
+        this.wallets.onNewBlock();
+        broadcast("/p2p/block", Json.write(this.chain.tip().toJson()), from);
+        return HttpServer.Response.json(Json.o("ok", true, "height", Long.valueOf(this.chain.height())));
     }
 
     private void pullMempool(String str) {
@@ -605,7 +774,14 @@ public final class Node {
                 addPeerQuietly(str3);
             }
             Chain.Result submitBlock = submitBlock(fromJson, str3);
-            return (submitBlock.ok || this.chain.has(fromJson.hash())) ? HttpServer.Response.json(Json.o("ok", true)) : HttpServer.Response.error(400, submitBlock.error);
+            if (submitBlock.ok || this.chain.has(fromJson.hash())) {
+                return HttpServer.Response.json(Json.o("ok", true));
+            }
+            Log.w("p2p", "block " + fromJson.height + " from " + (str3 != null ? str3 : request.remote) + " rejected: " + submitBlock.error);
+            return HttpServer.Response.error(400, submitBlock.error);
+        }
+        if (str.equals("/p2p/fork") && request.method.equals("POST")) {
+            return handleFork(request, str3);
         }
         if (str.equals("/p2p/tx") && request.method.equals("POST")) {
             if (offline()) {
