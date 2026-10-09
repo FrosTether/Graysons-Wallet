@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Run a node | Qoin</title>
-<meta name="description" content="Keep Frostchain online while phones sleep: run frostnode on a server, a laptop or a spare phone, and show the chain live in FrostExplorer.">
-<link rel="canonical" href="https://get.finux.tech/node/">
+<title>For developers | Qoin</title>
+<meta name="description" content="Build frostnode from source, run a Frostchain test network on one machine, use the node&#x27;s HTTP API and keep a public node healthy.">
+<link rel="canonical" href="https://get.finux.tech/dev/">
 <meta name="theme-color" content="#f5f0fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#150e1a" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Run a node">
-<meta property="og:description" content="Keep Frostchain online while phones sleep: run frostnode on a server, a laptop or a spare phone, and show the chain live in FrostExplorer.">
-<meta property="og:url" content="https://get.finux.tech/node/">
-<meta property="og:image" content="https://get.finux.tech/og/node.png">
+<meta property="og:title" content="For developers">
+<meta property="og:description" content="Build frostnode from source, run a Frostchain test network on one machine, use the node&#x27;s HTTP API and keep a public node healthy.">
+<meta property="og:url" content="https://get.finux.tech/dev/">
+<meta property="og:image" content="https://get.finux.tech/og/dev.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Run a node: keep the chain online while phones sleep.">
+<meta property="og:image:alt" content="For developers: build, run and script Frostchain nodes.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E">
 <link rel="preload" href="/fonts/archivo.woff" as="font" type="font/woff" crossorigin>
@@ -228,6 +228,15 @@ footer a { color: var(--muted); }
   .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .cards.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+/* On phones the API table becomes a list: each call on its own line, what it returns under it. */
+@media (max-width: 640px) {
+  #api table { min-width: 0; }
+  #api thead { display: none; }
+  #api tr { display: block; padding: 12px 16px; }
+  #api tr + tr { border-top: 1px solid var(--line); }
+  #api td { display: block; padding: 0; border: 0; }
+  #api td.mono { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; overflow-wrap: anywhere; }
+}
 </style>
 </head>
 <body>
@@ -236,109 +245,116 @@ footer a { color: var(--muted); }
     <a class="brand" href="/">Qoin <span class="tick mono">QNR</span></a>
     <nav aria-label="Qoin">
       <a href="/">Get Qoin</a>
-      <a href="/node/" aria-current="page">Nodes</a>
+      <a href="/node/">Nodes</a>
       <a href="/qnr/">QNR vs XMR</a>
-      <a href="/dev/">Developers</a>
+      <a href="/dev/" aria-current="page">Developers</a>
     </nav>
   </header>
   <main>
     <div class="opener">
-      <h1>Run a node</h1>
-      <p class="lede">Phones mine Qoin, but phones sleep. An always-on node keeps the chain online: it stores every block, passes new blocks and payments between phones, and shows the chain live in FrostExplorer.</p>
+      <h1>For devs</h1>
+      <p class="lede">Everything you need to build frostnode from source, run a test network on one machine, script against a node's HTTP API and keep a public node healthy. Frostchain is open source under GPL-3.0.</p>
       <div class="cta">
-        <a class="btn" href="https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip">Download frostnode</a>
-        <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md">The full guide</a>
+        <a class="btn" href="https://github.com/FrosTether/Graysons-Wallet">Source on GitHub</a>
+        <a href="/node/">Just want a node running? One command</a>
       </div>
-      <p class="fine">Needs Java 17. It starts in about 100 MB of memory, and the chain grows by about 130 MB a year. It never holds anyone's 25 words.</p>
+      <p class="fine">Chain <span class="mono">b8b1ec3fefb96834</span> (v0.5) · Java 17 · no Android SDK needed for the node</p>
     </div>
 
-    <section id="does" aria-labelledby="does-h">
-      <h2 id="does-h">What a node does</h2>
-      <dl class="facts">
-        <div><dt>Keeps the chain</dt><dd>Stores every block and checks every rule, the same checks the phones run.</dd></div>
-        <div><dt>Relays</dt><dd>Passes new blocks and payments between phones that can't reach each other, on TCP port <span class="mono">7830</span>.</dd></div>
-        <div><dt>Shows it</dt><dd>Serves FrostExplorer on port <span class="mono">7831</span>: every block, its tone, names and balances, updating live.</dd></div>
-        <div><dt>No wallet</dt><dd>A node can't spend, mine or see anyone's 25 words. Mining still happens on phones that hear a tone.</dd></div>
-        <div><dt>Rewards</dt><dd>None yet. Paying always-on nodes, the way Dash pays its masternodes, is one of the governance options I'm working out. For now, running one is how you keep the network up.</dd></div>
-      </dl>
-    </section>
-
-    <section id="run" aria-labelledby="run-h">
-      <h2 id="run-h">Pick where it runs</h2>
-      <p class="intro">Anything that stays on and online works. A free cloud server is best, since it never sleeps and has a fixed address.</p>
-
-      <div class="tabs" role="tablist" aria-label="Where the node runs">
-        <button type="button" role="tab" id="tab-server" aria-controls="panel-server" aria-selected="true">Server</button>
-        <button type="button" role="tab" id="tab-laptop" aria-controls="panel-laptop" aria-selected="false" tabindex="-1">Laptop</button>
-        <button type="button" role="tab" id="tab-phone" aria-controls="panel-phone" aria-selected="false" tabindex="-1">Android phone</button>
-      </div>
-
-      <div class="panel" role="tabpanel" id="panel-server" aria-labelledby="tab-server">
-        <ol class="steps">
-          <li><b>Get a server.</b><span>Oracle Cloud's Always Free tier gives you a small Ubuntu machine at no cost. Any Ubuntu or Debian server works.</span></li>
-          <li><b>Run the installer.</b><span>It installs Java and the latest frostnode, checks the download against the release checksums, and sets it up as a service that starts on boot. Run it again any time to update.</span>
-            <div class="cmd"><pre>curl -fsSL https://get.finux.tech/node/install.sh | sudo sh</pre><button type="button" data-copy>Copy</button></div>
-          </li>
-          <li><b>Open port 7830.</b><span>The installer opens it on the server itself. Cloud providers block it a second time outside the machine: on Oracle Cloud, go to Networking, your VCN, Security lists, Default, and add an ingress rule for source <span class="mono">0.0.0.0/0</span>, TCP, port <span class="mono">7830</span>.</span></li>
-          <li><b>Check it.</b><span>From your phone's browser, open <span class="mono">http://&lt;server&nbsp;IP&gt;:7830/p2p/info</span>. It should show the chain <span class="mono">b8b1ec3fefb96834</span> and the height.</span></li>
-        </ol>
-      </div>
-
-      <div class="panel" role="tabpanel" id="panel-laptop" aria-labelledby="tab-laptop" hidden>
-        <ol class="steps">
-          <li><b>Install Java 17.</b><span>On Windows or a Mac, use the Temurin 17 installer from <a href="https://adoptium.net/temurin/releases/?version=17">adoptium.net</a>. On Linux, <span class="mono">sudo apt install openjdk-17-jre-headless</span>.</span></li>
-          <li><b>Download and unzip frostnode.</b><span>Unzip <a href="https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip">frostnode.zip</a> anywhere you like.</span></li>
-          <li><b>Start it.</b><span>Open a terminal in that folder and run:</span>
-            <div class="cmd"><pre><span class="c"># Mac or Linux</span>
-frostnode/bin/frostnode --data frostnode-data
-<span class="c"># Windows</span>
-frostnode\bin\frostnode.bat --data frostnode-data</pre><button type="button" data-copy>Copy</button></div>
-          </li>
-          <li><b>Keep it awake.</b><span>Set the laptop to never sleep while it's plugged in. Phones on the same Wi-Fi can add it by the laptop's local IP. For phones elsewhere, your router has to forward TCP 7830 to the laptop.</span></li>
-        </ol>
-      </div>
-
-      <div class="panel" role="tabpanel" id="panel-phone" aria-labelledby="tab-phone" hidden>
-        <ol class="steps">
-          <li><b>Install Termux.</b><span>Get it from <a href="https://f-droid.org/packages/com.termux/">F-Droid</a>. A spare phone on a charger makes a decent node.</span></li>
-          <li><b>Run frostnode next to the app.</b><span>Graysons Vault already uses port 7830 on the phone, so frostnode takes 7832 and 7833 and copies the chain from the app:</span>
-            <div class="cmd"><pre>pkg install openjdk-17 unzip
-curl -LO https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip
-unzip -o frostnode.zip
-termux-wake-lock
-frostnode/bin/frostnode --data ~/frostnode-data --port 7832 --explorer-port 7833 --peer 127.0.0.1:7830</pre><button type="button" data-copy>Copy</button></div>
-          </li>
-          <li><b>Open the explorer.</b><span>Visit <span class="mono">http://localhost:7833</span> in the phone's browser. It runs while the phone stays awake.</span></li>
-        </ol>
-      </div>
-    </section>
-
-    <section id="connect" aria-labelledby="connect-h">
-      <h2 id="connect-h">Connect the phones</h2>
+    <section id="build" aria-labelledby="build-h">
+      <h2 id="build-h">Build from source</h2>
       <ol class="steps">
-        <li><b>Open Graysons Vault.</b><span>Go to Node, then Add.</span></li>
-        <li><b>Enter the node's address.</b><span>The server's IP or a name like <span class="mono">node.finux.tech</span> pointing at it. Port 7830 is the default, so the host alone works.</span></li>
-        <li><b>Watch it sync.</b><span>The Node screen shows the node's height. Phones now pass blocks through it, even when they're on different networks.</span></li>
+        <li><b>Get the code.</b><span>The node, the chain rules and the Android app live in one repository.</span>
+          <div class="cmd"><pre>git clone https://github.com/FrosTether/Graysons-Wallet.git
+cd Graysons-Wallet</pre><button type="button" data-copy>Copy</button></div>
+        </li>
+        <li><b>Run the chain tests.</b><span>They cover consensus, signatures, sync, reorgs and the wallet. <span class="mono">ConsensusTest</span> fails if a change would alter the chain ID, so you can't fork the network by accident.</span>
+          <div class="cmd"><pre>./gradlew :core:test</pre><button type="button" data-copy>Copy</button></div>
+        </li>
+        <li><b>Build frostnode.</b><span>This makes <span class="mono">node/build/install/frostnode/</span> with <span class="mono">bin/frostnode</span> and its <span class="mono">lib/</span>. The same folder, zipped, is <a href="https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/frostnode.zip">frostnode.zip</a> on each release.</span>
+          <div class="cmd"><pre>./gradlew :node:installDist</pre><button type="button" data-copy>Copy</button></div>
+        </li>
       </ol>
     </section>
 
-    <section id="explorer" aria-labelledby="explorer-h">
-      <h2 id="explorer-h">Put FrostExplorer on the web</h2>
-      <p class="intro">A Cloudflare Tunnel gives the explorer an https address on your own domain, with no port to open. It runs on the same machine as the node.</p>
-      <div class="cmd"><pre><span class="c"># try it: prints a temporary https://….trycloudflare.com address</span>
-cloudflared tunnel --url http://localhost:7831
+    <section id="testnet" aria-labelledby="testnet-h">
+      <h2 id="testnet-h">A network on one machine</h2>
+      <p class="intro">Two nodes on different ports, the second syncing from the first. Each keeps its own data folder, so you can stop, wipe and restart either one.</p>
+      <div class="cmd"><pre><span class="c"># node A, with FrostExplorer on 7831</span>
+node/build/install/frostnode/bin/frostnode --data a --port 7830 --explorer-port 7831
 
-<span class="c"># keep it, on your own name</span>
-cloudflared tunnel login
-cloudflared tunnel create frostexplorer
-cloudflared tunnel route dns frostexplorer explorer.finux.tech
-cloudflared tunnel run --url http://localhost:7831 frostexplorer</pre><button type="button" data-copy>Copy</button></div>
-      <p class="fine">Get <span class="mono">cloudflared</span> from Cloudflare's downloads page, or <span class="mono">pkg install cloudflared</span> in Termux. Keeping it running after a reboot is in the <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md#put-it-on-explorerfinuxtech">full guide</a>.</p>
+<span class="c"># node B, in a second terminal, peered with A, no explorer</span>
+node/build/install/frostnode/bin/frostnode --data b --port 7840 --explorer-port 0 --peer 127.0.0.1:7830</pre><button type="button" data-copy>Copy</button></div>
+      <p class="fine">Mining happens on phones, so blocks come from Graysons Vault phones pointed at your node (Node → Add, your machine's local IP). Phones on the same Wi-Fi also find nodes on their own over UDP 7830.</p>
     </section>
 
-    <section id="public" aria-labelledby="public-h">
-      <h2 id="public-h">Public nodes</h2>
-      <p class="body">None are listed yet. Running one that's always on? Send me its address on the <a href="https://finux.tech/contact">contact page</a> and I'll list it here, so new phones can find it.</p>
+    <section id="options" aria-labelledby="options-h">
+      <h2 id="options-h">Options and files</h2>
+      <div class="cmd"><pre>frostnode [--data DIR] [--port 7830] [--explorer-port 7831] [--peer HOST[:PORT]]...</pre><button type="button" data-copy>Copy</button></div>
+      <dl class="facts">
+        <div><dt><span class="mono">--peer</span></dt><dd>A node to sync from at startup. Repeat it for more. A node remembers up to 64 peers.</dd></div>
+        <div><dt><span class="mono">--explorer-port 0</span></dt><dd>Turns FrostExplorer off.</dd></div>
+        <div><dt><span class="mono">chain.jsonl</span></dt><dd>Every block, one JSON object a line, in the data folder. It's re-checked from genesis at startup, and a bad line is cut off along with everything after it.</dd></div>
+        <div><dt><span class="mono">peers.json</span>, <span class="mono">settings.json</span></dt><dd>The peers it knows and its settings, next to the chain.</dd></div>
+        <div><dt>Logs</dt><dd>The first line shows the chain ID. Every 5 minutes it logs the height, the peers it reached and the mempool size.</dd></div>
+      </dl>
+    </section>
+
+    <section id="api" aria-labelledby="api-h">
+      <h2 id="api-h">The node's HTTP API</h2>
+      <p class="intro">Nodes talk plain HTTP and JSON on port 7830. These are the same calls phones and other nodes use, so you can sync, watch or submit from any language.</p>
+      <div class="table">
+        <table>
+          <thead><tr><th scope="col">Call</th><th scope="col">Returns</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">GET /p2p/info</td><td>Chain ID, height, tip hash, total work, next difficulty, agent, mempool size, QNR mined. Also at <span class="mono">/api/status</span>.</td></tr>
+            <tr><td class="mono">GET /p2p/hashes?from=H&amp;count=N</td><td>Block hashes from height H, up to 2,000.</td></tr>
+            <tr><td class="mono">GET /p2p/blocks?from=H&amp;count=N</td><td>Full blocks from height H, up to 50 or about 3 MB.</td></tr>
+            <tr><td class="mono">POST /p2p/block</td><td>Submit a block as JSON. <span class="mono">{"ok":true}</span> or a 400 with the reason.</td></tr>
+            <tr><td class="mono">POST /p2p/tx</td><td>Submit a signed transaction. Returns its txid.</td></tr>
+            <tr><td class="mono">GET /p2p/mempool</td><td>Up to 200 waiting transactions.</td></tr>
+            <tr><td class="mono">GET /p2p/peers</td><td>The peers this node has reached.</td></tr>
+            <tr><td class="mono">POST /p2p/hello</td><td><span class="mono">{"port":7830}</span> asks the node to add you as a peer.</td></tr>
+            <tr><td class="mono">GET /api/resolve?addr=X</td><td>An address or <span class="mono">.frostchain</span> name, resolved to the account ID, raw address and name.</td></tr>
+            <tr><td class="mono">GET /api/account?addr=X</td><td>Balance, mining rewards still locked, payments waiting to go out, and name.</td></tr>
+            <tr><td class="mono">GET /api/history?addr=X</td><td>Every payment, reward and name claim for an account.</td></tr>
+            <tr><td class="mono">GET /api/block?h=H</td><td>One block with its hash. No <span class="mono">h</span> gives the tip.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="cmd"><pre>curl http://localhost:7830/p2p/info
+curl "http://localhost:7830/api/resolve?addr=jacobfrost"</pre><button type="button" data-copy>Copy</button></div>
+      <p class="fine">Send <span class="mono">X-Frost-Port: 7840</span> with a POST and the node adds you as a peer at that port. FrostExplorer's read-only API on port 7831 (status, blocks, search, CORS open) is listed in the <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md#frostexplorer">node guide</a>.</p>
+    </section>
+
+    <section id="rules" aria-labelledby="rules-h">
+      <h2 id="rules-h">The rules a node checks</h2>
+      <dl class="facts">
+        <div><dt>Blocks</dt><dd>Double SHA-256 over a 152-byte header. One every 5 minutes on average, never within 270 seconds of the last, at most 30 seconds ahead of a node's clock. LWMA difficulty over 60 blocks.</dd></div>
+        <div><dt>Reward</dt><dd>13.37 QNR a block in the first year, then 4.25% less each year, at most 33,069,515.29 QNR. Mined coins unlock after 12 blocks.</dd></div>
+        <div><dt>Tone proof</dt><dd>Every block carries the reading of the tone it was mined on: 3.75–4.25, 7.50–8.20 or 10.80–11.40 Hz, peak at least 10 times the noise, at most 15 minutes old.</dd></div>
+        <div><dt>Signatures</dt><dd>LMS (RFC 8554), 1,024 one-time signatures per key, with key rotation on chain.</dd></div>
+        <div><dt>Where</dt><dd><a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/core/src/main/java/com/frostether/frostchain/Consensus.java">Consensus.java</a> and <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/core/src/main/java/com/frostether/frostchain/Chain.java">Chain.java</a> in the chain core.</dd></div>
+      </dl>
+    </section>
+
+    <section id="operate" aria-labelledby="operate-h">
+      <h2 id="operate-h">Running a public node</h2>
+      <ul class="cards">
+        <li><a href="/node/"><b>Install</b><span>One command on Ubuntu or Debian sets up Java, the service and the firewall. Run it again to update.</span></a></li>
+        <li><a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/node/README.md#put-it-on-explorerfinuxtech"><b>Put the explorer online</b><span>A Cloudflare Tunnel gives FrostExplorer an https address with no port to open.</span></a></li>
+      </ul>
+      <dl class="facts">
+        <div><dt>Ports</dt><dd>Open TCP 7830 for peers and phones. Keep 7831 closed and use a tunnel instead.</dd></div>
+        <div><dt>Keys</dt><dd>A node holds no wallet and no 25 words, so there's nothing to steal on the server.</dd></div>
+        <div><dt>Backups</dt><dd>Optional: any node can re-sync the chain from its peers. Copying <span class="mono">chain.jsonl</span> just makes a restart faster.</dd></div>
+        <div><dt>Updates</dt><dd>Watch the <a href="https://github.com/FrosTether/Graysons-Wallet/releases">releases</a>. A new chain ID means a rule change, and every node has to update to follow it.</dd></div>
+      </dl>
+    </section>
+
+    <section id="contribute" aria-labelledby="contribute-h">
+      <h2 id="contribute-h">Contribute</h2>
+      <p class="body">Issues and pull requests are welcome on <a href="https://github.com/FrosTether/Graysons-Wallet">GitHub</a>. Keep <span class="mono">./gradlew :core:test</span> passing, and say so in the pull request if a change touches consensus. Next on the list: keeping old blocks on disk instead of in memory, native SHA-256 mining, and the quantum-safe privacy layer. Running a public node? Send its address on the <a href="https://finux.tech/contact">contact page</a> and it goes on the <a href="/node/#public">node list</a>.</p>
     </section>
   </main>
   <footer>
