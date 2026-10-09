@@ -404,7 +404,7 @@
         <div class="mf-actions">
           <button data-mfgo="send"><span>↗</span>Send</button>
           <button data-mfgo="receive"><span>↙</span>Receive</button>
-          <button data-goto="#temporal"><span>⧗</span>Temporal</button>
+          <button data-goto="#frostoise"><span>❄</span>Mine</button>
         </div>
       </div>
       <div class="card hidden" id="mf-noname">
@@ -474,90 +474,6 @@
   </nav>
 </section>
 
-<!-- ================= Temporal ================= -->
-<section id="temporal" class="screen tp-screen hidden">
-  <header class="bar tp-bar">
-    <img src="temporal.svg" alt="" class="logo sm">
-    <div class="who"><b>Temporal</b><span class="small" id="tp-sub">a time machine that runs on QNR</span></div>
-    <span class="pill"><span class="dot" id="tp-node-dot"></span><span id="tp-node-text">…</span></span>
-  </header>
-
-  <main>
-    <!-- Seal -->
-    <div data-tp="seal">
-      <div class="card tp-gate hidden" id="tp-gate">
-        <h2>Unlock a wallet to pay the gas</h2>
-        <p class="small muted">Each seal burns 1 QNR from a wallet you made in Graysons Vault. Going back in time works without one.</p>
-        <form id="tp-unlock">
-          <label for="tp-file">Wallet</label>
-          <select id="tp-file"></select>
-          <label for="tp-pass">Password</label>
-          <input id="tp-pass" type="password" autocomplete="current-password">
-          <button class="btn tp-primary wide" type="submit" id="tp-open">Unlock</button>
-        </form>
-        <div class="msg" id="tp-gate-msg"></div>
-      </div>
-      <form class="card" id="tp-seal">
-        <h2>Seal a capsule</h2>
-        <p class="small muted">Write something for later. Its fingerprint goes on the chain with 1 QNR burned as gas, which proves you wrote it before that block. Temporal keeps the words shut until the day you pick.</p>
-        <label for="tp-text">Your message</label>
-        <textarea id="tp-text" rows="6" maxlength="4000" placeholder="What do you want to tell the future?"></textarea>
-        <label for="tp-opens">Opens on</label>
-        <input id="tp-opens" type="datetime-local">
-        <div class="tp-dial" id="tp-dial"></div>
-        <button class="btn tp-primary wide" type="submit" id="tp-review">Review the seal</button>
-        <div class="msg" id="tp-seal-msg"></div>
-      </form>
-    </div>
-
-    <!-- Capsules -->
-    <div data-tp="capsules" class="hidden">
-      <div class="card">
-        <div class="row-between"><b>Your capsules</b><span class="tag tp" id="tp-count"></span></div>
-        <ul class="tp-list" id="tp-list"></ul>
-      </div>
-      <div class="card">
-        <h3>Add a capsule</h3>
-        <p class="small muted">Paste a capsule code: one you copied before reinstalling, or one from get.finux.tech/temporal.</p>
-        <textarea id="tp-code" rows="3" placeholder="temporal1:…" autocapitalize="none" spellcheck="false"></textarea>
-        <button class="btn wide" id="tp-add">Add it</button>
-        <div class="msg" id="tp-add-msg"></div>
-      </div>
-    </div>
-
-    <!-- Go back -->
-    <div data-tp="back" class="hidden">
-      <form class="card" id="tp-travel">
-        <h2>Go back</h2>
-        <p class="small muted">Pick any moment since the chain started, 13:37 Eastern on 8 October 2026. Temporal finds the block mined then and plays the tone it was mined on.</p>
-        <input id="tp-slide" type="range" min="0" max="1000" value="1000" aria-label="When">
-        <input id="tp-when" type="datetime-local">
-        <button class="btn tp-primary wide" type="submit">Go</button>
-      </form>
-      <div class="card hidden" id="tp-arrival">
-        <div class="tp-stamp mono" id="tp-a-when"></div>
-        <h2 id="tp-a-title"></h2>
-        <dl class="kv" id="tp-a-kv"></dl>
-        <div class="actions">
-          <button class="btn" id="tp-a-play">Play its tone</button>
-          <button class="btn" id="tp-a-ride">Ride forward an hour</button>
-        </div>
-        <div class="small muted mono tp-ride" id="tp-a-ride-now"></div>
-      </div>
-      <div class="card">
-        <div class="row-between"><b>The gas</b><span class="tag tp">burned for good</span></div>
-        <dl class="kv" id="tp-gas"></dl>
-        <p class="small muted">The burn address is the SHA-256 of the words <b>frostchain/burn</b> and <b>temporal/v1</b>, not of any key, so nobody can ever spend from it.</p>
-      </div>
-    </div>
-  </main>
-
-  <nav class="tabbar tp-tabbar" id="tp-tabbar">
-    <a data-tpgo="seal" class="on"><svg viewBox="0 0 24 24"><path d="M7 3h10M7 21h10M8 3c0 5 8 6 8 9s-8 4-8 9M16 3c0 5-8 6-8 9s8 4 8 9"/></svg>Seal</a>
-    <a data-tpgo="capsules"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M4 11h16M9 4h6v3H9z"/></svg>Capsules</a>
-    <a data-tpgo="back"><svg viewBox="0 0 24 24"><path d="M11 6L5 12l6 6M19 6l-6 6 6 6"/></svg>Go back</a>
-  </nav>
-</section>
 
 <!-- ================= modal ================= -->
 <div id="modal" class="modal hidden" role="dialog" aria-modal="true">

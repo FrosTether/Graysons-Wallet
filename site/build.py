@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the Qoin site: Get Qoin, Run a node, QNR vs XMR and Temporal.
+"""Builds the Qoin site: Get Qoin, Run a node and QNR vs XMR.
 
     python3 site/build.py [out-dir] [site-url]
 
@@ -43,34 +43,7 @@ PAGES = [
          og="qnr", og_query="t=QNR vs XMR&l=Monero's emission curve, quantum-safe keys and tone mining.&lamps=0"
                            "&f=Side by side, as of 8 October 2026.",
          og_alt="QNR vs XMR, side by side."),
-    dict(slug="temporal", folder="temporal", nav="Temporal", title="Temporal | Qoin",
-         description="A time machine for Frostchain: seal a message for the future, or go back to any block. "
-                     "Each seal burns 1 QNR as gas.",
-         og="temporal", og_query="t=Temporal&l=A time machine for Frostchain. It runs on QNR.&lamps=0"
-                                "&f=Seal a message for the future. Go back to any block.",
-         og_alt="Temporal: a time machine for Frostchain.",
-         scripts=[REPO / "app/src/main/assets/ui/qr.js"]),
 ]
-
-
-def burn_address():
-    """Temporal's burn address: the same derivation as Temporal.BURN_ADDRESS in the chain core."""
-    b32 = "abcdefghijklmnopqrstuvwxyz234567"
-
-    def base32(data):
-        out, acc, bits = [], 0, 0
-        for byte in data:
-            acc, bits = (acc << 8) | byte, bits + 8
-            while bits >= 5:
-                out.append(b32[(acc >> (bits - 5)) & 31])
-                bits -= 5
-        if bits:
-            out.append(b32[(acc << (5 - bits)) & 31])
-        return "".join(out)
-
-    account = hashlib.sha256(b"frostchain/burn" + b"temporal/v1").digest()[:20]
-    check = base32(hashlib.sha256(b"frostchain/address-checksum" + account).digest()[:5])[:4]
-    return "fc" + base32(account) + check
 
 
 def qr_svg(text):
@@ -146,7 +119,7 @@ def main():
     site_url = sys.argv[2] if len(sys.argv) > 2 else "https://get.finux.tech/"
     if not site_url.endswith("/"):
         site_url += "/"
-    values = {"APK_URL": APK_URL, "RELEASE_URL": RELEASE, "NODE_URL": NODE_URL, "BURN_ADDRESS": burn_address(),
+    values = {"APK_URL": APK_URL, "RELEASE_URL": RELEASE, "NODE_URL": NODE_URL,
               "QR_SVG": qr_svg(APK_URL)}
     base_css = (SITE / "common/base.css").read_text()
     site_js = (SITE / "common/site.js").read_text()

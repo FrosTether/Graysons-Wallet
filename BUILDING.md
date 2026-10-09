@@ -9,7 +9,7 @@ It was rebuilt from the released 0.3.0 APK (see [Where this source came from](#w
 |---|---|
 | `core/` | Frostchain itself in plain Java: consensus rules, LMS keys, wallets, the node and its peer-to-peer HTTP. No Android code. |
 | `node/` | `frostnode`, the headless server node. See [node/README.md](node/README.md). |
-| `app/` | The Android app: Graysons Vault (Graysons Wallet before 0.4.2), Frostoise, MyFrost and Temporal. Its screens are web pages in `app/src/main/assets/ui`. |
+| `app/` | The Android app: Graysons Vault (Graysons Wallet before 0.4.2), Frostoise and MyFrost. Its screens are web pages in `app/src/main/assets/ui`. |
 
 ## The Android app
 
@@ -100,7 +100,6 @@ The suite takes a few minutes, because several tests mine real blocks:
 | `ReorgTest` | Two forks meeting, with the lighter one switching over |
 | `WalletFlowTest` | Mine into a wallet, send by address and by name, claim a name |
 | `MinerTest` | The real Frostoise miner: waits for launch and the tone, finds a block, backs off when the phone is hot |
-| `TemporalTest` | Temporal: the burn address and fingerprint the web page shares, seals on the chain, capsules kept shut, travel |
 
 ## The server node
 

@@ -1,14 +1,13 @@
 # Graysons Vault ⚡
 
 Android wallet, node and miner for **Qoin (QNR)** on Frostchain, part of [Finux](https://finux.tech).
-The ticker is QNR, for Qoin's CryptoNote roots. One install gives you four apps:
+The ticker is QNR, for Qoin's CryptoNote roots. One install gives you three apps:
 
 - **Graysons Vault** (called Graysons Wallet before 0.4.2): create or restore a wallet, claim a `.frostchain` name, run your node and watch blocks arrive in the explorer
 - **Frostoise**: the tone-gated miner. It only hashes while your phone hears a mining tone
 - **MyFrost**: send and receive QNR by `@name`
-- **Temporal**: a time machine. Seal a message for the future, or go back to any block. Each seal burns 1 QNR as gas
 
-> **Proof of concept (v0.4.3).** QNR has no guaranteed value. Expect bugs and breaking changes.
+> **Proof of concept (v0.5.1).** QNR has no guaranteed value. Expect bugs and breaking changes.
 
 ## Download
 
@@ -57,17 +56,6 @@ Every block carries a *resonance proof* of the reading, and nodes reject blocks 
 
 Phones on the same Wi-Fi find each other automatically. To reach anyone else, open **Graysons Vault → Node → Add** and enter a public node's address.
 Public nodes are listed at **[get.finux.tech/node](https://get.finux.tech/node/)**, which also shows how to run one: a single command on a server.
-
-## Temporal
-
-Temporal seals capsules: a message with an opening date. Its fingerprint goes on the chain in the memo of a 1 QNR payment
-to an address nobody can spend from, `fcn22knwovgbfytc6qyjczvb4kkxwjhqjmoaru` (the SHA-256 of the words
-`frostchain/burn` and `temporal/v1`). The block that carries it proves the words existed by then. The words stay on the
-phone, shut until the date. Temporal also goes back to any moment since genesis: the block mined then, the tone it was
-mined on, and what you held.
-
-It's not a consensus rule: a seal is an ordinary payment. The same rules run on the web at
-[get.finux.tech/temporal](https://get.finux.tech/temporal/), in `Temporal.java`, and in FrostExplorer's API.
 
 ## Chain parameters (v0.5)
 

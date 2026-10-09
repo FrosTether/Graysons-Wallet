@@ -10,7 +10,6 @@ import com.frostether.frostchain.Json;
 import com.frostether.frostchain.Log;
 import com.frostether.frostchain.Node;
 import com.frostether.frostchain.Resonance;
-import com.frostether.frostchain.Temporal;
 import com.frostether.frostchain.Tx;
 import com.frostether.frostchain.U64;
 import com.sun.net.httpserver.HttpExchange;
@@ -37,8 +36,6 @@ import java.util.concurrent.Executors;
  *   /api/explorer/blocks       newest blocks, ?before=HEIGHT&count=30
  *   /api/explorer/block?h=     one block with its transactions
  *   /api/explorer/search?q=    a height, a block hash, an address or a .frostchain name
- *   /api/explorer/at?t=        the chain at a moment: the block mined by then, QNR mined by then (Temporal's travel)
- *   /api/explorer/temporal     Temporal's burn address, QNR burned and the seals; ?fp= finds one capsule's seal
  *
  * It only reads the node's chain, so it's safe to put on the public internet (or behind a Cloudflare tunnel).
  */
@@ -120,12 +117,6 @@ final class Explorer {
                 case "/api/explorer/search":
                     json(ex, 200, search(q));
                     return;
-                case "/api/explorer/at":
-                    json(ex, 200, at(q));
-                    return;
-                case "/api/explorer/temporal":
-                    json(ex, 200, temporal(q));
-                    return;
                 default:
                     send(ex, 404, "text/plain; charset=utf-8", bytes("not found"));
             }
@@ -155,39 +146,6 @@ final class Explorer {
         o.put("minSpacing", Long.valueOf(Consensus.MIN_BLOCK_SPACING));
         o.put("agent", Node.AGENT);
         o.put("coin", Consensus.COIN);
-        o.put("burnAddress", Temporal.BURN_ADDRESS);
-        o.put("burnId", Bytes.hex(Temporal.BURN_ID));
-        long burned = Temporal.burned(chain);
-        o.put("burned", U64.str(burned));
-        o.put("burnedText", U64.format(burned));
-        return o;
-    }
-
-    Map<String, Object> at(Map<String, String> q) {
-        Temporal.At at = Temporal.at(node.chain, q.containsKey("t") ? number(q.get("t")) : node.chain.now());
-        Map<String, Object> o = Json.o("block", summary(at.block, false), "mined", U64.str(at.mined), "minedText", U64.format(at.mined),
-                "seals", Long.valueOf(at.seals));
-        return o;
-    }
-
-    Map<String, Object> temporal(Map<String, String> q) {
-        if (q.containsKey("fp")) {
-            String fp = q.get("fp").trim().toLowerCase(java.util.Locale.ROOT);
-            if (!fp.matches("[0-9a-f]{40}")) {
-                throw new IllegalArgumentException("a capsule fingerprint is 40 hex characters");
-            }
-            Temporal.Seal seal = Temporal.find(node.chain, fp);
-            Map<String, Object> o = Json.o("fingerprint", fp);
-            o.put("seal", seal == null ? null : seal.toJson());
-            return o;
-        }
-        Map<String, Object> o = Temporal.info(node.chain);
-        List<Object> seals = new ArrayList<>();
-        List<Temporal.Seal> all = Temporal.seals(node.chain);
-        for (int i = all.size() - 1; i >= 0 && seals.size() < MAX_COUNT; i--) {
-            seals.add(all.get(i).toJson());
-        }
-        o.put("seals", seals);
         return o;
     }
 
