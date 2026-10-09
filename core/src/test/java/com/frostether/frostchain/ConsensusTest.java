@@ -18,23 +18,22 @@ public class ConsensusTest {
     }
 
     @Test
-    public void blockOnePaysTheNormalReward() {
-        // v0.4: no fixed first-block reward. Block 1 follows the same curve as every block.
-        assertEquals(((MAX >>> 20) * 3) / 2, Consensus.reward(1, 0));
-        assertEquals("263.88279066622", U64.format(Consensus.reward(1, 0)));
-    }
-
-    @Test
-    public void laterBlocksFollowTheEmissionCurve() {
-        long afterBlockOne = Consensus.reward(2, Consensus.reward(1, 0));
-        assertEquals((((MAX - Consensus.reward(1, 0)) >>> 20) * 3) / 2, afterBlockOne);
-        assertTrue(afterBlockOne < Consensus.reward(1, 0));
-    }
-
-    @Test
-    public void rewardShrinksAsCoinsAreMined() {
-        assertTrue(Consensus.reward(3, 1_000_000 * U64.COIN) < Consensus.reward(3, 0));
+    public void firstYearPaysLeet() {
+        assertEquals("13.37", U64.format(Consensus.reward(1, 0)));
+        assertEquals(Consensus.FIRST_REWARD, Consensus.reward(105_120, 123));
         assertEquals(0, Consensus.reward(0, 0));
+    }
+
+    @Test
+    public void eachYearPaysFourPointTwoFivePercentLess() {
+        assertEquals("12.801775", U64.format(Consensus.reward(105_121, 0)));
+        assertEquals("12.2576995625", U64.format(Consensus.reward(2 * 105_120 + 1, 0)));
+        assertTrue(Consensus.reward(Long.MAX_VALUE, 0) == 0);
+    }
+
+    @Test
+    public void supplyTopsOutNear33Million() {
+        assertEquals("33,069,515.2869234816", U64.format(Consensus.maxSupply()));
     }
 
     @Test
@@ -73,7 +72,7 @@ public class ConsensusTest {
     }
 
     @Test
-    public void genesisIsTheV04Relaunch() {
+    public void genesisIsTheV05Relaunch() {
         // The chain ID is the genesis block's hash. Phones only talk to nodes with the same one,
         // so this locks it in: a change here means a different chain.
         assertEquals(1_791_481_020L, Consensus.GENESIS_TIME); // Thu 8 Oct 2026, 13:37 Eastern
@@ -81,6 +80,6 @@ public class ConsensusTest {
         assertEquals(CHAIN_ID, Block.genesis().hashHex());
     }
 
-    /** v0.4 chain ID. 0.3.x phones are on 98ede167f7885dae… and won't connect to it. */
-    static final String CHAIN_ID = "aa18513e5ee8db9f7371c88ec2aca9b414288355ccc8faa071b23368b39be292";
+    /** v0.5 chain ID, the 13.37 relaunch. v0.4 phones are on aa18513e5ee8db9f… and 0.3.x on 98ede167f7885dae…; neither connects. */
+    static final String CHAIN_ID = "b8b1ec3fefb968349fcf3fdf0cf0735c6912428c477a8d32b0f37277d154cefc";
 }

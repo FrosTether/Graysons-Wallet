@@ -32,17 +32,17 @@ public class WalletFlowTest {
         assertEquals(null, node.chain.nameOf(miner));
         assertArrayEquals(Consensus.founderAccount(), node.chain.lookupName("jacobfrost"));
 
-        // Preview, then send 250 QNR to the friend by their raw address.
-        Map<String, Object> preview = w.send(Address.raw(friend), "250", "first send", true);
+        // Preview, then send 10 QNR to the friend by their raw address.
+        Map<String, Object> preview = w.send(Address.raw(friend), "10", "first send", true);
         assertEquals("0.0001", ((String) preview.get("feeText")).replaceAll("0+$", ""));
-        Map<String, Object> sent = w.send(Address.raw(friend), "250", "first send", false);
+        Map<String, Object> sent = w.send(Address.raw(friend), "10", "first send", false);
         assertTrue(((String) sent.get("txid")).length() == 64);
         assertEquals(1, node.mempool.size());
 
         TestKit.mine(node, clock, miner);
         clock.now += 1800;
         assertEquals(0, node.mempool.size());
-        assertEquals(250 * TestKit.QOIN, node.chain.account(friend).balance);
+        assertEquals(10 * TestKit.QOIN, node.chain.account(friend).balance);
 
         // The friend opens their wallet, claims a name, and gets paid by name.
         w.open(friendFile, "friend123");
@@ -54,8 +54,8 @@ public class WalletFlowTest {
         w.open(minerFile, "miner123");
         w.send("oofmaster.frostchain", "1.5", "", false);
         TestKit.mine(node, clock, miner);
-        // Claiming a name is free in 0.3.0 (the wallet sets a zero fee), so the friend has 250 + 1.5.
-        assertEquals(250 * TestKit.QOIN + 150 * TestKit.QOIN / 100, node.chain.account(friend).balance);
+        // Claiming a name is free in 0.3.0 (the wallet sets a zero fee), so the friend has 10 + 1.5.
+        assertEquals(10 * TestKit.QOIN + 150 * TestKit.QOIN / 100, node.chain.account(friend).balance);
 
         // Mistakes come back as plain messages.
         try {

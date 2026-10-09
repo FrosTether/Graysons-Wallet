@@ -36,7 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class Node {
-    public static final String AGENT = "Frostchain/0.4 (Graysons Vault)";
+    public static final String AGENT = "Frostchain/0.5 (Graysons Vault)";
     static final long MAX_REORG_BYTES = 25165824;
     static final int MAX_RESPONSE = 6291456;
     private Thread beaconThread;

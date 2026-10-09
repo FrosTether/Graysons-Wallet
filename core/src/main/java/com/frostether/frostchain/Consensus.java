@@ -7,7 +7,7 @@ import java.util.List;
 
 public final class Consensus {
     public static final long BLOCK_TIME = 300;
-    public static final String CHAIN_NAME = "Frostchain v0.4";
+    public static final String CHAIN_NAME = "Frostchain v0.5";
     /** The ticker the apps show: QNR, for Qoin's CryptoNote roots (0.4.2; it was QOIN). Display only, never hashed. */
     public static final String COIN = "QNR";
     public static final int COINBASE_MATURITY = 12;
@@ -54,15 +54,35 @@ public final class Consensus {
     private Consensus() {
     }
 
+    /** Blocks in a reward year: 365 days of 5-minute blocks. */
+    public static final long BLOCKS_PER_YEAR = 105_120;
+    /** The first year's reward, 13.37 QNR a block (v0.5). */
+    public static final long FIRST_REWARD = 1_337_000_000_000L;
+
     /**
-     * Block reward for height j after j2 coins have been mined: (2^64 - mined) / 2^20 x 1.5.
-     * Since v0.4 block 1 follows the same curve as every other block; 0.3.x paid it a fixed 13,370.08241991.
+     * Block reward at height j: 13.37 QNR in the first year (blocks 1 to 105,120), then 4.25% less each year,
+     * rounded down to the smallest unit. All of it goes to the miner. The second argument (coins mined so far) is
+     * kept for callers but no longer used. Every reward added up is 33,069,515.28692348 QNR, half of it mined in about 16 years.
+     * Before v0.5 the reward was (2^64 - mined) / 2^20 x 1.5, about 263.88 QNR a block.
      */
     public static long reward(long j, long j2) {
         if (j <= 0) {
             return 0L;
         }
-        return ((((-1) - j2) >>> 20) * 3) / 2;
+        long r = FIRST_REWARD;
+        for (long year = (j - 1) / BLOCKS_PER_YEAR; year > 0 && r > 0; year--) {
+            r = r * 9575 / 10000;
+        }
+        return r;
+    }
+
+    /** Every reward added up: the most QNR there will ever be, in the smallest unit. */
+    public static long maxSupply() {
+        long total = 0;
+        for (long r = FIRST_REWARD; r > 0; r = r * 9575 / 10000) {
+            total += r * BLOCKS_PER_YEAR;
+        }
+        return total;
     }
 
     public static byte[] target(long j) {
