@@ -338,7 +338,13 @@ cloudflared tunnel run --url http://localhost:7831 frostexplorer</pre><button ty
 
     <section id="public" aria-labelledby="public-h">
       <h2 id="public-h">Public nodes</h2>
-      <p class="body">None are listed yet. Running one that's always on? Send me its address on the <a href="https://finux.tech/contact">contact page</a> and I'll list it here, so new phones can find it.</p>
+      <p class="body">Graysons Vault 0.5.4 and newer know the first one already, so a new install finds the chain without adding anything under Node, then Add.</p>
+      <dl class="facts">
+        <div><dt>Node 1</dt><dd><span class="mono">149.28.63.221</span>, port <span class="mono">7830</span>. It relays blocks and payments and keeps a copy of the chain. It doesn't mine and holds no wallet.</dd></div>
+        <div><dt>Check it</dt><dd><a href="http://149.28.63.221:7830/p2p/info"><span class="mono">149.28.63.221:7830/p2p/info</span></a> shows the chain <span class="mono">b8b1ec3fefb96834</span> and its height.</dd></div>
+        <div><dt>Explorer</dt><dd><a href="http://149.28.63.221:7831/">FrostExplorer</a> shows its blocks, tones, names and balances, and looks up any payment by its transaction ID.</dd></div>
+      </dl>
+      <p class="body">Running one that's always on? Send me its address on the <a href="https://finux.tech/contact">contact page</a> and I'll list it here, so new phones can find it.</p>
     </section>
   </main>
   <footer>
