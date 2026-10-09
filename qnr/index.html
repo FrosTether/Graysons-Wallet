@@ -290,8 +290,8 @@ footer a { color: var(--muted); }
             <tr><th scope="row">Quantum computers</th><td data-coin="XMR">A large enough one could break elliptic-curve cryptography</td><td data-coin="QNR">Hash-based signatures are built to hold up against them</td></tr>
             <tr><th scope="row">Privacy</th><td data-coin="XMR">Private by default: each spend hides among 16 possible senders, receivers get one-time addresses, and amounts are hidden</td><td data-coin="QNR">None. Balances and payments are public, like Bitcoin's.</td></tr>
             <tr><th scope="row">Next upgrade</th><td data-coin="XMR">FCMP++ hides each spend among every output on the chain instead of 15 decoys. It's on test networks, with no mainnet date yet.</td><td data-coin="QNR">Still being decided. See below.</td></tr>
-            <tr><th scope="row">Emission</th><td data-coin="XMR">A smooth curve that ended in 2022 at about 18.1 million XMR, then a tail of 0.6 XMR a block forever</td><td data-coin="QNR"><span class="mono">13.37</span> QNR a block for the first year, then 4.25% less each year, so half of all QNR is mined after about 16 years. No tail yet.</td></tr>
-            <tr><th scope="row">Most there'll ever be</th><td data-coin="XMR">No cap, because of the tail. It adds under 1% a year, shrinking.</td><td data-coin="QNR"><span class="mono">33,069,515.29</span> QNR</td></tr>
+            <tr><th scope="row">Emission</th><td data-coin="XMR">A smooth curve that ended in 2022 at about 18.1 million XMR, then a tail of 0.6 XMR a block forever</td><td data-coin="QNR"><span class="mono">13.37</span> QNR a block for the first year, then 4.25% less each year until it reaches a tail of <span class="mono">1.337</span> QNR a block forever, in year 55 (about 2081).</td></tr>
+            <tr><th scope="row">Most there'll ever be</th><td data-coin="XMR">No cap, because of the tail. It adds under 1% a year, shrinking.</td><td data-coin="QNR">No cap either. About 29.9 million QNR when the tail starts, then 0.47% a year, shrinking.</td></tr>
             <tr><th scope="row">Smallest unit</th><td data-coin="XMR">12 decimal places</td><td data-coin="QNR">11 decimal places</td></tr>
             <tr><th scope="row">Mined coins unlock</th><td data-coin="XMR">After 60 blocks, about 2 hours</td><td data-coin="QNR">After 12 blocks, about 1 hour</td></tr>
             <tr><th scope="row">Wallet recovery</th><td data-coin="XMR">25 words (16 in newer wallets that use Polyseed)</td><td data-coin="QNR">25 words</td></tr>
@@ -310,7 +310,6 @@ footer a { color: var(--muted); }
         <article>
           <h3>From Monero</h3>
           <ul>
-            <li><b>A tail.</b> A small fixed reward forever, so mining still pays once the curve flattens.</li>
             <li><b>View keys.</b> Let someone see a wallet's payments without being able to spend, like a crew member watching a manager's register.</li>
             <li><b>One-time receive addresses.</b> Monero's are built on elliptic curves, so QNR would need a hash-based version to stay quantum-safe.</li>
           </ul>
