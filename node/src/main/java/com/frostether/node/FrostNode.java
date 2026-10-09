@@ -30,9 +30,10 @@ public final class FrostNode {
         int port = Consensus.P2P_PORT;
         int explorerPort = Consensus.P2P_PORT + 1;
         List<String> peers = new ArrayList<>();
+        long maxReorg = -1;
         for (int i = 0; i < args.length; i++) {
             String a = args[i];
-            boolean needsValue = a.equals("--data") || a.equals("--port") || a.equals("--peer") || a.equals("--explorer-port");
+            boolean needsValue = a.equals("--data") || a.equals("--port") || a.equals("--peer") || a.equals("--explorer-port") || a.equals("--max-reorg");
             if (needsValue && i + 1 >= args.length) {
                 System.err.println(a + " needs a value");
                 usage();
@@ -51,6 +52,9 @@ public final class FrostNode {
                 case "--explorer-port":
                     explorerPort = Integer.parseInt(args[++i]);
                     break;
+                case "--max-reorg":
+                    maxReorg = Long.parseLong(args[++i]);
+                    break;
                 case "-h":
                 case "--help":
                     usage();
@@ -68,6 +72,9 @@ public final class FrostNode {
         Node node = new Node(data, null);
         // A server has no Wi-Fi neighbours to find, so skip the LAN beacons.
         node.putSetting("discovery", Boolean.FALSE);
+        if (maxReorg >= 0) {
+            node.chain.setMaxReorgDepth(maxReorg); // for this run only
+        }
         node.start(port, true);
         if (node.port() != port) {
             System.err.println("port " + port + " is busy. Is another frostnode already running?");
@@ -78,7 +85,8 @@ public final class FrostNode {
             System.out.println("peer added: " + node.addPeer(p));
         }
         System.out.println("frostnode listening on 0.0.0.0:" + node.port() + ", chain " + Bytes.hex(node.chain.chainId).substring(0, 16)
-                + ", height " + node.chain.height() + ", data in " + data);
+                + ", height " + node.chain.height() + ", reorg limit "
+                + (node.chain.maxReorgDepth() == 0 ? "none" : node.chain.maxReorgDepth() + " blocks") + ", data in " + data);
 
         Explorer explorer = null;
         if (explorerPort > 0) {
@@ -106,6 +114,6 @@ public final class FrostNode {
     }
 
     private static void usage() {
-        System.out.println("usage: frostnode [--data DIR] [--port 7830] [--explorer-port 7831] [--peer HOST[:PORT]]...");
+        System.out.println("usage: frostnode [--data DIR] [--port 7830] [--explorer-port 7831] [--max-reorg BLOCKS] [--peer HOST[:PORT]]...");
     }
 }

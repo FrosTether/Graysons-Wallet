@@ -54,6 +54,29 @@ public final class Consensus {
     private Consensus() {
     }
 
+    /**
+     * The deepest reorg a node accepts from a peer on its own, in blocks (288 = one day of 5-minute blocks). A chain
+     * that forks further back than this is refused, however much work it has, so rented hashpower can't rewrite
+     * history. Zcash does the same with 99 blocks. Phones here mine alone while they're apart, so this is generous:
+     * a split that lasts longer than a day needs an operator's decision (frostnode --max-reorg, or 0 for no limit).
+     * It's a node rule, not a block rule: it never makes a block invalid, only keeps a node on the chain it has.
+     */
+    public static final long MAX_REORG_DEPTH = 288;
+
+    /**
+     * Checkpoints: block height to block hash (hex). A node never accepts a block at one of these heights with any
+     * other hash, and drops a stored chain that disagrees with one. Empty until the network has agreed on which chain
+     * is Qoin's. To add one, take the hash FrostExplorer shows for a block that's at least a day deep, and put it here
+     * in a release. Every wrong entry splits nodes off the chain, so check it on two independent nodes first.
+     */
+    public static final java.util.Map<Long, String> CHECKPOINTS = checkpoints();
+
+    private static java.util.Map<Long, String> checkpoints() {
+        java.util.Map<Long, String> m = new java.util.LinkedHashMap<>();
+        // m.put(1000L, "000000...");
+        return java.util.Collections.unmodifiableMap(m);
+    }
+
     /** Blocks in a reward year: 365 days of 5-minute blocks. */
     public static final long BLOCKS_PER_YEAR = 105_120;
     /** The first year's reward, 13.37 QNR a block (v0.5). */

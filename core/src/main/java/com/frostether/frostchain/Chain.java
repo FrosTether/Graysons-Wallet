@@ -38,6 +38,35 @@ public final class Chain {
      * hex string it replaced (0.5.2).
      */
     private final Map<Long, Integer> index = new HashMap<>();
+    private volatile long maxReorgDepth = Consensus.MAX_REORG_DEPTH;
+    private volatile Map<Long, String> checkpoints = Consensus.CHECKPOINTS;
+
+    /** Blocks this node will undo to follow a heavier chain. 0 means no limit. */
+    public long maxReorgDepth() {
+        return this.maxReorgDepth;
+    }
+
+    public void setMaxReorgDepth(long blocks) {
+        this.maxReorgDepth = Math.max(0L, blocks);
+    }
+
+    /** Replaces the checkpoints. Tests use this; the real list is Consensus.CHECKPOINTS. */
+    void setCheckpoints(Map<Long, String> map) {
+        this.checkpoints = map;
+    }
+
+    /** Would following a chain that forks after height forkHeight undo more blocks than this node allows? */
+    public synchronized boolean tooDeep(long forkHeight) {
+        return this.maxReorgDepth > 0 && (this.blocks.size() - 1) - forkHeight > this.maxReorgDepth;
+    }
+
+    private String checkpointError(Block block) {
+        String want = this.checkpoints.get(Long.valueOf(block.height));
+        if (want != null && !want.equalsIgnoreCase(block.hashHex())) {
+            return "conflicts with the checkpoint at block " + block.height;
+        }
+        return null;
+    }
 
     private static Long key(byte[] hash) {
         long k = 0;
@@ -255,6 +284,11 @@ public final class Chain {
             sb.append("alt chain doesn't connect");
             return null;
         }
+        if (tooDeep(j)) {
+            sb.append("it would undo ").append((this.blocks.size() - 1) - j).append(" blocks, more than this node's limit of ")
+                    .append(this.maxReorgDepth);
+            return null;
+        }
         BigInteger altWork = BigInteger.ZERO;
         for (Block b : list) {
             altWork = altWork.add(new BigInteger(Long.toUnsignedString(b.difficulty)));
@@ -336,6 +370,10 @@ public final class Chain {
         }
         if (!Bytes.equal(block.prev, block2.hash())) {
             return "wrong previous block";
+        }
+        String conflict = checkpointError(block);
+        if (conflict != null) {
+            return conflict;
         }
         if (block.time <= medianTime(list, i)) {
             return "timestamp too early";
@@ -576,6 +614,9 @@ public final class Chain {
             }
             if (!Bytes.equal(block.prev, tip().hash())) {
                 return "bad link";
+            }
+            if (checkpointError(block) != null) {
+                return "bad checkpoint";
             }
             if (block.time < tip().time + Consensus.MIN_BLOCK_SPACING) {
                 return "bad spacing";

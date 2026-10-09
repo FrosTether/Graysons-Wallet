@@ -60,6 +60,7 @@ public final class Node {
     private final ExecutorService relay = Executors.newFixedThreadPool(2);
     private Map<String, Object> settings = new LinkedHashMap();
     private volatile String syncStatus = "idle";
+    private volatile long lastDeepWarn = 0L;
     private final Object syncWake = new Object();
 
     public Node(File file, Chain.Clock clock) throws IOException {
@@ -72,6 +73,10 @@ public final class Node {
         this.miner = new Miner(this);
         this.wallets = new Wallets(new File(file, "wallets"), this);
         loadSettings();
+        long savedLimit = Json.num(this.settings, "maxReorg", -1L);
+        if (savedLimit >= 0) {
+            this.chain.setMaxReorgDepth(savedLimit);
+        }
         loadPeers();
         addSeedPeers();
     }
@@ -375,6 +380,17 @@ public final class Node {
         }
         this.syncStatus = "syncing from " + str;
         long findFork = findFork(str, num);
+        if (this.chain.tooDeep(findFork)) {
+            // Don't download a chain we won't switch to. Say so now and then, not every 10 seconds.
+            long now = System.currentTimeMillis();
+            if (now - this.lastDeepWarn > 600000L) {
+                this.lastDeepWarn = now;
+                Log.w("sync", str + " has more work, but its chain forks " + (this.chain.height() - findFork)
+                        + " blocks back, past this node's limit of " + this.chain.maxReorgDepth() + ". Staying on our chain."
+                        + " If that chain is the right one, raise the limit (frostnode --max-reorg N, 0 for none).");
+            }
+            return true;
+        }
         long j = 1 + findFork;
         if (findFork == this.chain.height()) {
             while (true) {

@@ -132,8 +132,22 @@ Then open `http://localhost:7833` in the phone's browser.
 ## Options
 
 ```
-frostnode [--data DIR] [--port 7830] [--explorer-port 7831] [--peer HOST[:PORT]]...
+frostnode [--data DIR] [--port 7830] [--explorer-port 7831] [--max-reorg BLOCKS] [--peer HOST[:PORT]]...
 ```
 
 `--peer` adds a node to sync from at startup. `--explorer-port 0` turns FrostExplorer off.
 Every 5 minutes the node logs its height, how many peers it reached and its mempool size.
+
+## Reorg limit and checkpoints
+
+A node follows the chain with the most work, but it won't undo more than **288 blocks** (one day) to do it. Without a limit, anyone who rents enough hashpower could rewrite old history on a small chain. When a peer offers a heavier chain that forks further back than the limit, the node keeps its own chain and logs why (at most every 10 minutes).
+
+If that happens and the peer's chain is the right one, for example after a long network split, raise the limit for one run and let the node switch:
+
+```bash
+frostnode --data /opt/frostnode/data --max-reorg 0     # 0 means no limit
+```
+
+Phones use the same 288, and can change it with `"maxReorg"` in `settings.json`.
+
+**Checkpoints** are fixed `height → block hash` pairs in `Consensus.CHECKPOINTS`. A node never accepts a different block at a checkpointed height, so a heavier fork can't pass one. The list is empty until the network agrees which chain is Qoin's. To add one, take a block's hash from FrostExplorer once it's at least a day deep, confirm it on two independent nodes, and put it in a release. A wrong checkpoint splits nodes off the chain, so be careful.
