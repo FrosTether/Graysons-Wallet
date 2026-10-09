@@ -78,7 +78,7 @@ curl "http://localhost:7830/api/resolve?addr=jacobfrost"</pre><button type="butt
       <h2 id="rules-h">The rules a node checks</h2>
       <dl class="facts">
         <div><dt>Blocks</dt><dd>Double SHA-256 over a 152-byte header. One every 5 minutes on average, never within 270 seconds of the last, at most 30 seconds ahead of a node's clock. LWMA difficulty over 60 blocks.</dd></div>
-        <div><dt>Reward</dt><dd>13.37 QNR a block in the first year, then 4.25% less each year, at most 33,069,515.29 QNR. Mined coins unlock after 12 blocks.</dd></div>
+        <div><dt>Reward</dt><dd>13.37 QNR a block in the first year, then 4.25% less each year, down to a tail of 1.337 QNR a block forever from year 55. No cap. Mined coins unlock after 12 blocks.</dd></div>
         <div><dt>Tone proof</dt><dd>Every block carries the reading of the tone it was mined on: 3.75–4.25, 7.50–8.20 or 10.80–11.40 Hz, peak at least 10 times the noise, at most 15 minutes old.</dd></div>
         <div><dt>Signatures</dt><dd>LMS (RFC 8554), 1,024 one-time signatures per key, with key rotation on chain.</dd></div>
         <div><dt>Where</dt><dd><a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/core/src/main/java/com/frostether/frostchain/Consensus.java">Consensus.java</a> and <a href="https://github.com/FrosTether/Graysons-Wallet/blob/main/core/src/main/java/com/frostether/frostchain/Chain.java">Chain.java</a> in the chain core.</dd></div>

@@ -28,12 +28,15 @@ public class ConsensusTest {
     public void eachYearPaysFourPointTwoFivePercentLess() {
         assertEquals("12.801775", U64.format(Consensus.reward(105_121, 0)));
         assertEquals("12.2576995625", U64.format(Consensus.reward(2 * 105_120 + 1, 0)));
-        assertTrue(Consensus.reward(Long.MAX_VALUE, 0) == 0);
     }
 
     @Test
-    public void supplyTopsOutNear33Million() {
-        assertEquals("33,069,515.2869234816", U64.format(Consensus.maxSupply()));
+    public void tailKeepsPayingForever() {
+        long year54 = 54 * 105_120L;
+        assertTrue(Consensus.reward(year54, 0) > Consensus.TAIL_REWARD);       // last year of the decay
+        assertEquals("1.337", U64.format(Consensus.reward(year54 + 1, 0)));   // year 55: the tail
+        assertEquals("1.337", U64.format(Consensus.reward(Long.MAX_VALUE, 0)));
+        assertEquals("29,900,516.3676049104", U64.format(Consensus.supplyAtTail()));
     }
 
     @Test
