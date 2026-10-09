@@ -63,7 +63,8 @@ frostnode serves FrostExplorer on port 7831: the live chain in the same look as 
 
 - Height, a countdown to the next block window (blocks every 5 minutes, never within 270 seconds), QNR mined so far, and the difficulty.
 - Every block's resonance proof: the tone it was mined on, its band, its spectrum, and a button that plays the tone back.
-- Search by block number, block hash, address or `.frostchain` name. An account shows its balance and history.
+- Search by block number, block hash, transaction ID, address or `.frostchain` name. An account shows its balance and history.
+- Look up any transaction by its ID: pending (in the mempool) or confirmed, with its block, time, parties, amount, fee and how many confirmations it has. Every transaction ID in a block or an account's history is a link, and `http://<server>:7831/#tx/<id>` opens one transaction directly, so anyone can verify a payment you send them.
 
 Open `http://<server>:7831/` (on Oracle Cloud, open port 7831 the same way as 7830, or use the tunnel below). It only reads the chain, so it's safe on the open internet.
 Other sites can use the same data. It's JSON with CORS open:
@@ -73,7 +74,8 @@ Other sites can use the same data. It's JSON with CORS open:
 | `/api/explorer/status` | Height, tip, seconds until the next block window, difficulty, QNR mined |
 | `/api/explorer/blocks?before=HEIGHT&count=30` | The newest blocks, up to 100 at a time |
 | `/api/explorer/block?h=HEIGHT` | One block with its transactions |
-| `/api/explorer/search?q=TEXT` | A block, or an account with its balance and history |
+| `/api/explorer/tx?id=TXID` | One transaction: `status` (`pending` or `confirmed`), and for confirmed ones its block, time and `confirmations` |
+| `/api/explorer/search?q=TEXT` | A block, a transaction, or an account with its balance and history |
 
 ### Put it on explorer.finux.tech
 

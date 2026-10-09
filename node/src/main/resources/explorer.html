@@ -128,7 +128,7 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
 
   <form class="search" id="search" role="search">
     <label class="sr" for="q">Search the chain</label>
-    <input id="q" type="search" placeholder="Block number, block hash, address or name" autocomplete="off" autocapitalize="none" spellcheck="false">
+    <input id="q" type="search" placeholder="Block number, block hash, transaction ID, address or name" autocomplete="off" autocapitalize="none" spellcheck="false">
     <button type="submit" class="primary">Search</button>
   </form>
   <p class="banner" id="banner" role="status" hidden></p>
@@ -221,6 +221,26 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
         <div class="txs" id="a-history" style="margin-top: 8px"></div>
       </div>
     </article>
+    <article class="panel" id="txpanel" aria-live="polite" hidden>
+      <div class="panel-head">
+        <div class="num">Transaction</div>
+        <span class="band-chip" id="t-status">–</span>
+      </div>
+      <dl class="kv">
+        <dt>Status</dt><dd id="t-conf">–</dd>
+        <dt>Block</dt><dd id="t-block" class="mono">–</dd>
+        <dt>Time</dt><dd id="t-time">–</dd>
+        <dt>Type</dt><dd id="t-type">–</dd>
+        <dt>From</dt><dd id="t-from" class="mono">–</dd>
+        <dt>To</dt><dd id="t-to" class="mono">–</dd>
+        <dt>Amount</dt><dd id="t-amount" class="mono">–</dd>
+        <dt>Fee</dt><dd id="t-fee" class="mono">–</dd>
+        <dt>Memo</dt><dd id="t-memo">–</dd>
+        <dt>Transaction ID</dt><dd id="t-id" class="mono">–</dd>
+      </dl>
+      <p class="note" id="t-note"></p>
+      <div><button type="button" id="t-close">Back to blocks</button></div>
+    </article>
   </div>
 
   <footer>
@@ -294,7 +314,8 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
       if (changed) {
         blocks = await get("/api/explorer/blocks?count=30");
         renderList();
-        if (selected == null || !blocks.some((b) => b.height === selected)) {
+        const elsewhere = !el("txpanel").hidden || !el("account").hidden; // a transaction or account is open: leave it
+        if (!elsewhere && (selected == null || !blocks.some((b) => b.height === selected))) {
           if (blocks.length) select(blocks[0].height); else renderEmpty();
         }
       }
@@ -351,7 +372,9 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
   async function select(h) {
     selected = h;
     el("account").hidden = true;
+    el("txpanel").hidden = true;
     el("detail").hidden = false;
+    clearLink();
     el("blocks").querySelectorAll("button[data-h]").forEach((btn) => btn.setAttribute("aria-current", String(+btn.dataset.h === h)));
     const quick = blocks.find((b) => b.height === h);
     if (quick) renderDetail(quick);
@@ -388,11 +411,12 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
     }
     renderSpectrum(b);
     const txs = b.txList;
-    el("d-txs").innerHTML = !txs ? `<p class="empty">Loading…</p>` : txs.length ? `<table><thead><tr><th>Type</th><th>From</th><th>To</th><th class="amt">QNR</th><th>Memo</th></tr></thead><tbody>${
+    el("d-txs").innerHTML = !txs ? `<p class="empty">Loading…</p>` : txs.length ? `<table><thead><tr><th>Type</th><th>From</th><th>To</th><th class="amt">QNR</th><th>Memo</th><th>ID</th></tr></thead><tbody>${
       txs.map((x) => `<tr><td>${x.type === "send" ? "Send" : x.type === "name" ? "Name" : "New key"}</td>
         <td><button type="button" class="linkish mono" data-addr="${esc(x.from)}">${esc(short(x.from, x.fromName))}</button></td>
         <td>${x.to ? `<button type="button" class="linkish mono" data-addr="${esc(x.to)}">${esc(short(x.to, x.toName))}</button>` : (x.type === "name" ? esc(x.name) + ".frostchain" : "–")}</td>
-        <td class="amt">${x.type === "send" ? qoin(x.amount, 4) : "–"}</td><td>${esc(x.memo)}</td></tr>`).join("")
+        <td class="amt">${x.type === "send" ? qoin(x.amount, 4) : "–"}</td><td>${esc(x.memo)}</td>
+        <td>${x.id ? `<button type="button" class="linkish mono" data-tx="${esc(x.id)}">${esc(x.id.slice(0, 8))}…</button>` : "–"}</td></tr>`).join("")
     }</tbody></table>` : `<p class="empty">Only the mining reward in this block.</p>`;
     retune();
   }
@@ -431,6 +455,14 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
     if (b) { e.preventDefault(); find(b.dataset.addr); }
   });
   el("a-close").addEventListener("click", () => { el("account").hidden = true; el("detail").hidden = false; });
+  el("t-close").addEventListener("click", () => { el("txpanel").hidden = true; el("detail").hidden = false; clearLink(); });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-tx]");
+    if (b) { e.preventDefault(); find(b.dataset.tx); }
+  });
+  // A link to one transaction: http://host:7831/#tx/<id>
+  const clearLink = () => { if (location.hash) history.replaceState(null, "", location.pathname + location.search); };
+  const linkTo = (id) => history.replaceState(null, "", location.pathname + location.search + "#tx/" + id);
 
   async function find(q) {
     try {
@@ -440,8 +472,12 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
         if (!blocks.some((b) => b.height === r.block.height)) blocks = [r.block].concat(blocks);
         selected = r.block.height;
         el("account").hidden = true;
+        el("txpanel").hidden = true;
         el("detail").hidden = false;
+        clearLink();
         renderDetail(r.block);
+      } else if (r.kind === "tx") {
+        showTx(r.tx);
       } else {
         showAccount(r);
       }
@@ -450,18 +486,47 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
     }
   }
 
+  const when = (t) => `${new Date(t * 1000).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })} · ${ago(t)}`;
+  function party(addr, name) {
+    return addr ? `<button type="button" class="linkish" data-addr="${esc(addr)}">${esc(name || addr)}</button>${name ? `<br>${esc(addr)}` : ""}` : "–";
+  }
+  function showTx(t) {
+    el("detail").hidden = true;
+    el("account").hidden = true;
+    el("txpanel").hidden = false;
+    const pending = t.status !== "confirmed";
+    el("txpanel").style.setProperty("--band", pending ? cssVar("--alpha") : cssVar("--theta"));
+    el("t-status").textContent = pending ? "Pending" : "Confirmed";
+    el("t-conf").textContent = pending ? "Waiting for a miner to put it in a block" : t.confirmations + (t.confirmations === 1 ? " confirmation" : " confirmations");
+    el("t-block").innerHTML = pending ? "–" : `<button type="button" class="linkish" data-block="${t.height}">#${t.height}</button><br>${esc(t.block)}`;
+    el("t-time").textContent = pending ? "Not in a block yet" : when(t.time);
+    el("t-type").textContent = t.type === "send" ? "Send" : t.type === "name" ? "Claim a name" : "Move to a fresh key";
+    el("t-from").innerHTML = party(t.from, t.fromName);
+    el("t-to").innerHTML = t.type === "send" ? party(t.to, t.toName) : t.type === "name" ? esc(t.name) + ".frostchain" : "–";
+    el("t-amount").textContent = t.type === "send" ? qoin(t.amount) + " QNR" : "–";
+    el("t-fee").textContent = qoin(t.fee) + " QNR";
+    el("t-memo").textContent = t.memo || "–";
+    el("t-id").textContent = t.id;
+    el("t-note").textContent = pending
+      ? "This node has the transaction but no block holds it yet. Check again after the next block."
+      : "Blocks are about 5 minutes apart, so " + t.confirmations + " confirmation" + (t.confirmations === 1 ? "" : "s") + " means it has been in the chain for roughly " + Math.max(0, (t.confirmations - 1) * 5) + "+ minutes. Share this page's link to let anyone check it.";
+    linkTo(t.id);
+  }
+
   function showAccount(a) {
     el("detail").hidden = true;
+    el("txpanel").hidden = true;
     el("account").hidden = false;
     el("a-name").textContent = a.name || "Account";
     el("a-addr").textContent = a.address;
     el("a-balance").textContent = qoin(a.balance) + " QNR";
     el("a-immature").textContent = qoin(a.immature) + " QNR";
     const rows = a.history || [];
-    el("a-history").innerHTML = rows.length ? `<table><thead><tr><th>Block</th><th>What</th><th class="amt">QNR</th><th>Memo</th></tr></thead><tbody>${
+    el("a-history").innerHTML = rows.length ? `<table><thead><tr><th>Block</th><th>What</th><th class="amt">QNR</th><th>Memo</th><th>Tx</th></tr></thead><tbody>${
       rows.map((r) => `<tr><td class="mono"><button type="button" class="linkish" data-block="${r.height}">#${r.height}</button></td>
         <td>${esc(r.kind === "mined" ? "Mined a block" : r.kind === "received" ? "Received" : r.kind === "sent" ? "Sent" : r.kind === "name" ? "Claimed " + r.name + ".frostchain" : r.kind === "rekey" ? "Moved to a fresh key" : r.kind)}</td>
-        <td class="amt">${r.kind === "name" || r.kind === "rekey" ? "–" : (r.kind === "sent" ? "−" : "") + fmtMinor(r.amount)}</td><td>${esc(r.memo)}</td></tr>`).join("")
+        <td class="amt">${r.kind === "name" || r.kind === "rekey" ? "–" : (r.kind === "sent" ? "−" : "") + fmtMinor(r.amount)}</td><td>${esc(r.memo)}</td>
+        <td>${r.txid ? `<button type="button" class="linkish mono" data-tx="${esc(r.txid)}">${esc(r.txid.slice(0, 8))}…</button>` : "–"}</td></tr>`).join("")
     }</tbody></table>` : `<p class="empty">Nothing on the chain for this account yet.</p>`;
   }
   document.addEventListener("click", (e) => {
@@ -640,6 +705,9 @@ footer { font-size: 14px; color: var(--dim); border-top: 1px solid var(--line); 
   resize();
   if (animating) requestAnimationFrame((n) => { prevFrame = n; loop(n); });
   refresh();
+  const openShared = () => { const m = /^#tx\/([0-9a-fA-F]{64})$/.exec(location.hash); if (m) find(m[1]); };
+  openShared();
+  window.addEventListener("hashchange", openShared);
   setInterval(refresh, 15000);
   setInterval(tick, 1000);
 })();

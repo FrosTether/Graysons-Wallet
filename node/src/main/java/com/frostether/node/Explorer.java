@@ -35,7 +35,8 @@ import java.util.concurrent.Executors;
  *   /api/explorer/status       height, tip, next block window, difficulty, QOIN mined
  *   /api/explorer/blocks       newest blocks, ?before=HEIGHT&count=30
  *   /api/explorer/block?h=     one block with its transactions
- *   /api/explorer/search?q=    a height, a block hash, an address or a .frostchain name
+ *   /api/explorer/tx?id=       one transaction by its ID: pending in the mempool, or confirmed in a block
+ *   /api/explorer/search?q=    a height, a block hash, a transaction ID, an address or a .frostchain name
  *
  * It only reads the node's chain, so it's safe to put on the public internet (or behind a Cloudflare tunnel).
  */
@@ -114,6 +115,9 @@ final class Explorer {
                 case "/api/explorer/block":
                     json(ex, 200, block(q));
                     return;
+                case "/api/explorer/tx":
+                    json(ex, 200, tx(q.getOrDefault("id", "")));
+                    return;
                 case "/api/explorer/search":
                     json(ex, 200, search(q));
                     return;
@@ -176,7 +180,7 @@ final class Explorer {
     Map<String, Object> search(Map<String, String> q) {
         String s = q.getOrDefault("q", "").trim();
         if (s.isEmpty()) {
-            throw new IllegalArgumentException("type a block number, a block hash, an address or a name");
+            throw new IllegalArgumentException("type a block number, a block hash, a transaction ID, an address or a name");
         }
         String plain = s.startsWith("#") ? s.substring(1) : s;
         if (plain.matches("[0-9]{1,15}")) {
@@ -194,7 +198,11 @@ final class Explorer {
                     return Json.o("kind", "block", "block", summary(b, true));
                 }
             }
-            throw new IllegalArgumentException("no block with that hash on this chain");
+            Map<String, Object> t = findTx(want);
+            if (t != null) {
+                return Json.o("kind", "tx", "tx", t);
+            }
+            throw new IllegalArgumentException("no block or transaction with that ID on this chain yet");
         }
         byte[] id = node.resolve(s);
         ChainState.Account a = node.chain.account(id);
@@ -207,6 +215,95 @@ final class Explorer {
                 "balance", U64.format(a == null ? 0L : a.balance), "immature", U64.format(a == null ? 0L : a.immature));
         o.put("history", history);
         return o;
+    }
+
+    /** One transaction by ID, for /api/explorer/tx. */
+    Map<String, Object> tx(String id) {
+        String want = id.trim().toLowerCase();
+        if (!want.matches("[0-9a-f]{64}")) {
+            throw new IllegalArgumentException("a transaction ID is 64 letters and numbers (0-9, a-f)");
+        }
+        Map<String, Object> t = findTx(want);
+        if (t == null) {
+            throw new IllegalArgumentException("no transaction with that ID on this chain yet");
+        }
+        return t;
+    }
+
+    // Transaction ID -> block height, built as the chain grows. A reorg changes the hash of the block we last indexed
+    // (or shortens the chain), and then the index is thrown away and rebuilt.
+    private final Map<String, Long> txIndex = new HashMap<>();
+    private long indexedTo = 0;
+    private String indexedHash = null;
+
+    private synchronized void catchUpIndex() {
+        Chain chain = node.chain;
+        Block seen = chain.at(indexedTo);
+        if (indexedTo > 0 && (seen == null || !seen.hashHex().equals(indexedHash))) {
+            txIndex.clear();
+            indexedTo = 0;
+        }
+        long tip = chain.height();
+        for (long h = indexedTo + 1; h <= tip; h++) {
+            Block b = chain.at(h);
+            if (b == null) {
+                break;
+            }
+            for (Tx tx : b.txs) {
+                txIndex.put(Bytes.hex(tx.id(chain.chainId)), Long.valueOf(h));
+            }
+            indexedTo = h;
+        }
+        Block last = chain.at(indexedTo);
+        indexedHash = last == null ? null : last.hashHex();
+    }
+
+    /** The transaction with this ID: confirmed in a block, still pending in the mempool, or null. */
+    private Map<String, Object> findTx(String want) {
+        Chain chain = node.chain;
+        Long height;
+        synchronized (this) {
+            catchUpIndex();
+            height = txIndex.get(want);
+        }
+        if (height != null) {
+            Block b = chain.at(height.longValue());
+            if (b != null) {
+                for (Tx tx : b.txs) {
+                    if (Bytes.hex(tx.id(chain.chainId)).equals(want)) {
+                        Map<String, Object> o = txJson(tx);
+                        o.put("status", "confirmed");
+                        o.put("height", Long.valueOf(b.height));
+                        o.put("block", b.hashHex());
+                        o.put("time", Long.valueOf(b.time));
+                        o.put("confirmations", Long.valueOf(chain.height() - b.height + 1));
+                        return o;
+                    }
+                }
+            }
+        }
+        for (Tx tx : node.mempool.all()) {
+            if (Bytes.hex(tx.id(chain.chainId)).equals(want)) {
+                Map<String, Object> o = txJson(tx);
+                o.put("status", "pending");
+                o.put("confirmations", Long.valueOf(0));
+                return o;
+            }
+        }
+        return null;
+    }
+
+    private Map<String, Object> txJson(Tx tx) {
+        boolean send = tx.type == Tx.SEND;
+        Map<String, Object> t = Json.o("type", send ? "send" : tx.type == Tx.NAME ? "name" : "rekey",
+                "from", Address.raw(tx.from), "fromName", nameOf(tx.from),
+                "to", send ? Address.raw(tx.to) : "", "toName", send ? nameOf(tx.to) : "");
+        t.put("amount", U64.format(tx.amount));
+        t.put("fee", U64.format(tx.fee));
+        t.put("memo", tx.memo == null ? "" : tx.memo);
+        t.put("name", tx.name == null ? "" : tx.name);
+        t.put("id", Bytes.hex(tx.id(node.chain.chainId)));
+        return t;
     }
 
     private Map<String, Object> summary(Block b, boolean withTxs) {
@@ -236,16 +333,7 @@ final class Explorer {
         if (withTxs) {
             List<Object> txs = new ArrayList<>();
             for (Tx tx : b.txs) {
-                boolean send = tx.type == Tx.SEND;
-                Map<String, Object> t = Json.o("type", send ? "send" : tx.type == Tx.NAME ? "name" : "rekey",
-                        "from", Address.raw(tx.from), "fromName", nameOf(tx.from),
-                        "to", send ? Address.raw(tx.to) : "", "toName", send ? nameOf(tx.to) : "");
-                t.put("amount", U64.format(tx.amount));
-                t.put("fee", U64.format(tx.fee));
-                t.put("memo", tx.memo == null ? "" : tx.memo);
-                t.put("name", tx.name == null ? "" : tx.name);
-                t.put("id", Bytes.hex(tx.id(node.chain.chainId)));
-                txs.add(t);
+                txs.add(txJson(tx));
             }
             o.put("txList", txs);
         }
