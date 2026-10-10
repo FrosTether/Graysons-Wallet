@@ -1,0 +1,49 @@
+plugins {
+    id 'application'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation project(':core')
+    testImplementation 'junit:junit:4.13.2'
+}
+
+application {
+    mainClass = 'com.frostether.desktop.GraysonsDesktop'
+    applicationName = 'GraysonsVault'
+}
+
+// The desktop app shows the same screens as the Android app: copy them in as resources under /ui.
+def uiDir = rootProject.file('app/src/main/assets/ui')
+tasks.register('copyUi', Copy) {
+    from uiDir
+    into layout.buildDirectory.dir('generated-ui/ui')
+}
+sourceSets.main.resources.srcDir(layout.buildDirectory.dir('generated-ui'))
+processResources.dependsOn copyUi
+
+def appVersion = {
+    def m = (rootProject.file('app/build.gradle').text =~ /versionName '([^']+)'/)
+    m.find() ? m.group(1) : '0.0.0'
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Version': appVersion())
+    }
+}
+
+test {
+    systemProperty 'frostchain.noSeedPeers', 'true'
+    testLogging {
+        events 'passed', 'failed'
+    }
+}

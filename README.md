@@ -1,13 +1,15 @@
 # Graysons Vault ⚡
 
-Android wallet, node and miner for **Qoin (QNR)** on Frostchain, part of [Finux](https://finux.tech).
-The ticker is QNR, for Qoin's CryptoNote roots. One install gives you three apps:
+Wallet, node and miner for **Qoin (QNR)** on Frostchain, part of [Finux](https://finux.tech), for Android, Windows and Linux.
+The ticker is QNR, for Qoin's CryptoNote roots. On Android, one install gives you three apps:
 
 - **Graysons Vault** (called Graysons Wallet before 0.4.2): create or restore a wallet, claim a `.frostchain` name, run your node and watch blocks arrive in the explorer
 - **Frostoise**: the tone-gated miner. It only hashes while your phone hears a mining tone
 - **MyFrost**: send and receive QNR by `@name`
 
-> **Proof of concept (v0.5.3).** QNR has no guaranteed value. Expect bugs and breaking changes.
+Both the phone and desktop apps have **Remix**: blend pink noise, the nine solfeggio tones and the found wave, and watch the mix as a wireframe tunnel.
+
+> **Proof of concept (v0.6.0).** QNR has no guaranteed value. Expect bugs and breaking changes.
 
 ## Download
 
@@ -15,6 +17,23 @@ The ticker is QNR, for Qoin's CryptoNote roots. One install gives you three apps
 This link always serves the newest build. The old `GraysonsWallet.apk` link still works too. Checksums and notes are on the [release page](https://github.com/FrosTether/Graysons-Wallet/releases/latest).
 To share the app, send people to **[get.finux.tech](https://get.finux.tech)**: the download, the mining tones and how to start, on one page.
 Your phone will ask you to allow installs from your browser, since the app isn't on the Play Store.
+
+### Windows and Linux
+
+The desktop app has the same wallet, node and MyFrost as the phone. It doesn't mine: Frostoise stays on phones.
+Download it from the [release page](https://github.com/FrosTether/Graysons-Wallet/releases/latest). Each build brings its own Java, so nothing else needs installing.
+
+| System | File |
+|---|---|
+| Windows 10 or 11 | The `.msi` installer, or `GraysonsVault-windows-x64.zip` to run without installing |
+| Debian, Ubuntu, Mint | The `.deb`: `sudo apt install ./graysons-vault_*.deb` |
+| Other Linux (x64) | `GraysonsVault-linux-x64.tar.gz`: unpack and run `GraysonsVault/bin/GraysonsVault` |
+
+- It opens in its own window when Edge, Chrome or Chromium is installed, otherwise in your browser. The window only answers this computer, and only with a key made fresh each run.
+- Its node keeps running after you close the window, so the computer keeps serving the network. Bring the window back from the tray icon or by starting the app again. **More → Quit** stops it.
+- Your wallet and the chain live in `%APPDATA%\GraysonsVault` on Windows and `~/.local/share/graysons-vault` on Linux.
+- To use a phone wallet on the computer, tap **Restore** and enter its 25 words. Don't use one wallet on two devices at once: both would spend the same one-time keys.
+- The builds aren't code-signed yet, so Windows may warn about an unknown publisher. Check the file against `SHA256SUMS` first.
 
 **Coming from 0.3.x?** 0.4 runs a new chain, so you start fresh:
 
@@ -84,7 +103,7 @@ See [ROADMAP.md](ROADMAP.md) for what comes next and how to help.
 
 ## Source
 
-The full source is here: the chain core in `core/`, the server node in `node/` and the Android app in `app/`.
+The full source is here: the chain core in `core/`, the server node in `node/`, the Android app in `app/` and the desktop app in `desktop/`.
 It was rebuilt from the 0.3.0 APK, then changed for the v0.4 relaunch, and is covered by an end-to-end test suite.
 See [BUILDING.md](BUILDING.md) to build the app, run the tests or set up a server node.
 

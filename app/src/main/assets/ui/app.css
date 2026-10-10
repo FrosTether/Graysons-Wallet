@@ -224,3 +224,9 @@ ol.steps .copy { border-bottom: 1px dashed currentColor; }
 .tag.tp { background: var(--gold-soft); color: var(--gold); border-color: transparent; }
 input[type=datetime-local] { width: 100%; padding: 11px 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; min-height: 44px; font-family: var(--mono); font-size: 14px; }
 input[type=range] { width: 100%; accent-color: var(--gold); margin: 6px 0 10px; }
+
+/* Desktop (Windows and Linux): no mining, a Quit button. */
+.desktop-only { display: none; }
+html.desktop .desktop-only { display: block; }
+html.desktop .phone-only { display: none !important; }
+.btn.remix-btn { background: linear-gradient(120deg, #ff3b5c22, #2ee6a022, #c04dff22); }

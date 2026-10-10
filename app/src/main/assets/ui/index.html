@@ -6,6 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Graysons Vault</title>
 <link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="remix.css">
 </head>
 <body>
 
@@ -60,7 +61,8 @@
     <div id="gate-msg" class="msg"></div>
   </div>
   <p class="foot muted small" id="gate-node">Starting node…</p>
-  <p class="foot"><a href="#frostoise" class="link frost">Open Frostoise miner →</a></p>
+  <p class="foot phone-only"><a href="#frostoise" class="link frost">Open Frostoise miner →</a></p>
+  <p class="foot desktop-only"><a href="#remix" class="link frost">Open Remix →</a></p>
 </section>
 
 <!-- ================= Wallet ================= -->
@@ -84,7 +86,8 @@
         <div class="actions">
           <button class="btn primary" data-go="send">Send</button>
           <button class="btn" data-go="receive">Receive</button>
-          <button class="btn frost" data-goto="#frostoise">Mine</button>
+          <button class="btn frost phone-only" data-goto="#frostoise">Mine</button>
+          <button class="btn remix-btn" data-goto="#remix">Remix</button>
         </div>
       </div>
       <div class="card" id="name-card">
@@ -205,6 +208,11 @@
 
     <!-- More -->
     <div data-page="more" class="hidden">
+      <div class="card desktop-only">
+        <h2>This computer</h2>
+        <p class="small muted">Graysons Vault keeps your node running after you close this window, so this computer keeps serving the network. Open it again from the tray icon or the app menu. Quit stops the node.</p>
+        <button class="btn wide" id="d-quit">Quit Graysons Vault</button>
+      </div>
       <div class="card">
         <h2>Wallet</h2>
         <div class="stack">
@@ -482,7 +490,48 @@
 </div>
 <div id="toast" class="toast hidden"></div>
 
+<!-- ================= Remix: pink noise, solfeggio tones and found waves ================= -->
+<section id="remix" class="screen remix hidden" aria-label="Remix">
+  <canvas id="rx-stage" aria-hidden="true"></canvas>
+  <header class="rx-top">
+    <a class="rx-back" href="#wallet" aria-label="Back to Graysons Vault">‹ Vault</a>
+    <h1 class="rx-title">Remix</h1>
+    <div class="rx-chain" aria-live="polite">
+      <span class="rx-chip" id="rx-block">Block –</span>
+      <span class="rx-chip" id="rx-found">Found –</span>
+      <span class="rx-chip rx-tone-chip hidden" id="rx-its">Its tone –</span>
+    </div>
+  </header>
+  <button class="rx-play" id="rx-play" type="button">Start the sound</button>
+  <div class="rx-desk">
+    <div class="rx-strips">
+      <label class="rx-strip rx-noise"><input class="rx-fader" id="rx-noise" type="range" min="0" max="1" step="0.01" aria-label="Pink noise"><b>Pink</b><small>noise</small></label>
+      <div class="rx-tones" id="rx-tones" role="group" aria-label="Solfeggio tones"></div>
+      <div class="rx-strip rx-pulse">
+        <input class="rx-fader" id="rx-pulse" type="range" min="0" max="1" step="0.01" aria-label="Found wave pulse">
+        <b>Pulse</b>
+        <button type="button" class="rx-rate" id="rx-pulse-hz" aria-label="Pulse rate: press to change">7.83</button>
+      </div>
+    </div>
+    <label class="rx-blend"><span>Noise</span><input id="rx-blend" type="range" min="0" max="1" step="0.01" aria-label="Blend noise and tones"><span>Tones</span></label>
+    <div class="rx-row">
+      <div class="rx-presets">
+        <button type="button" data-rx-preset="block">This block</button>
+        <button type="button" data-rx-preset="last9">Last 9 blocks</button>
+        <button type="button" data-rx-preset="spectrum">All nine</button>
+        <button type="button" data-rx-preset="schumann">Schumann</button>
+        <button type="button" data-rx-preset="silence">Clear</button>
+      </div>
+      <label class="rx-follow"><input type="checkbox" id="rx-follow"> Follow new blocks</label>
+      <label class="rx-vol">Volume <input id="rx-vol" type="range" min="0" max="1" step="0.01"></label>
+      <button type="button" class="rx-stop hidden" id="rx-stop">Stop</button>
+    </div>
+    <p class="rx-note hidden" id="rx-note"></p>
+  </div>
+</section>
+
 <script src="qr.js"></script>
 <script src="app.js"></script>
+<script src="remix.js"></script>
 </body>
 </html>

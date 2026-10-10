@@ -10,6 +10,7 @@ It was rebuilt from the released 0.3.0 APK (see [Where this source came from](#w
 | `core/` | Frostchain itself in plain Java: consensus rules, LMS keys, wallets, the node and its peer-to-peer HTTP. No Android code. |
 | `node/` | `frostnode`, the headless server node. See [node/README.md](node/README.md). |
 | `app/` | The Android app: Graysons Vault (Graysons Wallet before 0.4.2), Frostoise and MyFrost. Its screens are web pages in `app/src/main/assets/ui`. |
+| `desktop/` | Graysons Vault for Windows and Linux: the same screens, served to a window on this computer, with the node and wallet from `core/`. No mining. |
 
 ## The Android app
 
@@ -109,6 +110,25 @@ The suite takes a few minutes, because several tests mine real blocks:
 
 This makes `node/build/install/frostnode/`, which is the folder that goes to `/opt/frostnode` on the server.
 It also serves FrostExplorer, the public block explorer, on port 7831. See [node/README.md](node/README.md).
+
+## The desktop app
+
+Java 17 or newer (jpackage comes with the JDK):
+
+```bash
+./gradlew :desktop:installDist                 # desktop/build/install/GraysonsVault, needs Java to run
+desktop/build/install/GraysonsVault/bin/GraysonsVault
+./gradlew :desktop:test                        # the window server's security checks
+sh desktop/packaging/package.sh linux          # out/: a .tar.gz and, with fakeroot, a .deb, each with its own Java
+sh desktop/packaging/package.sh windows        # on Windows, in Git Bash: a .zip, and an .msi if the WiX Toolset 3 is installed
+```
+
+The screens are the files in `app/src/main/assets/ui`, copied in at build time. `GraysonsDesktop` starts the node on port
+7830 and serves the screens on 127.0.0.1:7835 (or any free port). The wallet API answers only requests to 127.0.0.1 or
+localhost that carry the run's random key, which the window gets in its address. Options:
+`GraysonsVault [--data DIR] [--port 7830] [--no-window]`.
+
+The Build workflow packages Windows and Linux on GitHub's own Windows and Ubuntu machines and adds them to the release.
 
 ## Chain IDs
 

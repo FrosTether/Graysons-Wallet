@@ -30,6 +30,10 @@
       return r.result;
     });
   }
+  window.FrostCall = call;
+  /** The desktop app (Windows, Linux) talks over /wallet/api; it never mines. */
+  var DESKTOP = !window.FrostBridge;
+  if (DESKTOP) document.documentElement.classList.add('desktop');
 
   // ---------------- helpers ----------------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -121,10 +125,12 @@
   var S = { status: null, wallet: null, page: 'home', lastHeight: -1, sensor: 'mag', review: null, cores: 4 };
 
   // ---------------- routing: one page, three apps ----------------
-  var TITLES = { wallet: 'Graysons Vault', frostoise: 'Frostoise', myfrost: 'MyFrost' };
+  var TITLES = { wallet: 'Graysons Vault', frostoise: 'Frostoise', myfrost: 'MyFrost', remix: 'Remix' };
   function mode() {
     var h = location.hash || '#wallet';
-    return h.indexOf('#frostoise') === 0 ? 'frostoise' : h.indexOf('#myfrost') === 0 ? 'myfrost' : 'wallet';
+    if (h.indexOf('#remix') === 0) return 'remix';
+    if (h.indexOf('#frostoise') === 0) return DESKTOP ? 'wallet' : 'frostoise';
+    return h.indexOf('#myfrost') === 0 ? 'myfrost' : 'wallet';
   }
   function route() {
     var m = mode();
@@ -139,20 +145,23 @@
     $('wallet').classList.toggle('hidden', m !== 'wallet' || !open);
     $('gate').classList.toggle('hidden', m !== 'wallet' || !!open);
     $('myfrost').classList.toggle('hidden', m !== 'myfrost');
+    $('remix').classList.toggle('hidden', m !== 'remix');
+    if (window.Remix) { if (m === 'remix') window.Remix.show(); else window.Remix.hide(); }
     if (m === 'wallet' && !open) loadWalletList();
     if (m === 'myfrost') mfShow();
   }
   /** Switch app. On Android each app is its own launcher icon and task, so open that one. */
   function goApp(target) {
     var m = target.replace(/^#/, '').split('?')[0];
-    if (window.FrostBridge && window.FrostBridge.openApp && m !== mode()) { window.FrostBridge.openApp(m); return; }
+    // Remix is a screen inside whichever app opened it, not an app of its own.
+    if (window.FrostBridge && window.FrostBridge.openApp && m !== mode() && m !== 'remix' && mode() !== 'remix') { window.FrostBridge.openApp(m); return; }
     location.hash = target;
   }
   window.addEventListener('hashchange', route);
   qsa('[data-goto]').forEach(function (b) { b.addEventListener('click', function () { goApp(b.dataset.goto); }); });
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href^="#"]');
-    if (a && window.FrostBridge && window.FrostBridge.openApp) { e.preventDefault(); goApp(a.getAttribute('href')); }
+    if (a && window.FrostBridge && window.FrostBridge.openApp && a.getAttribute('href').length > 1) { e.preventDefault(); goApp(a.getAttribute('href')); }
   });
 
   function go(page) {
@@ -1007,10 +1016,20 @@
   /** Android back button: close a dialog, then go back to Home, then leave. */
   function back() {
     if (!$('modal').classList.contains('hidden')) { if (!$('modal').dataset.locked) closeModal(); return true; }
+    if (mode() === 'remix') { location.hash = '#wallet'; return true; }
     if (mode() === 'wallet' && S.wallet && S.wallet.open && S.page !== 'home') { go('home'); return true; }
     if (mode() === 'myfrost' && S.wallet && S.wallet.open && MF.page !== 'home') { mfGo('home'); return true; }
     return false;
   }
   window.FrostUI = { refresh: refresh, route: route, back: back };
+  if (DESKTOP) {
+    $('o-none').textContent = 'No wallets on this computer yet. Create one, or restore from your 25 words.';
+    $('d-quit').addEventListener('click', function () {
+      call('desktop.quit').then(function () {
+        document.body.innerHTML = '<p style="padding:24px">Graysons Vault has stopped, and so has its node. You can close this window.</p>';
+      }, function (e) { toast(e.message); });
+    });
+  }
   start();
 })();
+

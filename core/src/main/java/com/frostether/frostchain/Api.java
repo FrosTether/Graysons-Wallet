@@ -27,6 +27,11 @@ public final class Api {
         default int thermalLevel() {
             return 0;
         }
+
+        /** False on the desktop app, which runs a node and wallet but never mines (0.6). */
+        default boolean canMine() {
+            return true;
+        }
     }
 
     public Api(Node node, Platform platform) {
@@ -191,6 +196,9 @@ public final class Api {
     }
 
     private Map<String, Object> startMining(Map<String, Object> map) throws Exception {
+        if (!this.platform.canMine()) {
+            throw new IllegalArgumentException("the desktop app doesn't mine: mine with Frostoise on a phone");
+        }
         String str = Json.str(map, "payout", "");
         byte[] openAccount = str.trim().isEmpty() ? this.node.wallets.openAccount() : this.node.resolve(str);
         if (openAccount == null) {
@@ -224,7 +232,7 @@ public final class Api {
 
     private Map<String, Object> blockRow(Block at) {
         String nameOf = at.height == 0 ? null : this.node.chain.nameOf(at.miner);
-        Object[] objArr = new Object[16];
+        Object[] objArr = new Object[18];
         objArr[0] = "height";
         objArr[1] = Long.valueOf(at.height);
         objArr[2] = "hash";

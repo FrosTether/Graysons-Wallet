@@ -1,7 +1,7 @@
 name: Build
 
-# Every push to main that touches the app or the chain runs the chain tests, then builds the app
-# and frostnode and refreshes the release for the current version (v<versionName>), so
+# Every push to main that touches the app or the chain runs the chain tests, then builds the app,
+# frostnode and the desktop app (Windows and Linux) and refreshes the release for the current version (v<versionName>), so
 #   https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsVault.apk
 # always serves the newest build (GraysonsWallet.apk too, the app's name before 0.4.2, for old links). A push that only changes frostnode goes through node.yml
 # instead, which swaps in a new frostnode.zip and leaves the app alone.
@@ -15,6 +15,7 @@ on:
     paths:
       - 'app/**'
       - 'core/**'
+      - 'desktop/**'
       - 'gradle/**'
       - '*.gradle'
       - 'gradlew'
@@ -43,11 +44,52 @@ jobs:
           java-version: '17'
           cache: gradle
       - name: Run the tests
-        run: ./gradlew --no-daemon :core:test
+        run: ./gradlew --no-daemon :core:test :desktop:test
+
+  desktop:
+    # Graysons Vault for Windows and Linux, each with its own Java runtime. jpackage can't cross-build,
+    # so each system builds its own. A failure here never holds back the phone app.
+    name: Desktop (${{ matrix.os }})
+    needs: test-core
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Build
+        run: ./gradlew --no-daemon :desktop:installDist
+      - name: Packaging tools (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y fakeroot
+      - name: WiX Toolset for the installer (Windows)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        run: |
+          choco install wixtoolset --no-progress -y
+          echo "C:\\Program Files (x86)\\WiX Toolset v3.14\\bin" >> "$GITHUB_PATH"
+      - name: Package
+        run: sh desktop/packaging/package.sh ${{ runner.os == 'Windows' && 'windows' || 'linux' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: out/*
 
   build:
     name: App and frostnode
-    needs: test-core
+    needs: [test-core, desktop]
+    # Runs even when a desktop build failed: the phone app and frostnode still ship.
+    if: ${{ !cancelled() && needs.test-core.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -82,6 +124,13 @@ jobs:
           fi
       - name: Build frostnode
         run: ./gradlew --no-daemon :node:distZip
+      - name: Get the desktop builds
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          path: out
+          merge-multiple: true
       - name: Collect the files
         run: |
           mkdir -p out

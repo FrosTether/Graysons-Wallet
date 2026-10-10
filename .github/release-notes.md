@@ -1,13 +1,19 @@
-**Graysons Vault 0.5.5** fixes syncing with the public node. A phone behind a home router or mobile data can reach the public node (`149.28.63.221`, port 7830), but the node can't reach the phone. Before 0.5.5 the phone only fetched blocks from the node and never sent its own chain, so the node stayed behind. Now a phone (or any node) that has more blocks than a peer sends that peer the blocks it's missing, and the peer switches over only if they validate and carry more work, the same check as before.
+**Graysons Vault 0.6.0** comes to Windows and Linux, and adds **Remix**.
 
-Nothing else changes: same chain (`chain b8b1ec3fefb96834` under Graysons Vault → Node), same block rules, same coin, QNR.
+- **Desktop app.** The same wallet, node and MyFrost as the phone, for Windows and Linux. It doesn't mine: Frostoise stays on phones. Its node keeps running after you close the window, so your computer keeps serving the network until you choose **Quit** (in **More**, or the tray icon). It opens in its own window when Edge, Chrome or Chromium is installed, otherwise in your browser.
+- **Remix**, on phones and computers: blend pink noise with the nine solfeggio tones (174 to 963 Hz) and the found wave, Frostoise's hum pulsing at 4.0, 7.83 or 11.11 Hz, and watch the mix as a wireframe tunnel. **This block** plays the newest block's tone, picked from its hash, and **Follow new blocks** changes the mix each time a block lands. Nothing on screen flashes at the pulse rate.
+- **Fix:** the recent blocks under **Node** and on the Frostoise screen failed to load in 0.5.5. They show again.
+
+Nothing about the chain changes: same chain (`chain b8b1ec3fefb96834`), same rules, same coin, QNR.
 
 ### Install
 
-- **On 0.4.3 or newer?** Install `GraysonsVault.apk` over it. Your wallet, words and name stay.
-- **On 0.4.2 or older?** Uninstall it first, install this, then tap **Restore** and enter your 25 words.
-- **New here?** Install, tap **Create wallet** and write down your 25 words.
+- **Android, on 0.4.3 or newer:** install `GraysonsVault.apk` over it. Your wallet, words and name stay.
+- **Android, on 0.4.2 or older:** uninstall it first, install this, then tap **Restore** and enter your 25 words.
+- **Windows:** run the `.msi` installer, or unzip `GraysonsVault-windows-x64.zip` anywhere and run `GraysonsVault.exe`. Windows may warn about an unknown publisher, since the app isn't code-signed yet: choose **More info → Run anyway**. Allow it through the firewall so other nodes can reach yours.
+- **Linux:** install the `.deb` (`sudo apt install ./graysons-vault_*.deb`), or unpack `GraysonsVault-linux-x64.tar.gz` and run `GraysonsVault/bin/GraysonsVault`.
+- **Moving a wallet to the computer:** tap **Restore** and enter your 25 words. Don't use the same wallet on two devices at once: both would spend the same one-time keys.
 
-Check the file against `SHA256SUMS`. `GraysonsWallet.apk` is the same file under the old name, for old links. `frostnode.zip` is the server node; servers should update it too. See [get.finux.tech/node](https://get.finux.tech/node/).
+Check every file against `SHA256SUMS`. `GraysonsWallet.apk` is the same file under the old name, for old links. `frostnode.zip` is the server node. See [get.finux.tech/node](https://get.finux.tech/node/).
 
-This is a proof of concept: expect bugs.
+QNR has no guaranteed value. This is a proof of concept: expect bugs.
