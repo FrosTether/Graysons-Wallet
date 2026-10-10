@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Frostoise
+Comment=Tone-gated Qoin miner
+Exec=graysons-vault frostoise
+Icon=frostoise
+Terminal=false
+Categories=Office;Finance;Network;
+Keywords=Qoin;QNR;Frostchain;Finux;wallet;mining;
+StartupWMClass=GraysonsVault

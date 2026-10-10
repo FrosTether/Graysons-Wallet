@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=MyFrost
+Comment=Send and receive QNR by @name
+Exec=graysons-vault myfrost
+Icon=myfrost
+Terminal=false
+Categories=Office;Finance;Network;
+Keywords=Qoin;QNR;Frostchain;Finux;wallet;mining;
+StartupWMClass=GraysonsVault

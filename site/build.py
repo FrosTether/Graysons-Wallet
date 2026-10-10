@@ -18,6 +18,7 @@ SITE = pathlib.Path(__file__).resolve().parent
 REPO = SITE.parent
 RELEASE = "https://github.com/FrosTether/Graysons-Wallet/releases/latest"
 APK_URL = RELEASE + "/download/GraysonsVault.apk"
+DEB_URL = RELEASE + "/download/GraysonsVault.deb"
 NODE_URL = RELEASE + "/download/frostnode.zip"
 ICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
         "%3Ccircle cx='16' cy='16' r='15' fill='%23150e1a'/%3E%3Ccircle cx='16' cy='16' r='8' fill='%23ffb547'/%3E%3C/svg%3E")
@@ -125,7 +126,7 @@ def main():
     site_url = sys.argv[2] if len(sys.argv) > 2 else "https://get.finux.tech/"
     if not site_url.endswith("/"):
         site_url += "/"
-    values = {"APK_URL": APK_URL, "RELEASE_URL": RELEASE, "NODE_URL": NODE_URL,
+    values = {"APK_URL": APK_URL, "DEB_URL": DEB_URL, "RELEASE_URL": RELEASE, "NODE_URL": NODE_URL,
               "QR_SVG": qr_svg(APK_URL)}
     base_css = (SITE / "common/base.css").read_text()
     site_js = (SITE / "common/site.js").read_text()

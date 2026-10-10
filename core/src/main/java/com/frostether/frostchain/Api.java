@@ -224,7 +224,7 @@ public final class Api {
 
     private Map<String, Object> blockRow(Block at) {
         String nameOf = at.height == 0 ? null : this.node.chain.nameOf(at.miner);
-        Object[] objArr = new Object[16];
+        Object[] objArr = new Object[18];
         objArr[0] = "height";
         objArr[1] = Long.valueOf(at.height);
         objArr[2] = "hash";

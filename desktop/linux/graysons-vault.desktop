@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Graysons Vault
+Comment=Qoin (QNR) wallet and Frostchain node
+Exec=graysons-vault wallet
+Icon=graysons-vault
+Terminal=false
+Categories=Office;Finance;Network;
+Keywords=Qoin;QNR;Frostchain;Finux;wallet;mining;
+StartupWMClass=GraysonsVault

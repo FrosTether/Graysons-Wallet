@@ -727,6 +727,12 @@
       qsa('[data-sensor]').forEach(function (x) { x.classList.toggle('on', x.dataset.sensor === S.sensor); });
     }
     qsa('[data-sensor]').forEach(function (x) { x.disabled = sens[x.dataset.sensor] === false; });
+    // No magnetometer (a laptop, some phones): pick the microphone instead, and the other way round.
+    var other = S.sensor === 'mag' ? 'mic' : 'mag';
+    if (!running && sens[S.sensor] === false && sens[other] !== false) {
+      S.sensor = other;
+      qsa('[data-sensor]').forEach(function (x) { x.classList.toggle('on', x.dataset.sensor === S.sensor); });
+    }
     $('sensor-btn').textContent = running ? 'Stop sensor' : 'Start sensor';
     var badge = $('lock-badge');
     if (!running || !r) {

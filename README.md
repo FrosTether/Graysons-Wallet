@@ -16,6 +16,8 @@ This link always serves the newest build. The old `GraysonsWallet.apk` link stil
 To share the app, send people to **[get.finux.tech](https://get.finux.tech)**: the download, the mining tones and how to start, on one page.
 Your phone will ask you to allow installs from your browser, since the app isn't on the Play Store.
 
+**On Linux** (Ubuntu, Xubuntu, Debian): [GraysonsVault.deb](https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsVault.deb) gives you the same three apps, with a full node. See [desktop/README.md](desktop/README.md).
+
 **Coming from 0.3.x?** 0.4 runs a new chain, so you start fresh:
 
 1. Uninstall 0.3.x. Android won't install 0.4 over it.

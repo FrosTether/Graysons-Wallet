@@ -18,7 +18,8 @@ rootProject.name = 'graysons-wallet'
 
 // core: the Frostchain rules, node and wallet, in plain Java.
 // node: the headless server node (frostnode) for /opt/frostnode.
-include ':core', ':node'
+// desktop: Graysons Vault, Frostoise and MyFrost for Linux desktops, using the app's own screens.
+include ':core', ':node', ':desktop'
 
 // app: the Android app. It needs the Android SDK, so a server without one builds only core and node.
 if (System.getenv('ANDROID_HOME') || System.getenv('ANDROID_SDK_ROOT') || file('local.properties').exists()) {

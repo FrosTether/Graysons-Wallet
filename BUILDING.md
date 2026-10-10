@@ -9,6 +9,7 @@ It was rebuilt from the released 0.3.0 APK (see [Where this source came from](#w
 |---|---|
 | `core/` | Frostchain itself in plain Java: consensus rules, LMS keys, wallets, the node and its peer-to-peer HTTP. No Android code. |
 | `node/` | `frostnode`, the headless server node. See [node/README.md](node/README.md). |
+| `desktop/` | Graysons Vault, Frostoise and MyFrost for Linux desktops: the app's screens and a full node in one program, packed as a .deb. See [desktop/README.md](desktop/README.md). |
 | `app/` | The Android app: Graysons Vault (Graysons Wallet before 0.4.2), Frostoise and MyFrost. Its screens are web pages in `app/src/main/assets/ui`. |
 
 ## The Android app

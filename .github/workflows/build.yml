@@ -3,7 +3,8 @@ name: Build
 # Every push to main that touches the app or the chain runs the chain tests, then builds the app
 # and frostnode and refreshes the release for the current version (v<versionName>), so
 #   https://github.com/FrosTether/Graysons-Wallet/releases/latest/download/GraysonsVault.apk
-# always serves the newest build (GraysonsWallet.apk too, the app's name before 0.4.2, for old links). A push that only changes frostnode goes through node.yml
+# always serves the newest build (GraysonsWallet.apk too, the app's name before 0.4.2, for old links), and
+# GraysonsVault.deb the Linux desktop apps. A push that only changes frostnode goes through node.yml
 # instead, which swaps in a new frostnode.zip and leaves the app alone.
 #
 # Signing: with the SIGNING_* repository secrets set (see BUILDING.md), the app is signed with the release key.
@@ -15,6 +16,7 @@ on:
     paths:
       - 'app/**'
       - 'core/**'
+      - 'desktop/**'
       - 'gradle/**'
       - '*.gradle'
       - 'gradlew'
@@ -82,12 +84,15 @@ jobs:
           fi
       - name: Build frostnode
         run: ./gradlew --no-daemon :node:distZip
+      - name: Build the Linux desktop apps
+        run: desktop/linux/build-deb.sh
       - name: Collect the files
         run: |
           mkdir -p out
           cp app/build/outputs/apk/release/app-release.apk out/GraysonsVault.apk
           cp out/GraysonsVault.apk out/GraysonsWallet.apk
           cp node/build/distributions/*.zip out/frostnode.zip
+          cp desktop/build/graysons-vault_*_all.deb out/GraysonsVault.deb
           cd out && sha256sum * | tee SHA256SUMS
       - name: Read the signing certificate
         # Phones accept an update only when it's signed by the same certificate as the app they have.

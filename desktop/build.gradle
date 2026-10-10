@@ -1,0 +1,30 @@
+plugins {
+    id 'application'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation project(':core')
+}
+
+// The desktop apps show the Android app's screens unchanged: app/src/main/assets/ui is packed into the jar.
+sourceSets {
+    main {
+        resources {
+            srcDir '../app/src/main/assets'
+        }
+    }
+}
+
+application {
+    mainClass = 'com.frostether.desktop.VaultDesktop'
+    applicationName = 'graysons-vault'
+}

@@ -41,6 +41,9 @@
       </div>
 
       <div class="panel" role="tabpanel" id="panel-laptop" aria-labelledby="tab-laptop" hidden>
+        <p class="intro">On Ubuntu, Xubuntu or Debian, the server installer works on a laptop too: it runs frostnode as a service that starts on boot.</p>
+        <div class="cmd"><pre>curl -fsSL https://get.finux.tech/node/install.sh | sudo sh</pre><button type="button" data-copy>Copy</button></div>
+        <p class="intro" style="margin-top: 14px">The <a href="{{DEB_URL}}">Graysons Vault desktop apps</a> run alongside it and sync from it. On Windows or a Mac, or to run it by hand:</p>
         <ol class="steps">
           <li><b>Install Java 17.</b><span>On Windows or a Mac, use the Temurin 17 installer from <a href="https://adoptium.net/temurin/releases/?version=17">adoptium.net</a>. On Linux, <span class="mono">sudo apt install openjdk-17-jre-headless</span>.</span></li>
           <li><b>Download and unzip frostnode.</b><span>Unzip <a href="{{NODE_URL}}">frostnode.zip</a> anywhere you like.</span></li>
